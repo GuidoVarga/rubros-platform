@@ -1,0 +1,227 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 📌 Technical Architecture & Code Guidelines
+
+## 🔍 Project Purpose
+
+This monorepo application is designed to serve as a listing platform that will scale across multiple business categories and geographic zones (e.g., provinces and cities). The application prioritizes **discoverability and SEO**, serving server-rendered or statically generated content whenever possible.
+
+Our tech stack is designed to maximize performance, maintainability, and scalability.
+
+## 🧱 Tech Stack Overview
+
+- **Monorepo**: Managed with [Turborepo](https://turbo.build/repo)
+- **Package Manager**: [pnpm](https://pnpm.io)
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/docs)
+- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/)
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Database**: PostgreSQL
+- **Rendering Strategy**:
+  - Prefer **SSG (Static Site Generation)** for most listings and pages
+  - Use **SSR (Server Side Rendering)** for dynamic SEO-critical pages
+- **Scrapers**: Custom-built scrapers will populate the database and keep it updated regularly.
+
+> ⚠️ Before adding a new library or abstraction, validate its necessity within the SSR/SSG-first architecture model. We aim to keep client-side logic minimal.
+
+---
+
+## 📁 Folder Structure Convention
+
+Each app should follow a modular structure and respect the monorepo workspace separation:
+```bash
+apps/
+└── web/                        # Main Next.js 15 app
+    ├── app/                   # App Router pages
+    │   ├── (public)/          # Public pages like home, contact, etc. (optional)
+    │   │   ├── page.tsx       # Main landing page
+    │   │   └── contact/
+    │   │       └── page.tsx
+    │   │
+    │   ├── [city]/[category]/ # Dynamic listing pages by city and category
+    │   │   └── page.tsx
+    │   │
+    │   └── layout.tsx         # Root layout for the app
+    │
+    ├── components/            # Reusable project components
+    ├── lib/                   # Utility functions, validators, etc.
+    ├── prisma/                # Prisma client, middlewares, seeders
+    ├── styles/                # Global styles
+    ├── i18n/                  # Translation files (es, en, etc.)
+    └── middleware.ts          # Middleware for redirects, auth, etc.
+
+packages/
+├── ui/                        # Shared UI components (based on shadcn/ui)
+├── types/                     # Shared TypeScript types
+├── config/                    # Shared config (eslint, tailwind, tsconfig)
+└── scraper/                   # Scrapers for seeding and updating listings
+```
+
+> ✅ Reuse components from `packages/ui` whenever possible. If a component is tied to a domain or layout section, place it in `components/`.
+
+---
+
+## 🌍 Internationalization
+
+- First language supported: **Spanish**
+- Use `next-intl` for i18n in App Router
+- Translation JSON structure:
+- Translation will be by domain
+
+```json
+{
+  "app": {},
+  "pages": {},
+  "components": {},
+  "general": {},
+  "domain": {}
+}
+```
+
+## 🧩 Prisma Usage
+
+- All DB access must go through Prisma.
+- Schema files reside in /apps/web/prisma/schema.prisma.
+- Always run prisma format after schema changes.
+- Use Zod to validate external or unsafe data.
+
+## 📄 Tailwind CSS Rules
+
+ - Use tailwind CSS V3.
+
+## Tailwind CSS Best Practices for Clean, Maintainable, and Scalable Code
+
+
+### 0. **Read documentation**
+
+https://tailwindcss.com/docs/installation/framework-guides/nextjs
+
+### 1. **Code Organization**
+- **Reusable Components**: Create reusable components (e.g., `Button`, `Card`) instead of repeating classes.
+- **Separation of Concerns**: Use separate files for global styles, components, and custom utilities.
+
+### 2. **Avoid Repetition**
+- **Extract Common Classes**: Use `@apply` in a CSS file to extract repeated class combinations.
+  ```css
+  .btn-primary {
+    @apply px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors;
+  }```
+
+- **Avoid Inline Repetition:** If a class combination is used more than once, extract it into a custom class.
+
+### 3. **Use @layer for Organization**
+- **Organize Styles**: Use @layer to separate styles into base, components, and utilities.
+
+@layer components {
+  .card {
+    @apply p-6 bg-white shadow-md rounded-lg border border-gray-200;
+  }
+}
+
+### 4. **Conditional Classes**
+- **Use clsx or classnames:** Handle conditional classes cleanly.
+
+```tsx
+import clsx from 'clsx';
+
+const Button = ({ isActive }) => {
+  return (
+    <button
+      className={clsx(
+        'btn-primary',
+        isActive && 'bg-brand-primary text-white'
+      )}
+    >
+      Click me
+    </button>
+  );
+};
+```
+
+### 5. **Customize Tailwind Configuration**
+
+- **Extend the Theme:** Define custom colors, spacing, and utilities in tailwind.config.js.
+````js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          primary: '#4F46E5',
+          secondary: '#6B7280',
+        },
+      },
+    },
+  },
+};
+````
+
+### 6. **Avoid Overusing @apply**
+
+- **Prefer Tailwind Classes**: Use Tailwind classes directly in JSX instead of creating too many custom classes with @apply.
+
+````tsx
+<div className="p-6 bg-white shadow-md rounded-lg border border-gray-200">
+  <h2 className="text-xl font-bold mb-4">Title</h2>
+  <p className="text-gray-700">Content</p>
+</div>
+````
+
+### 7. **Documentation and Clarity**
+
+- **Comment Custom Styles**: Document the purpose of custom classes.
+
+````css
+/* styles/utilities.css */
+/**
+ * Text Shadow Utility
+ * Usage: Add a subtle text shadow for better readability.
+ */
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+````
+
+### 8. **Optimize for Production**
+
+- **Purge Unused Classes**: Configure Tailwind to remove unused classes in production.
+
+````javascript
+// tailwind.config.js
+module.exports = {
+  purge: {
+    enabled: process.env.NODE_ENV === 'production',
+    content: ['./src/**/*.{ts,tsx}'],
+  },
+};
+````
+
+## ✅ General Technical Guidelines
+
+- Use type instead of interface when possible.
+- Always use semantic HTML.
+- Avoid unnecessary client-side state unless required.
+- Prefer server functions over client logic.
+- Write accessible and performant code.
+- Follow the existing folder structure before creating new files or folders.
+- All additions must aim to be reusable, scalable, and maintainable.
+
+
+## 🧠 Aditional Instructions
+
+### When generating new code:
+
+- Read project rules
+- Use Next.js App Router conventions
+- Prioritize server components and static rendering
+- Use Tailwind CSS with class-based styling
+- Use shadcn/ui where applicable
+- Favor prisma for data access
+- Do not client state managment by default
+- Always follow the folder structure defined above
+- Extract constants and translations properly
+- Follow SEO best practices (metadata, H1s, OpenGraph)
+- Structure code in a way that can scale to multiple zones and business categories
+
