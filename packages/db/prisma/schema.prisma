@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  location    Location  @relation(fields: [locationId], references: [id])
+  locationId  String
+
+  @@index([categoryId])
+  @@index([locationId])
+  @@index([slug])
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  icon        String?
+  status      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  businesses  Business[]
+
+  @@index([slug])
+}
+
+model City {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  zones       Zone[]
+  location    Location?
+
+  @@index([slug])
+}
+
+model Zone {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  status      Boolean    @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  city        City      @relation(fields: [cityId], references: [id])
+  cityId      String
+  location    Location?
+
+  @@index([cityId])
+  @@index([slug])
+}
+
+model Location {
+  id          String      @id @default(cuid())
+  type        LocationType
+  cityId      String?     @unique  // Hacemos único el cityId
+  zoneId      String?     @unique  // Hacemos único el zoneId
+  city        City?       @relation(fields: [cityId], references: [id])
+  zone        Zone?       @relation(fields: [zoneId], references: [id])
+  businesses  Business[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([cityId, zoneId]) // Asegura que solo uno esté presente
+}
+
+enum LocationType {
+  CITY
+  ZONE
+}

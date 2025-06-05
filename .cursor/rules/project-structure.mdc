@@ -13,11 +13,11 @@ Our tech stack is designed to maximize performance, maintainability, and scalabi
 
 ## 🧱 Tech Stack Overview
 
-- **Monorepo**: Managed with [Turborepo](https://turbo.build/repo)
-- **Package Manager**: [pnpm](https://pnpm.io)
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/docs)
-- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/)
-- **ORM**: [Prisma](https://www.prisma.io/)
+- **Monorepo**: Managed with [Turborepo](mdc:https:/turbo.build/repo)
+- **Package Manager**: [pnpm](mdc:https:/pnpm.io)
+- **Framework**: [Next.js 15 (App Router)](mdc:https:/nextjs.org/docs)
+- **Styling**: [Tailwind CSS v3](mdc:https:/tailwindcss.com) with [shadcn/ui](mdc:https:/ui.shadcn.com)
+- **ORM**: [Prisma](mdc:https:/www.prisma.io)
 - **Database**: PostgreSQL
 - **Rendering Strategy**:
   - Prefer **SSG (Static Site Generation)** for most listings and pages
@@ -33,7 +33,7 @@ Our tech stack is designed to maximize performance, maintainability, and scalabi
 Each app should follow a modular structure and respect the monorepo workspace separation:
 ```bash
 apps/
-└── web/                        # Main Next.js 15 app
+└── mechanic-finder/           # Main Next.js 15 app
     ├── app/                   # App Router pages
     │   ├── (public)/          # Public pages like home, contact, etc. (optional)
     │   │   ├── page.tsx       # Main landing page
@@ -51,12 +51,17 @@ apps/
     ├── styles/                # Global styles
     ├── i18n/                  # Translation files (es, en, etc.)
     └── middleware.ts          # Middleware for redirects, auth, etc.
-
+└── other-app-finder           # Another Next.js 15 app
 packages/
 ├── ui/                        # Shared UI components (based on shadcn/ui)
 ├── types/                     # Shared TypeScript types
 ├── config/                    # Shared config (eslint, tailwind, tsconfig)
 └── scraper/                   # Scrapers for seeding and updating listings
+└── db/
+    └── prisma/
+          └── schema.prisma
+    └── client.ts
+    └── index.ts
 ```
 
 > ✅ Reuse components from `packages/ui` whenever possible. If a component is tied to a domain or layout section, place it in `components/`.
