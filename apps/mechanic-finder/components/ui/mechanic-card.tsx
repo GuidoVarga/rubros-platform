@@ -39,13 +39,13 @@ export function MechanicCard({ business }: MechanicCardProps) {
         {business.email && (
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
-            <span>{business.email}</span>
+            <span className="break-words w-full">{business.email}</span>
           </div>
         )}
         {business.website && (
           <div className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
-            <span>{business.website}</span>
+            <span className="break-words w-full">{business.website}</span>
           </div>
         )}
       </CardContent>

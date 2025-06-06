@@ -1,11 +1,11 @@
 "use client";
 
 import { TopAd, SideAd, InFeedAd } from "./adsense";
-import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd } from "./mock-ads";
+import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "./mock-ads";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-export function AdComponent({ type }: { type: "top" | "side" | "in-feed" | "square" }) {
+export function AdComponent({ type }: { type: "top" | "side" | "in-feed" | "square" | "footer" }) {
   if (isDevelopment) {
     switch (type) {
       case "top":
@@ -16,6 +16,8 @@ export function AdComponent({ type }: { type: "top" | "side" | "in-feed" | "squa
         return <MockInFeedAd />;
       case "square":
         return <MockSquareAd />;
+      case "footer":
+        return <MockFooterAd />;
     }
   }
 
@@ -25,8 +27,8 @@ export function AdComponent({ type }: { type: "top" | "side" | "in-feed" | "squa
     case "side":
       return <SideAd />;
     case "in-feed":
-      return <InFeedAd />;
     case "square":
+    case "footer":
       return <InFeedAd />;
   }
 }

@@ -70,3 +70,15 @@ export function MockSquareAd() {
     </div>
   );
 }
+
+export function MockFooterAd() {
+  return (
+    <div className="w-full">
+      <MockAd
+        height="150px"
+        label="Anuncio Footer"
+        className="rounded-md"
+      />
+    </div>
+  );
+}

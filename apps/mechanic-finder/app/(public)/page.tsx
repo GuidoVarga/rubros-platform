@@ -1,38 +1,43 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
 import { MechanicCard } from "@/components/ui/mechanic-card";
 import { LocationFilter } from "@/components/filters/location-filter";
 import { AdComponent } from "@/components/ads/ads";
+import { getBusinesses, getLocations } from "@/actions/business";
+import { PaginatedList } from "@/components/ui/paginated-list";
 
 export const metadata: Metadata = {
   title: "Rubros - Encuentra tu Mecánico de Confianza",
   description: "Encuentra los mejores mecánicos en tu zona",
 };
 
-export default async function Home() {
-  const [businesses, locations] = await Promise.all([
-    prisma.business.findMany({
-      include: {
-        category: true,
-        location: {
-          include: {
-            city: true,
-            zone: true,
-          },
-        },
+interface HomeProps {
+  searchParams: {
+    page?: string;
+    city?: string;
+    zone?: string;
+    subCategory?: string;
+    search?: string;
+  };
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = 16;
+
+  const [{ businesses, pagination }, locations] = await Promise.all([
+    getBusinesses({
+      pagination: {
+        page: currentPage,
+        limit: itemsPerPage,
       },
-      take: 12,
+      filters: {
+        cityId: searchParams.city,
+        zoneId: searchParams.zone,
+        subCategoryId: searchParams.subCategory,
+        search: searchParams.search,
+      },
     }),
-    prisma.city.findMany({
-      where: {
-        status: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-      },
-    }),
+    getLocations(),
   ]);
 
   return (
@@ -40,7 +45,7 @@ export default async function Home() {
       <AdComponent type="top" />
 
       <section className="container">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
             Encuentra los mejores servicios en tu zona
           </h1>
@@ -54,25 +59,18 @@ export default async function Home() {
       </section>
 
       <section className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {businesses.map((business, index) => (
-                <>
-                  <MechanicCard key={business.id} business={business} />
-                  {index === 5 && (
-                    <div className="col-span-full">
-                      <AdComponent type="in-feed" />
-                    </div>
-                  )}
-                </>
-              ))}
-            </div>
-          </div>
-          <div className="hidden lg:block">
-            <AdComponent type="side" />
-          </div>
-        </div>
+        <PaginatedList
+          items={businesses}
+          renderItem={(business) => (
+            <MechanicCard key={business.id} business={business} />
+          )}
+          pagination={{
+            currentPage,
+            totalPages: pagination.pages,
+            totalItems: pagination.total,
+            itemsPerPage,
+          }}
+        />
       </section>
 
       <section className="container py-16">
@@ -99,6 +97,10 @@ export default async function Home() {
             </p>
           </div>
         </div>
+      </section>
+
+      <section className="container mb-8">
+        <AdComponent type="footer" />
       </section>
     </div>
   );

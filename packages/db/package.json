@@ -2,9 +2,9 @@
   "name": "@rubros/db",
   "version": "1.0.0",
   "description": "",
-  "main": "client.ts",
+  "main": "index.ts",
   "exports": {
-    ".": "./client.ts",
+    ".": "./index.ts",
     "./generated/prisma": "./generated/prisma/index.js"
   },
   "type": "module",

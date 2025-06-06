@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdComponent } from "@/components/ads/ads";
 
 export function Footer() {
   return (
@@ -77,6 +78,12 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Sección de anuncio */}
+        <div className="mt-12 mb-8">
+          <AdComponent type="footer" />
+        </div>
+
         <div className="border-t mt-8 pt-8">
           <p className="text-sm text-muted-foreground text-center">
             © {new Date().getFullYear()} Rubros. Todos los derechos reservados.
