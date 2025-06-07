@@ -53,7 +53,20 @@ apps/
     └── middleware.ts          # Middleware for redirects, auth, etc.
 └── other-app-finder           # Another Next.js 15 app
 packages/
-├── ui/                        # Shared UI components (based on shadcn/ui)
+├── ui/                        # Shared UI components and utils (based on shadcn/ui)
+    ├── components/    #export
+        ├── Button/ #(example)
+          ├── Button.tsx
+          ├── types.ts
+          ├── index.ts
+        ├── Command/ #(example)
+          ├── command.tsx
+          ├── index.ts
+        ├── index.ts
+    ├── ads/ #export
+    ├── utils/ #export
+    ├── lib/
+    ├── styles/
 ├── types/                     # Shared TypeScript types
 ├── config/                    # Shared config (eslint, tailwind, tsconfig)
 └── scraper/                   # Scrapers for seeding and updating listings
@@ -65,7 +78,7 @@ packages/
 ```
 
 > ✅ Reuse components from `packages/ui` whenever possible. If a component is tied to a domain or layout section, place it in `components/`.
-We use shadcn components.
+- We use shadcn components.
 ---
 
 ## 🌍 Internationalization

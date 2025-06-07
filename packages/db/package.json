@@ -2,10 +2,29 @@
   "name": "@rubros/db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.ts",
-    "./generated/prisma": "./generated/prisma/index.js"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./generated/prisma": {
+      "import": "./generated/prisma/index.js",
+      "types": "./generated/prisma/index.d.ts"
+    },
+    "./entities": {
+      "import": "./dist/entities/index.js",
+      "types": "./dist/entities/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
   },
   "type": "module",
   "scripts": {
@@ -14,7 +33,9 @@
     "generate": "prisma generate",
     "studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
-    "init-docker": "docker compose up -d"
+    "init-docker": "docker compose up -d",
+   "build-ts": "tsc -p tsconfig.json",
+    "postbuild-ts": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/"
   },
   "keywords": [],
   "author": "",

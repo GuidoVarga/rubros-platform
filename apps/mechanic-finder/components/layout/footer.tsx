@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdComponent } from "@/components/ads/ads";
+import { AdComponent } from "../ads/ads";
 
 export function Footer() {
   return (

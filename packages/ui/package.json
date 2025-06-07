@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@rubros/eslint-config": "workspace:*",
     "@rubros/typescript-config": "workspace:*",
+    "@rubros/db": "workspace:*",
     "@turbo/gen": "^2.5.0",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",

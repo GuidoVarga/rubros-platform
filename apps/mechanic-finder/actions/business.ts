@@ -3,6 +3,7 @@
 import {prisma} from "@/lib/db";
 import type {GetBusinessesParams, BusinessFilters} from "@/types/business";
 import {Categories} from "@rubros/db";
+import {BusinessEntity} from "@rubros/db/entities";
 
 export async function getBusinesses({
   filters,
@@ -20,7 +21,7 @@ export async function getBusinesses({
     const total = await prisma.business.count({where});
 
     // Get businesses
-    const businesses = await prisma.business.findMany({
+    const businesses = (await prisma.business.findMany({
       where: {
         ...where,
         category: {
@@ -41,7 +42,7 @@ export async function getBusinesses({
       },
       skip: offset,
       take: pagination.limit,
-    });
+    })) as BusinessEntity[];
 
     return {
       businesses,

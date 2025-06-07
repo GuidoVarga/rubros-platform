@@ -1,7 +1,7 @@
 "use client";
 
 import { TopAd, SideAd, InFeedAd } from "./adsense";
-import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "./mock-ads";
+import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "@rubros/ui";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { MechanicCard } from "@/components/ui/mechanic-card";
 import { LocationFilter } from "@/components/filters/location-filter";
-import { AdComponent } from "@/components/ads/ads";
+import { Button } from "@rubros/ui";
+
 import { getBusinesses, getLocations } from "@/actions/business";
 import { PaginatedList } from "@/components/ui/paginated-list";
+import Link from "next/link";
+import { AdComponent } from "@/components/ads/ads";
 
 export const metadata: Metadata = {
   title: "Rubros - Encuentra tu Mecánico de Confianza",
@@ -62,7 +65,12 @@ export default async function Home({ searchParams }: HomeProps) {
         <PaginatedList
           items={businesses}
           renderItem={(business) => (
-            <MechanicCard key={business.id} business={business} />
+            <MechanicCard key={business.id} business={business} footerButton=
+              {
+                (<Link href={`/mechanic/${business.slug}`} className="w-full">
+                  <Button variant="secondary" className="w-full">Ver más</Button>
+                </Link>)
+              } />
           )}
           pagination={{
             currentPage,
