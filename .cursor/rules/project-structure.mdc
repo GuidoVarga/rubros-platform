@@ -65,7 +65,7 @@ packages/
 ```
 
 > ✅ Reuse components from `packages/ui` whenever possible. If a component is tied to a domain or layout section, place it in `components/`.
-
+We use shadcn components.
 ---
 
 ## 🌍 Internationalization

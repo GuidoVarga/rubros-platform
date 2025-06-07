@@ -1,8 +1,8 @@
 import type { Business, Category, Location, City, Zone } from "@rubros/db/generated/prisma";
 import Link from "next/link";
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@rubros/ui";
+import { Button } from "@rubros/ui";
 
 interface MechanicCardProps {
   business: Business & {
@@ -51,7 +51,7 @@ export function MechanicCard({ business }: MechanicCardProps) {
       </CardContent>
       <CardFooter>
         <Link href={`/mechanic/${business.slug}`} className="w-full">
-          <Button className="w-full">Ver más</Button>
+          <Button variant="secondary" className="w-full">Ver más</Button>
         </Link>
       </CardFooter>
     </Card>

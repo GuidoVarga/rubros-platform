@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button } from "./button";
+import { Button } from "@rubros/ui";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 interface PaginationBarProps {
@@ -92,7 +92,6 @@ export function PaginationBar({
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
-          size="icon"
           disabled={currentPage === 1}
           onClick={() => router.push(createPageURL(currentPage - 1))}
         >
@@ -115,8 +114,7 @@ export function PaginationBar({
             return (
               <Button
                 key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="icon"
+                variant={currentPage === page ? "primary" : "outline"}
                 onClick={() => router.push(createPageURL(page))}
                 className="w-9 h-9"
               >
@@ -128,7 +126,6 @@ export function PaginationBar({
 
         <Button
           variant="outline"
-          size="icon"
           disabled={currentPage === totalPages}
           onClick={() => router.push(createPageURL(currentPage + 1))}
         >
