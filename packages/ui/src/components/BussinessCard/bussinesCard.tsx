@@ -1,5 +1,3 @@
-'use server';
-
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../Card";
 import { BussinessCardProps } from "./types";
