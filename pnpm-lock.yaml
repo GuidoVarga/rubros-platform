@@ -78,6 +78,9 @@ importers:
       '@rubros/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@rubros/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@rubros/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -287,6 +290,9 @@ importers:
       '@rubros/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@rubros/types':
+        specifier: workspace:*
+        version: link:../types
       '@rubros/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

@@ -1,12 +1,7 @@
 "use client";
 
 import Script from "next/script";
-
-interface AdSenseProps {
-  slot: string;
-  style?: React.CSSProperties;
-  className?: string;
-}
+import { AdSenseProps } from "@rubros/types";
 
 export function AdSense({ slot, style, className }: AdSenseProps) {
   return (
@@ -31,37 +26,47 @@ export function AdSense({ slot, style, className }: AdSenseProps) {
   );
 }
 
-export function TopAd() {
+export function TopAd(props: Omit<AdSenseProps, "slot">) {
+  const defaultProps = {
+    className: props.className || "block",
+    style: props.style || { display: "block", minHeight: "90px" },
+  }
+
   return (
     <div className="w-full h-[90px] bg-muted/30 flex items-center justify-center">
       <AdSense
         slot="top-ad"
-        className="block"
-        style={{ display: "block", minHeight: "90px" }}
+        {...defaultProps}
       />
     </div>
   );
 }
 
-export function SideAd() {
+export function SideAd(props: Omit<AdSenseProps, "slot">) {
+  const defaultProps = {
+    className: props.className || "block",
+    style: props.style || { display: "block", minHeight: "600px" },
+  }
   return (
     <div className="w-full h-[600px] bg-muted/30 flex items-center justify-center">
       <AdSense
         slot="side-ad"
-        className="block"
-        style={{ display: "block", minHeight: "600px" }}
+        {...defaultProps}
       />
     </div>
   );
 }
 
-export function InFeedAd() {
+export function InFeedAd(props: Omit<AdSenseProps, "slot">) {
+  const defaultProps = {
+    className: props.className || "block",
+    style: props.style || { display: "block", minHeight: "200px" },
+  }
   return (
     <div className="w-full h-[200px] bg-muted/30 flex items-center justify-center">
       <AdSense
         slot="in-feed-ad"
-        className="block"
-        style={{ display: "block", minHeight: "200px" }}
+        {...defaultProps}
       />
     </div>
   );

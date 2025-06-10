@@ -1,34 +1,39 @@
 "use client";
 
+import { AdSenseProps } from "@rubros/types";
 import { TopAd, SideAd, InFeedAd } from "./adsense";
 import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "@rubros/ui";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-export function AdComponent({ type }: { type: "top" | "side" | "in-feed" | "square" | "footer" }) {
+type AdComponentProps = {
+  type: "top" | "side" | "in-feed" | "square" | "footer";
+} & Omit<AdSenseProps, "slot">;
+
+export function AdComponent({ type, ...props }: AdComponentProps) {
   if (isDevelopment) {
     switch (type) {
       case "top":
-        return <MockTopAd />;
+        return <MockTopAd {...props} />;
       case "side":
-        return <MockSideAd />;
+        return <MockSideAd {...props} />;
       case "in-feed":
-        return <MockInFeedAd />;
+        return <MockInFeedAd {...props} />;
       case "square":
-        return <MockSquareAd />;
+        return <MockSquareAd {...props} />;
       case "footer":
-        return <MockFooterAd />;
+        return <MockFooterAd {...props} />;
     }
   }
 
   switch (type) {
     case "top":
-      return <TopAd />;
+      return <TopAd {...props} />;
     case "side":
-      return <SideAd />;
+      return <SideAd {...props} />;
     case "in-feed":
     case "square":
     case "footer":
-      return <InFeedAd />;
+      return <InFeedAd {...props} />;
   }
 }

@@ -27,19 +27,17 @@ export function PaginatedList<T>({
   return (
     <div className="space-y-8">
       <div className={gridClassName}>
-        {items.map((item, index) => (
+        {items.map((item, index) => {
+          const isAdd = index === adPosition;
           //@ts-ignore
-          <div key={item?.id}>
-            {renderItem(item, index)}
-            {index === adPosition && (
-              <div className="col-span-full">
-                <AdComponent type="in-feed" />
-              </div>
-            )}
-          </div>
-        ))}
+          const key = isAdd ? `${index}-ad` : item?.id;
+          return (
+            <div key={key}>
+              {isAdd ? <div className="w-full h-full"><AdComponent type="in-feed" style={{ height: "100%" }} /></div> : renderItem(item, index)}
+            </div>
+          )
+        })}
       </div>
-
       <PaginationBar
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
