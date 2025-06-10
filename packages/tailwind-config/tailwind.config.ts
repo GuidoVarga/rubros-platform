@@ -94,7 +94,7 @@ const config = {
       },
     },
   },
-  plugins: [animate, animate],
+  plugins: [animate],
 };
 
 export default config;
