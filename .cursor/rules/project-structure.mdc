@@ -40,10 +40,11 @@ apps/
     │   │   └── contact/
     │   │       └── page.tsx
     │   │
-    │   ├── [city]/[category]/ # Dynamic listing pages by city and category
+    │   ├── [slug]/[category]/ # Dynamic listing pages by city and category
     │   │   └── page.tsx
     │   │
     │   └── layout.tsx         # Root layout for the app
+        └── global.css         # Import global.css from tailwind config and overrides colors and fonts for its theme
     │
     ├── components/            # Reusable project components
     ├── lib/                   # Utility functions, validators, etc.
@@ -53,24 +54,25 @@ apps/
     └── middleware.ts          # Middleware for redirects, auth, etc.
 └── other-app-finder           # Another Next.js 15 app
 packages/
-├── ui/                        # Shared UI components and utils (based on shadcn/ui)
-    ├── components/    #export
-        ├── Button/ #(example)
-          ├── Button.tsx
-          ├── types.ts
+├── ui/                         # Shared UI components and utils (based on shadcn/ui)
+  ├── src/
+      ├── components/    #export
+          ├── Button/ #(example)
+            ├── Button.tsx
+            ├── types.ts
+            ├── index.ts
+          ├── Command/ #(example)
+            ├── command.tsx
+            ├── index.ts
           ├── index.ts
-        ├── Command/ #(example)
-          ├── command.tsx
-          ├── index.ts
-        ├── index.ts
-    ├── ads/ #export
-    ├── utils/ #export
-    ├── lib/
-    ├── styles/
-├── types/                     # Shared TypeScript types
-├── config/                    # Shared config (eslint, tailwind, tsconfig)
+      ├── ads/ #export
+      ├── utils/ #export
+      ├── lib/
+      ├── styles/
+├── typescript-config/          # Shared TypeScript types
+├── tailwind-config/           # Shared tailwind config (All Tailwind configuration shared across apps and the ui package is here. If new classes are needed per app, it will be extended within that app).
 └── scraper/                   # Scrapers for seeding and updating listings
-└── db/
+└── db/                        # Shared ORM client
     └── prisma/
           └── schema.prisma
     └── client.ts
@@ -109,8 +111,7 @@ packages/
 
  - Use tailwind CSS V3.
 
-## Tailwind CSS Best Practices for Clean, Maintainable, and Scalable Code
-
+## Tailwind CSS Generals Best Practices for Clean, Maintainable, and Scalable Code
 
 ### 0. **Read documentation**
 
@@ -227,15 +228,20 @@ module.exports = {
 - All additions must aim to be reusable, scalable, and maintainable.
 
 
-## 🧠 Aditional Instructions
+## 🧠 Guia de desarrollo
 
 ### When generating new code:
 
-- Read project rules
+- Each app has its own tailwind.config.ts and global.css which extend from the tailwind.config.ts and global.css of @rubros/tailwind-config, which contains the global configuration for the apps and the @rubros/ui package.
+  The apps extend these files and add properties for their theme (colors and fonts).
+  The @rubros/ui package does not need to include Tailwind configuration because it inherits what the apps use.
+- Use shadcn/ui where applicable (these components should go in the @rubros/ui package).
+- Whenever a component from shadcn/ui needs to be installed, it must go into @rubros/ui because it will be shared among the apps.
+  If a component needs to be created that abstracts a UI package component for use only in a specific app,
+  it must go in the app’s components directory (Example: MechanicCard that abstracts from BusinessCard).
 - Use Next.js App Router conventions
 - Prioritize server components and static rendering
 - Use Tailwind CSS with class-based styling
-- Use shadcn/ui where applicable
 - Favor prisma for data access
 - Do not client state managment by default
 - Always follow the folder structure defined above
