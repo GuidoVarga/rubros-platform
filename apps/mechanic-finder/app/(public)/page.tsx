@@ -22,7 +22,8 @@ interface HomeProps {
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const currentPage = Number(searchParams.page) || 1;
+  const { page, city, zone, subCategory, search } = await searchParams;
+  const currentPage = Number(page) || 1;
   const itemsPerPage = 16;
 
   const [{ businesses, pagination }, locations] = await Promise.all([
@@ -32,10 +33,10 @@ export default async function Home({ searchParams }: HomeProps) {
         limit: itemsPerPage,
       },
       filters: {
-        cityId: searchParams.city,
-        zoneId: searchParams.zone,
-        subCategoryId: searchParams.subCategory,
-        search: searchParams.search,
+        cityId: city,
+        zoneId: zone,
+        subCategoryId: subCategory,
+        search: search,
       },
     }),
     getLocations(),
