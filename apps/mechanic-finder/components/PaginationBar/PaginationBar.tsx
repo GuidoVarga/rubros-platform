@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@rubros/ui";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
-interface PaginationBarProps {
+export type PaginationBarProps = {
   currentPage: number;
   totalPages: number;
   totalItems: number;

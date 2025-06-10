@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { PaginationBar } from "./pagination-bar";
+import { PaginationBar } from "../PaginationBar/PaginationBar";
 import { AdComponent } from "@/components/ads/ads";
 
-interface PaginatedListProps<T> {
+export type PaginatedListProps<T> = {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
   pagination: {
@@ -28,7 +28,8 @@ export function PaginatedList<T>({
     <div className="space-y-8">
       <div className={gridClassName}>
         {items.map((item, index) => (
-          <div key={item?.id!}>
+          //@ts-ignore
+          <div key={item?.id}>
             {renderItem(item, index)}
             {index === adPosition && (
               <div className="col-span-full">
