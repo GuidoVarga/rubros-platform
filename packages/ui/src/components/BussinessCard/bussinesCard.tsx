@@ -5,7 +5,7 @@ import { BussinessCardProps } from "./types";
 export function BussinessCard({ name, description, location, phone, email, website, footerButton }: BussinessCardProps) {
 
   return (
-    <Card className="w-full">
+    <Card className="flex flex-col w-full h-full">
       <CardHeader>
         <CardTitle className="text-xl">{name}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -13,30 +13,38 @@ export function BussinessCard({ name, description, location, phone, email, websi
       <CardContent className="space-y-2">
         {location && (
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            <span>{location}</span>
+            <div>
+              <MapPin className="h-4 w-4" />
+            </div>
+            <span className="break-words min-w-0">{location}</span>
           </div>
         )}
         {phone && (
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4" />
-            <span>{phone}</span>
+            <div>
+              <Phone className="h-4 w-4" />
+            </div>
+            <span className="break-words min-w-0">{phone}</span>
           </div>
         )}
         {email && (
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            <span className="break-words w-full">{email}</span>
+            <div>
+              <Mail className="h-4 w-4" />
+            </div>
+            <span className="break-words min-w-0">{email}</span>
           </div>
         )}
         {website && (
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            <span className="break-words w-full">{website}</span>
+            <div>
+              <Globe className="h-4 w-4" />
+            </div>
+            <span className="break-words min-w-0">{website}</span>
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         {footerButton}
       </CardFooter>
     </Card>

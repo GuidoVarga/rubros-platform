@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MechanicCard } from "@/components/MechanicCard/MechanicFinder";
+import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 
 import { getBusinesses, getLocations } from "@/actions/business";

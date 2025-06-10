@@ -33,7 +33,11 @@ export function PaginatedList<T>({
           const key = isAdd ? `${index}-ad` : item?.id;
           return (
             <div key={key}>
-              {isAdd ? <div className="w-full h-full"><AdComponent type="in-feed" style={{ height: "100%" }} /></div> : renderItem(item, index)}
+              {isAdd ?
+                <div className="w-full h-full min-h-[200px]">
+                  <AdComponent type="in-feed" style={{ height: "100%" }} />
+                </div>
+                : renderItem(item, index)}
             </div>
           )
         })}
