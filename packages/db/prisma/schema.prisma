@@ -28,11 +28,11 @@ model Business {
   updatedAt   DateTime  @updatedAt
   category    Category  @relation(fields: [categoryId], references: [id])
   categoryId  String
-  location    Location  @relation(fields: [locationId], references: [id])
-  locationId  String
+  city        City      @relation(fields: [cityId], references: [id])
+  cityId      String
 
   @@index([categoryId])
-  @@index([locationId])
+  @@index([cityId])
   @@index([slug])
 }
 
@@ -50,6 +50,18 @@ model Category {
   @@index([slug])
 }
 
+model Province {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cities      City[]
+
+  @@index([slug])
+}
+
 model City {
   id          String    @id @default(cuid())
   name        String
@@ -57,42 +69,10 @@ model City {
   status      Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  zones       Zone[]
-  location    Location?
-
-  @@index([slug])
-}
-
-model Zone {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  status      Boolean    @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  city        City      @relation(fields: [cityId], references: [id])
-  cityId      String
-  location    Location?
-
-  @@index([cityId])
-  @@index([slug])
-}
-
-model Location {
-  id          String      @id @default(cuid())
-  type        LocationType
-  cityId      String?     @unique  // Hacemos único el cityId
-  zoneId      String?     @unique  // Hacemos único el zoneId
-  city        City?       @relation(fields: [cityId], references: [id])
-  zone        Zone?       @relation(fields: [zoneId], references: [id])
+  province    Province  @relation(fields: [provinceId], references: [id])
+  provinceId  String
   businesses  Business[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
 
-  @@unique([cityId, zoneId]) // Asegura que solo uno esté presente
-}
-
-enum LocationType {
-  CITY
-  ZONE
+  @@index([slug])
+  @@index([provinceId])
 }

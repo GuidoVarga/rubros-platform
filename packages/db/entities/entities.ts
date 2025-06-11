@@ -1,17 +1,16 @@
-import {Business, Category, City, Zone, Location} from "../generated/prisma";
+import { Business, Category, City, Province } from '../generated/prisma';
 
 export type BusinessEntity = Business & {
   category: CategoryEntity;
-  location: LocationEntity;
+  city: CityEntity;
 };
 
-export type CityEntity = City;
+export type CityEntity = City & {
+  province: ProvinceEntity;
+};
 
-export type ZoneEntity = Zone;
-
-export type LocationEntity = Location & {
-  city?: City;
-  zone?: Zone;
+export type ProvinceEntity = Province & {
+  cities?: CityEntity[];
 };
 
 export type CategoryEntity = Category;

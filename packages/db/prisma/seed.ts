@@ -1,30 +1,26 @@
-import {prisma} from "../client";
+import { prisma } from '../client';
 
 async function cleanup() {
   // Delete all records in reverse order of dependencies
-  console.log("🧹 Cleaning up database...");
+  console.log('🧹 Cleaning up database...');
 
   // First delete businesses as they depend on categories and locations
   await prisma.business.deleteMany();
-  console.log("Deleted all businesses");
-
-  // Then delete locations as they depend on cities and zones
-  await prisma.location.deleteMany();
-  console.log("Deleted all locations");
-
-  // Delete zones as they depend on cities
-  await prisma.zone.deleteMany();
-  console.log("Deleted all zones");
+  console.log('Deleted all businesses');
 
   // Delete cities
   await prisma.city.deleteMany();
-  console.log("Deleted all cities");
+  console.log('Deleted all cities');
+
+  // Then delete provinces
+  await prisma.province.deleteMany();
+  console.log('Deleted all provinces');
 
   // Finally delete categories
   await prisma.category.deleteMany();
-  console.log("Deleted all categories");
+  console.log('Deleted all categories');
 
-  console.log("✨ Database cleanup completed");
+  console.log('✨ Database cleanup completed');
 }
 
 async function main() {
@@ -35,26 +31,47 @@ async function main() {
   const categories = await Promise.all([
     prisma.category.create({
       data: {
-        name: "Mecánicos",
-        slug: "mecanicos",
-        description: "Talleres mecánicos y servicios automotrices",
-        icon: "🔧",
+        name: 'Mecánicos',
+        slug: 'mecanicos',
+        description: 'Talleres mecánicos y servicios automotrices',
+        icon: '🔧',
       },
     }),
     prisma.category.create({
       data: {
-        name: "Electricistas",
-        slug: "electricistas",
-        description: "Servicios de instalación y reparación eléctrica",
-        icon: "⚡",
+        name: 'Electricistas',
+        slug: 'electricistas',
+        description: 'Servicios de instalación y reparación eléctrica',
+        icon: '⚡',
       },
     }),
     prisma.category.create({
       data: {
-        name: "Plomeros",
-        slug: "plomeros",
-        description: "Servicios de plomería y gas",
-        icon: "🚰",
+        name: 'Plomeros',
+        slug: 'plomeros',
+        description: 'Servicios de plomería y gas',
+        icon: '🚰',
+      },
+    }),
+  ]);
+
+  const provinces = await Promise.all([
+    prisma.province.create({
+      data: {
+        name: 'Buenos Aires',
+        slug: 'buenos-aires',
+      },
+    }),
+    prisma.province.create({
+      data: {
+        name: 'Santa Fe',
+        slug: 'santa-fe',
+      },
+    }),
+    prisma.province.create({
+      data: {
+        name: 'Capital Federal',
+        slug: 'capital-federal',
       },
     }),
   ]);
@@ -63,457 +80,381 @@ async function main() {
   const cities = await Promise.all([
     prisma.city.create({
       data: {
-        name: "Buenos Aires",
-        slug: "buenos-aires",
+        name: 'Mar del Plata',
+        slug: 'mar-del-plata',
+        provinceId: provinces[0].id,
       },
     }),
     prisma.city.create({
       data: {
-        name: "Córdoba",
-        slug: "cordoba",
+        name: 'Miramar',
+        slug: 'miramar',
+        provinceId: provinces[0].id,
       },
     }),
     prisma.city.create({
       data: {
-        name: "Rosario",
-        slug: "rosario",
+        name: 'Rosario',
+        slug: 'rosario',
+        provinceId: provinces[1].id,
+      },
+    }),
+    prisma.city.create({
+      data: {
+        name: 'Santa Fe',
+        slug: 'santa-fe',
+        provinceId: provinces[1].id,
+      },
+    }),
+    prisma.city.create({
+      data: {
+        name: 'Palermo',
+        slug: 'palermo',
+        provinceId: provinces[2].id,
+      },
+    }),
+    prisma.city.create({
+      data: {
+        name: 'Colegiales',
+        slug: 'colegiales',
+        provinceId: provinces[2].id,
       },
     }),
   ]);
-
-  // Create zones for each city
-  const zones = await Promise.all([
-    // Buenos Aires zones
-    prisma.zone.create({
-      data: {
-        name: "Palermo",
-        slug: "buenos-aires-palermo",
-        cityId: cities[0].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Belgrano",
-        slug: "buenos-aires-belgrano",
-        cityId: cities[0].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Recoleta",
-        slug: "buenos-aires-recoleta",
-        cityId: cities[0].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Caballito",
-        slug: "buenos-aires-caballito",
-        cityId: cities[0].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Villa Urquiza",
-        slug: "buenos-aires-villa-urquiza",
-        cityId: cities[0].id,
-      },
-    }),
-    // Córdoba zones
-    prisma.zone.create({
-      data: {
-        name: "Nueva Córdoba",
-        slug: "cordoba-nueva-cordoba",
-        cityId: cities[1].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Centro",
-        slug: "cordoba-centro",
-        cityId: cities[1].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Alta Córdoba",
-        slug: "cordoba-alta-cordoba",
-        cityId: cities[1].id,
-      },
-    }),
-    // Rosario zones
-    prisma.zone.create({
-      data: {
-        name: "Centro",
-        slug: "rosario-centro",
-        cityId: cities[2].id,
-      },
-    }),
-    prisma.zone.create({
-      data: {
-        name: "Fisherton",
-        slug: "rosario-fisherton",
-        cityId: cities[2].id,
-      },
-    }),
-  ]);
-
-  // Create locations for cities and zones
-  const cityLocations = await Promise.all(
-    cities.map((city) =>
-      prisma.location.create({
-        data: {
-          type: "CITY",
-          cityId: city.id,
-        },
-      })
-    )
-  );
-
-  const zoneLocations = await Promise.all(
-    zones.map((zone) =>
-      prisma.location.create({
-        data: {
-          type: "ZONE",
-          zoneId: zone.id,
-        },
-      })
-    )
-  );
 
   // Create businesses
   const businesses = await Promise.all([
     // Mechanics in Buenos Aires - Palermo
     prisma.business.create({
       data: {
-        name: "Taller Mecánico Central",
-        slug: "taller-mecanico-central",
+        name: 'Taller Mecánico Central',
+        slug: 'taller-mecanico-central',
         description:
-          "Servicio completo de mecánica automotriz con más de 20 años de experiencia. Especialistas en todas las marcas.",
-        address: "Av. Corrientes 1234",
-        phone: "11-1234-5678",
-        email: "contacto@tallercentral.com",
-        website: "https://tallercentral.com",
+          'Servicio completo de mecánica automotriz con más de 20 años de experiencia. Especialistas en todas las marcas.',
+        address: 'Av. Corrientes 1234',
+        phone: '11-1234-5678',
+        email: 'contacto@tallercentral.com',
+        website: 'https://tallercentral.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo",
-        slug: "mecanica-express-palermo",
+        name: 'Mecánica Express Palermo',
+        slug: 'mecanica-express-palermo',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo2",
-        slug: "mecanica-express-palermo2",
+        name: 'Mecánica Express Palermo2',
+        slug: 'mecanica-express-palermo2',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo3",
-        slug: "mecanica-express-palermo3",
+        name: 'Mecánica Express Palermo3',
+        slug: 'mecanica-express-palermo3',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo4",
-        slug: "mecanica-express-palermo4",
+        name: 'Mecánica Express Palermo4',
+        slug: 'mecanica-express-palermo4',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo5",
-        slug: "mecanica-express-palermo5",
+        name: 'Mecánica Express Palermo5',
+        slug: 'mecanica-express-palermo5',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo6",
-        slug: "mecanica-express-palermo6",
+        name: 'Mecánica Express Palermo6',
+        slug: 'mecanica-express-palermo6',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Mecánica Express Palermo7",
-        slug: "mecanica-express-palermo7",
+        name: 'Mecánica Express Palermo7',
+        slug: 'mecanica-express-palermo7',
         description:
-          "Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.",
-        address: "Thames 1234",
-        phone: "11-5678-1234",
-        email: "contacto@mecanicaexpress.com",
-        website: "https://mecanicaexpress.com",
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[0].id,
+        cityId: cities[0].id,
       },
     }),
     // Mechanics in Buenos Aires - Belgrano
     prisma.business.create({
       data: {
-        name: "AutoTech Premium",
-        slug: "autotech-premium",
+        name: 'AutoTech Premium',
+        slug: 'autotech-premium',
         description:
-          "Especialistas en vehículos de alta gama. Servicio técnico oficial de BMW, Mercedes-Benz y Audi.",
-        address: "Av. Cabildo 2500",
-        phone: "11-4545-6767",
-        email: "info@autotechpremium.com",
-        website: "https://autotechpremium.com",
+          'Especialistas en vehículos de alta gama. Servicio técnico oficial de BMW, Mercedes-Benz y Audi.',
+        address: 'Av. Cabildo 2500',
+        phone: '11-4545-6767',
+        email: 'info@autotechpremium.com',
+        website: 'https://autotechpremium.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[1].id,
+        cityId: cities[1].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Diesel Masters",
-        slug: "diesel-masters",
+        name: 'Diesel Masters',
+        slug: 'diesel-masters',
         description:
-          "Expertos en motores diesel. Reparación y mantenimiento de camiones y utilitarios.",
-        address: "Sucre 1850",
-        phone: "11-4789-2323",
-        email: "contacto@dieselmasters.com.ar",
-        website: "https://dieselmasters.com.ar",
+          'Expertos en motores diesel. Reparación y mantenimiento de camiones y utilitarios.',
+        address: 'Sucre 1850',
+        phone: '11-4789-2323',
+        email: 'contacto@dieselmasters.com.ar',
+        website: 'https://dieselmasters.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[1].id,
+        cityId: cities[1].id,
       },
     }),
     // Mechanics in Buenos Aires - Recoleta
     prisma.business.create({
       data: {
-        name: "Classic Car Garage",
-        slug: "classic-car-garage",
+        name: 'Classic Car Garage',
+        slug: 'classic-car-garage',
         description:
-          "Restauración y mantenimiento de autos clásicos. Más de 30 años preservando joyas automotrices.",
-        address: "Junín 1440",
-        phone: "11-4812-9999",
-        email: "info@classiccargarage.com.ar",
-        website: "https://classiccargarage.com.ar",
+          'Restauración y mantenimiento de autos clásicos. Más de 30 años preservando joyas automotrices.',
+        address: 'Junín 1440',
+        phone: '11-4812-9999',
+        email: 'info@classiccargarage.com.ar',
+        website: 'https://classiccargarage.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[2].id,
+        cityId: cities[2].id,
       },
     }),
     // Mechanics in Buenos Aires - Caballito
     prisma.business.create({
       data: {
-        name: "ElectriCar Service",
-        slug: "electricar-service",
+        name: 'ElectriCar Service',
+        slug: 'electricar-service',
         description:
-          "Especialistas en vehículos eléctricos e híbridos. Servicio técnico certificado para Tesla y otros.",
-        address: "Av. Pedro Goyena 820",
-        phone: "11-4982-3434",
-        email: "service@electricar.com.ar",
-        website: "https://electricar.com.ar",
+          'Especialistas en vehículos eléctricos e híbridos. Servicio técnico certificado para Tesla y otros.',
+        address: 'Av. Pedro Goyena 820',
+        phone: '11-4982-3434',
+        email: 'service@electricar.com.ar',
+        website: 'https://electricar.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[3].id,
+        cityId: cities[3].id,
       },
     }),
     // Mechanics in Buenos Aires - Villa Urquiza
     prisma.business.create({
       data: {
-        name: "MotoTech Racing",
-        slug: "mototech-racing",
+        name: 'MotoTech Racing',
+        slug: 'mototech-racing',
         description:
-          "Especialistas en motocicletas deportivas y de alta cilindrada. Preparación para competición.",
-        address: "Av. Triunvirato 3600",
-        phone: "11-4544-7878",
-        email: "info@mototechracing.com.ar",
-        website: "https://mototechracing.com.ar",
+          'Especialistas en motocicletas deportivas y de alta cilindrada. Preparación para competición.',
+        address: 'Av. Triunvirato 3600',
+        phone: '11-4544-7878',
+        email: 'info@mototechracing.com.ar',
+        website: 'https://mototechracing.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[4].id,
+        cityId: cities[4].id,
       },
     }),
     // Mechanics in Córdoba - Nueva Córdoba
     prisma.business.create({
       data: {
-        name: "Taller del Centro",
-        slug: "taller-del-centro",
+        name: 'Taller del Centro',
+        slug: 'taller-del-centro',
         description:
-          "Tu taller de confianza en el centro de Córdoba. Mecánica general y especializada.",
-        address: "Av. Colón 1234",
-        phone: "351-123-4567",
-        email: "info@tallerdelcentro.com",
-        website: "https://tallerdelcentro.com",
+          'Tu taller de confianza en el centro de Córdoba. Mecánica general y especializada.',
+        address: 'Av. Colón 1234',
+        phone: '351-123-4567',
+        email: 'info@tallerdelcentro.com',
+        website: 'https://tallerdelcentro.com',
         categoryId: categories[0].id,
-        locationId: zoneLocations[5].id,
+        cityId: cities[5].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Turbo Performance",
-        slug: "turbo-performance",
+        name: 'Turbo Performance',
+        slug: 'turbo-performance',
         description:
-          "Especialistas en turbocompresores y preparación de motores. Potenciación y optimización.",
-        address: "Bv. Illia 557",
-        phone: "351-445-8899",
-        email: "info@turboperformance.com.ar",
-        website: "https://turboperformance.com.ar",
+          'Especialistas en turbocompresores y preparación de motores. Potenciación y optimización.',
+        address: 'Bv. Illia 557',
+        phone: '351-445-8899',
+        email: 'info@turboperformance.com.ar',
+        website: 'https://turboperformance.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[5].id,
+        cityId: cities[5].id,
       },
     }),
     // Mechanics in Córdoba - Centro
     prisma.business.create({
       data: {
-        name: "Quick Fix Auto",
-        slug: "quick-fix-auto",
+        name: 'Quick Fix Auto',
+        slug: 'quick-fix-auto',
         description:
-          "Servicio rápido de mecánica ligera. Cambio de aceite, frenos y mantenimiento preventivo.",
-        address: "27 de Abril 784",
-        phone: "351-567-8900",
-        email: "service@quickfixauto.com.ar",
-        website: "https://quickfixauto.com.ar",
+          'Servicio rápido de mecánica ligera. Cambio de aceite, frenos y mantenimiento preventivo.',
+        address: '27 de Abril 784',
+        phone: '351-567-8900',
+        email: 'service@quickfixauto.com.ar',
+        website: 'https://quickfixauto.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[6].id,
+        cityId: cities[5].id,
       },
     }),
     // Mechanics in Córdoba - Alta Córdoba
     prisma.business.create({
       data: {
-        name: "Truck & Bus Service",
-        slug: "truck-and-bus-service",
+        name: 'Truck & Bus Service',
+        slug: 'truck-and-bus-service',
         description:
-          "Especialistas en vehículos pesados. Reparación y mantenimiento de camiones y colectivos.",
-        address: "Juan B. Justo 4200",
-        phone: "351-678-9012",
-        email: "info@truckservice.com.ar",
-        website: "https://truckservice.com.ar",
+          'Especialistas en vehículos pesados. Reparación y mantenimiento de camiones y colectivos.',
+        address: 'Juan B. Justo 4200',
+        phone: '351-678-9012',
+        email: 'info@truckservice.com.ar',
+        website: 'https://truckservice.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[7].id,
+        cityId: cities[5].id,
       },
     }),
     // Mechanics in Rosario - Centro
     prisma.business.create({
       data: {
-        name: "Diagnóstico Preciso",
-        slug: "diagnostico-preciso",
+        name: 'Diagnóstico Preciso',
+        slug: 'diagnostico-preciso',
         description:
-          "Centro de diagnóstico computarizado. Detección y solución de fallas electrónicas.",
-        address: "Av. Pellegrini 1800",
-        phone: "341-456-7890",
-        email: "info@diagnosticopreciso.com.ar",
-        website: "https://diagnosticopreciso.com.ar",
+          'Centro de diagnóstico computarizado. Detección y solución de fallas electrónicas.',
+        address: 'Av. Pellegrini 1800',
+        phone: '341-456-7890',
+        email: 'info@diagnosticopreciso.com.ar',
+        website: 'https://diagnosticopreciso.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[8].id,
+        cityId: cities[3].id,
       },
     }),
     // Mechanics in Rosario - Fisherton
     prisma.business.create({
       data: {
-        name: "Import Car Solutions",
-        slug: "import-car-solutions",
+        name: 'Import Car Solutions',
+        slug: 'import-car-solutions',
         description:
-          "Especialistas en vehículos importados. Repuestos originales y servicio especializado.",
-        address: "Av. Eva Perón 7840",
-        phone: "341-567-8901",
-        email: "contact@importcarsolutions.com.ar",
-        website: "https://importcarsolutions.com.ar",
+          'Especialistas en vehículos importados. Repuestos originales y servicio especializado.',
+        address: 'Av. Eva Perón 7840',
+        phone: '341-567-8901',
+        email: 'contact@importcarsolutions.com.ar',
+        website: 'https://importcarsolutions.com.ar',
         categoryId: categories[0].id,
-        locationId: zoneLocations[9].id,
+        cityId: cities[3].id,
       },
     }),
     // Existing non-mechanic businesses
     prisma.business.create({
       data: {
-        name: "Electricidad 24/7",
-        slug: "electricidad-24-7",
+        name: 'Electricidad 24/7',
+        slug: 'electricidad-24-7',
         description:
-          "Servicios eléctricos de emergencia las 24 horas. Instalaciones, reparaciones y mantenimiento.",
-        address: "Av. Santa Fe 4321",
-        phone: "11-9876-5432",
-        email: "info@electricidad247.com",
-        website: "https://electricidad247.com",
+          'Servicios eléctricos de emergencia las 24 horas. Instalaciones, reparaciones y mantenimiento.',
+        address: 'Av. Santa Fe 4321',
+        phone: '11-9876-5432',
+        email: 'info@electricidad247.com',
+        website: 'https://electricidad247.com',
         categoryId: categories[1].id,
-        locationId: zoneLocations[1].id,
+        cityId: cities[4].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Plomería Profesional",
-        slug: "plomeria-profesional",
+        name: 'Plomería Profesional',
+        slug: 'plomeria-profesional',
         description:
-          "Expertos en plomería y gas. Servicios residenciales y comerciales.",
-        address: "Av. Cabildo 2468",
-        phone: "11-2468-1357",
-        email: "contacto@plomeriapro.com",
-        website: "https://plomeriapro.com",
+          'Expertos en plomería y gas. Servicios residenciales y comerciales.',
+        address: 'Av. Cabildo 2468',
+        phone: '11-2468-1357',
+        email: 'contacto@plomeriapro.com',
+        website: 'https://plomeriapro.com',
         categoryId: categories[2].id,
-        locationId: zoneLocations[2].id,
+        cityId: cities[5].id,
       },
     }),
     prisma.business.create({
       data: {
-        name: "Electricistas Unidos",
-        slug: "electricistas-unidos",
+        name: 'Electricistas Unidos',
+        slug: 'electricistas-unidos',
         description:
-          "Red de electricistas profesionales. Cobertura en toda la ciudad de Rosario.",
-        address: "Av. Pellegrini 789",
-        phone: "341-765-4321",
-        email: "contacto@electricistasunidos.com",
-        website: "https://electricistasunidos.com",
+          'Red de electricistas profesionales. Cobertura en toda la ciudad de Rosario.',
+        address: 'Av. Pellegrini 789',
+        phone: '341-765-4321',
+        email: 'contacto@electricistasunidos.com',
+        website: 'https://electricistasunidos.com',
         categoryId: categories[1].id,
-        locationId: cityLocations[2].id,
+        cityId: cities[3].id,
       },
     }),
   ]);
 
-  console.log("Seed completed successfully! 🌱");
+  console.log('Seed completed successfully! 🌱');
   console.log(`Created ${categories.length} categories`);
   console.log(`Created ${cities.length} cities`);
-  console.log(`Created ${zones.length} zones`);
+  console.log(`Created ${provinces.length} provinces`);
   console.log(`Created ${businesses.length} businesses`);
 }
 
 main()
   .catch((e) => {
-    console.error("Error seeding database:", e);
+    console.error('Error seeding database:', e);
     process.exit(1);
   })
   .finally(async () => {
