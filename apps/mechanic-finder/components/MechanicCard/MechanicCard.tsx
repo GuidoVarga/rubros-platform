@@ -1,6 +1,5 @@
 import { BussinessCard, Button } from "@rubros/ui";
 import { BusinessEntity } from "@rubros/db/entities";
-import { getLocationName } from "@rubros/db/utils";
 import Link from "next/link";
 
 type MechanicCardProps = {
@@ -9,12 +8,12 @@ type MechanicCardProps = {
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, location, phone, email, website } = business;
+  const { name, description, city, phone, email, website } = business;
   return (
     <BussinessCard
       name={name}
       description={description}
-      location={getLocationName(location)}
+      location={city?.name}
       phone={phone}
       email={email}
       website={website}

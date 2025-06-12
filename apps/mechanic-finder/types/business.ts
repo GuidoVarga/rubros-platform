@@ -1,12 +1,12 @@
 export type BusinessOrderBy = {
-  field: "name" | "createdAt";
-  direction: "asc" | "desc";
+  field: 'name' | 'createdAt';
+  direction: 'asc' | 'desc';
 };
 
 export type BusinessFilters = {
   subCategoryId?: string;
   cityId?: string;
-  zoneId?: string;
+  provinceId?: string;
   search?: string;
 };
 

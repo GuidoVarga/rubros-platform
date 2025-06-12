@@ -1,83 +1,127 @@
 'use client';
 
-import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@rubros/ui";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@rubros/ui";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rubros/ui";
+import { useState, useEffect } from "react";
+import { ComboBox, ComboBoxOption } from "@rubros/ui";
 import { useRouter } from "next/navigation";
+import { getCitiesByProvince } from "@/actions/cities";
+import { ProvinceEntity } from "@rubros/db";
 
-type Location = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
-interface LocationFilterProps {
-  locations: Location[];
-  selectedLocation?: string;
+type LocationFilterProps = {
+  provinces: ProvinceEntity[]
+  selectedProvince?: string;
+  selectedCity?: string;
 }
 
-export function LocationFilter({ locations, selectedLocation }: LocationFilterProps) {
-  const [open, setOpen] = useState(false);
+export function LocationFilter({ provinces, selectedProvince, selectedCity }: LocationFilterProps) {
+  const [citiesOptions, setCitiesOptions] = useState<ComboBoxOption[]>([]);
+  const [currentProvince, setCurrentProvince] = useState(selectedProvince || '');
+  const [currentCity, setCurrentCity] = useState(selectedCity || '');
+  const [provinceOpen, setProvinceOpen] = useState(false);
+  const [cityOpen, setCityOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSelect = (currentValue: string) => {
-    setOpen(false);
-    router.push(`/${currentValue}`);
+  const provincesOptions: ComboBoxOption[] = provinces.map((province) => ({
+    label: province.name,
+    value: province.id,
+  }));
+
+  // Cargar ciudades cuando cambia la provincia
+  useEffect(() => {
+    const loadCities = async () => {
+      if (currentProvince) {
+        try {
+          const province = provincesOptions.find(p => p.value === currentProvince);
+          if (province) {
+            const citiesData = await getCitiesByProvince(province.value);
+            setCitiesOptions(citiesData.map((city) => ({
+              label: city.name,
+              value: city.id,
+            })));
+          }
+        } catch (error) {
+          console.error("Error loading cities:", error);
+        }
+      } else {
+        setCitiesOptions([]);
+        setCurrentCity("");
+      }
+    };
+
+    if (provinces.length > 0) {
+      loadCities();
+    }
+  }, [currentProvince, provinces]);
+
+  const handleProvinceSelect = (provinceSlug: string) => {
+    console.log('provinceSlug', provinceSlug);
+    setCurrentProvince(provinceSlug);
+    setCurrentCity(""); // Reset city when province changes
+    setProvinceOpen(false);
   };
 
-  const selectedLocationName = locations.find(
-    (location) => location.slug === selectedLocation
-  )?.name;
+  const handleCitySelect = (citySlug: string) => {
+    setCurrentCity(citySlug);
+    setCityOpen(false);
+
+    // Navigate to the province/city page
+    if (currentProvince && citySlug) {
+      router.push(`/${currentProvince}/${citySlug}`);
+    }
+  };
+
+  const selectedProvinceName = provincesOptions.find(
+    (province) => province.value === currentProvince
+  )?.label;
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-10 bg-muted rounded-lg animate-pulse"></div>
+        <div className="h-10 bg-muted rounded-lg animate-pulse"></div>
+      </div>
+    );
+  }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          {selectedLocationName ?? "Selecciona una zona"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Buscar zona..." />
-          <CommandEmpty>No se encontraron resultados.</CommandEmpty>
-          <CommandGroup>
-            {locations.map((location) => (
-              <CommandItem
-                key={location.id}
-                value={location.slug}
-                onSelect={handleSelect}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedLocation === location.slug ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {location.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="space-y-4">
+      {/* Province Selector */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Provincia</label>
+        <ComboBox
+          onChange={handleProvinceSelect}
+          options={provincesOptions}
+          value={currentProvince}
+          isOpen={provinceOpen}
+          setIsOpen={setProvinceOpen}
+          placeholder="Selecciona una provincia"
+        />
+      </div>
+
+      {/* City Selector */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Ciudad</label>
+        <ComboBox
+          onChange={handleCitySelect}
+          options={citiesOptions}
+          value={currentCity}
+          isOpen={cityOpen}
+          setIsOpen={setCityOpen}
+          placeholder="Selecciona una ciudad"
+          searchPlaceholder="Buscar ciudad..."
+          emptyMessage="No se encontraron ciudades."
+        />
+      </div>
+
+      {/* Show current selection */}
+      {currentProvince && !currentCity && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>{selectedProvinceName}</strong> seleccionada.
+            Ahora elige una ciudad para ver los talleres disponibles.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
