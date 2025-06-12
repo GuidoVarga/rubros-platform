@@ -1,14 +1,15 @@
-"use server";
+'use server';
 
-import {prisma} from "@/lib/db";
-import type {GetBusinessesParams, BusinessFilters} from "@/types/business";
-import {Categories} from "@rubros/db";
-import {BusinessEntity} from "@rubros/db/entities";
+import { prisma } from '@/lib/db';
+import type { GetBusinessesParams } from '@/types/business';
+import { Categories } from '@rubros/db';
+import { BusinessEntity } from '@rubros/db/entities';
+import { buildWhereClause } from './utils';
 
 export async function getBusinesses({
   filters,
-  orderBy = {field: "createdAt", direction: "desc"},
-  pagination = {page: 1, limit: 16},
+  orderBy = { field: 'createdAt', direction: 'desc' },
+  pagination = { page: 1, limit: 16 },
 }: GetBusinessesParams = {}) {
   try {
     // Calculate offset
@@ -18,7 +19,7 @@ export async function getBusinesses({
     const where = buildWhereClause(filters);
 
     // Get total count for pagination
-    const total = await prisma.business.count({where});
+    const total = await prisma.business.count({ where });
 
     // Get businesses
     const businesses = (await prisma.business.findMany({
@@ -30,10 +31,9 @@ export async function getBusinesses({
       },
       include: {
         category: true,
-        location: {
+        city: {
           include: {
-            city: true,
-            zone: true,
+            province: true,
           },
         },
       },
@@ -53,63 +53,27 @@ export async function getBusinesses({
       },
     };
   } catch (error) {
-    console.error("Error fetching businesses:", error);
-    throw new Error("Failed to fetch businesses");
+    console.error('Error fetching businesses:', error);
+    throw new Error('Failed to fetch businesses');
   }
 }
 
-export async function getLocations() {
+// Función auxiliar para contar mecánicos en toda la provincia
+export async function getTotalMechanicsInProvince(provinceId: string) {
   try {
-    return await prisma.city.findMany({
+    return await prisma.business.count({
       where: {
         status: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        zones: {
-          where: {
-            status: true,
-          },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
+        category: {
+          slug: 'mecanicos',
+        },
+        city: {
+          provinceId: provinceId,
         },
       },
     });
   } catch (error) {
-    console.error("Error fetching locations:", error);
-    throw new Error("Failed to fetch locations");
+    console.error('Error counting mechanics in province:', error);
+    return 0;
   }
-}
-
-function buildWhereClause(filters?: BusinessFilters) {
-  if (!filters) return {};
-
-  const where: any = {};
-
-  if (filters.subCategoryId) {
-    where.subCategoryId = filters.subCategoryId;
-  }
-
-  if (filters.cityId || filters.zoneId) {
-    where.location = {
-      OR: [
-        filters.cityId ? {cityId: filters.cityId} : {},
-        filters.zoneId ? {zoneId: filters.zoneId} : {},
-      ].filter((condition) => Object.keys(condition).length > 0),
-    };
-  }
-
-  if (filters.search) {
-    where.OR = [
-      {name: {contains: filters.search, mode: "insensitive"}},
-      {description: {contains: filters.search, mode: "insensitive"}},
-    ];
-  }
-
-  return where;
 }
