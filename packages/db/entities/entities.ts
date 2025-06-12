@@ -5,12 +5,7 @@ export type BusinessEntity = Business & {
   city: CityEntity;
 };
 
-export type CityEntity = City & {
-  province: ProvinceEntity;
-};
+export type CityEntity = Pick<City, 'id' | 'name' | 'slug'>;
 
-export type ProvinceEntity = Province & {
-  cities?: CityEntity[];
-};
-
-export type CategoryEntity = Category;
+export type ProvinceEntity = Pick<Province, 'id' | 'name' | 'slug'>;
+export type CategoryEntity = Pick<Category, 'id' | 'name' | 'slug'>;
