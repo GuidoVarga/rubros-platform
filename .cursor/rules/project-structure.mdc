@@ -36,14 +36,18 @@ apps/
 └── mechanic-finder/           # Main Next.js 15 app
     ├── app/                   # App Router pages
     │   ├── (public)/          # Public pages like home, contact, etc. (optional)
-    │   │   ├── page.tsx       # Main landing page
     │   │   └── contact/
     │   │       └── page.tsx
     │   │
-    │   ├── [slug]/[category]/ # Dynamic listing pages by city and category
-    │   │   └── page.tsx
+    │   ├── [province]/ # Dynamic listing pages by province, city and category
+    │   │   └── [city]/
+                  └── [category]/
+                      └── page.tsx
+                  └── page.tsx
+            └── page.tsx
     │   │
     │   └── layout.tsx         # Root layout for the app
+        ├── page.tsx           # Main landing page
         └── global.css         # Import global.css from tailwind config and overrides colors and fonts for its theme
     │
     ├── components/            # Reusable project components
@@ -248,4 +252,3 @@ module.exports = {
 - Extract constants and translations properly
 - Follow SEO best practices (metadata, H1s, OpenGraph)
 - Structure code in a way that can scale to multiple zones and business categories
-
