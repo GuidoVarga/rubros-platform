@@ -16,8 +16,11 @@
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
 
-    --primary-hover: 0 0% 96.1%;
-    --primary-selected: 0 0% 90.1%;
+    --primary-hover:217 100% 75.3%;
+    --primary-selected: 217 100% 68%;
+
+    --primary-cta: 217 100% 18.5%;
+    --primary-cta-hover: 217 100% 11%;
 
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
@@ -25,7 +28,7 @@
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
 
-    --accent: 0 0% 96.1%;
+    --accent: 217 100% 75.3%;
     --accent-foreground: 0 0% 9%;
 
     --destructive: 0 84.2% 60.2%;
@@ -65,6 +68,9 @@
 
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
+
+    --primary-cta: 217 100% 18.5%;
+    --primary-cta-hover: 217 100% 11%;
 
     --primary-hover: 0 0% 14.9%;
 
