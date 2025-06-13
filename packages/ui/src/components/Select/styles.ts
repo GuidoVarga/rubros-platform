@@ -1,5 +1,5 @@
 import { StylesConfig } from 'react-select';
-import { SelectOption } from './MultiSelect';
+import { SelectOption } from './Select';
 
 export const getSelectStyles = <T extends SelectOption>(
   hasError?: boolean,

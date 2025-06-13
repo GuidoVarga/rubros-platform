@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { ComboBox, ComboBoxOption } from "@rubros/ui";
+import { Button, ComboBox, ComboBoxOption, Select, SelectOption } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
 import { CityEntity, ProvinceEntity } from "@rubros/db";
@@ -23,10 +23,8 @@ export function LocationFilter({
   selectedCity
 }: LocationFilterProps) {
   const [cities, setCities] = useState<CityEntity[]>([]);
-  const [currentProvince, setCurrentProvince] = useState(selectedProvince || '');
-  const [currentCity, setCurrentCity] = useState(selectedCity || '');
-  const [provinceOpen, setProvinceOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
+  const [currentProvince, setCurrentProvince] = useState<SelectOption | undefined>(undefined);
+  const [currentCity, setCurrentCity] = useState<SelectOption | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -44,7 +42,7 @@ export function LocationFilter({
   useEffect(() => {
     const loadCities = async () => {
       try {
-        const province = provincesOptions.find(p => p.value === currentProvince);
+        const province = provincesOptions.find(p => p.value === currentProvince?.value);
         if (province) {
           const citiesData = await getCitiesByProvince(province.value);
           setCities(citiesData);
@@ -59,62 +57,62 @@ export function LocationFilter({
     }
     else {
       setCities([]);
-      setCurrentCity("");
+      setCurrentCity(undefined);
     }
   }, [currentProvince, provinces]);
 
-  const handleProvinceSelect = (provinceId: string) => {
-    console.log('provinceId', provinceId);
-    setCurrentProvince(provinceId);
-    setCurrentCity(""); // Reset city when province changes
-    setProvinceOpen(false);
+  const handleProvinceSelect = (province: any) => {
+    console.log('province', province);
+    setCurrentProvince(province);
+    setCurrentCity(undefined); // Reset city when province changes
   };
 
-  const handleCitySelect = (cityId: string) => {
-    setCurrentCity(cityId);
-    setCityOpen(false);
+  const handleCitySelect = (city: any) => {
+    setCurrentCity(city);
+  };
 
-    // Navigate to the province/city page
-    if (currentProvince && cityId) {
-      const citySlug = cities.find(c => c.id === cityId)?.slug;
-      const provinceSlug = provinces.find(p => p.id === currentProvince)?.slug;
+  const handleSearch = () => {
+    if (currentProvince && currentCity) {
+      const provinceSlug = provinces.find(p => p.id === currentProvince.value)?.slug;
+      const citySlug = cities.find(c => c.id === currentCity.value)?.slug;
       router.push(`/${provinceSlug}/${citySlug}`);
     }
-  };
+  }
 
   const selectedProvinceName = provincesOptions.find(
-    (province) => province.value === currentProvince
+    (province) => province.value === currentProvince?.value
   )?.label;
 
   return (
     <div className={cn("flex flex-row gap-4 items-center", className)}>
       {/* Province Selector */}
-      <div>
-        <label className={cn("block text-sm font-medium mb-2", labelClassName)}>Provincia</label>
-        <ComboBox
-          onChange={handleProvinceSelect}
+      <div className="w-full">
+        <label className={cn("block text-md font-medium mb-2 pr-4", labelClassName)}>Provincia</label>
+        <Select
           options={provincesOptions}
           value={currentProvince}
-          isOpen={provinceOpen}
-          setIsOpen={setProvinceOpen}
+          onChange={(province) => handleProvinceSelect(province)}
           placeholder="Selecciona una provincia"
         />
       </div>
 
       {/* City Selector */}
-      <div>
-        <label className={cn("block text-sm font-medium mb-2", labelClassName)}>Ciudad</label>
-        <ComboBox
-          onChange={handleCitySelect}
+      <div className="w-full">
+        <label className={cn("block text-md font-medium mb-2 pr-4", labelClassName)}>Ciudad</label>
+        <Select
           options={citiesOptions}
           value={currentCity}
-          isOpen={cityOpen}
-          setIsOpen={setCityOpen}
+          onChange={(city) => handleCitySelect(city)}
           placeholder="Selecciona una ciudad"
-          searchPlaceholder="Buscar ciudad..."
-          emptyMessage="No se encontraron ciudades."
-          disabled={!currentProvince}
+          isLoading={loading}
+          isDisabled={!currentProvince}
+          isSearchable={true}
         />
+      </div>
+      <div className="w-full mt-4 pr-4">
+        <Button variant="primary" size="lg" onClick={handleSearch} disabled={!currentProvince || !currentCity}>
+          Ver talleres
+        </Button>
       </div>
 
       {/* Show current selection */}
