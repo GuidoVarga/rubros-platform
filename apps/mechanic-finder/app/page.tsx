@@ -12,33 +12,8 @@ export const metadata: Metadata = {
   description: "Encuentra los mejores mecánicos en tu zona",
 };
 
-interface HomeProps {
-  searchParams: Promise<{
-    page?: string;
-    subCategory?: string;
-    search?: string;
-  }>;
-}
-
-export default async function Home({ searchParams }: HomeProps) {
-  const { page, subCategory, search } = await searchParams;
-  const currentPage = Number(page) || 1;
-  const itemsPerPage = 16;
-
-  const { businesses, pagination } = await getBusinesses({
-    pagination: {
-      page: currentPage,
-      limit: itemsPerPage,
-    },
-    filters: {
-      subCategoryId: subCategory,
-      search: search,
-    },
-  });
-
+export default async function Home() {
   const provinces: ProvinceEntity[] = await getProvinces();
-
-  console.log('fetched provinces', provinces);
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,24 +25,10 @@ export default async function Home({ searchParams }: HomeProps) {
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
             Mecánicos, electricistas, plomeros y más. Compara precios, lee reseñas y contacta directamente.
           </p>
-          <div className="mt-8 max-w-md mx-auto">
-            <LocationFilter provinces={provinces} />
+          <div className="mt-8 w-full">
+            <LocationFilter provinces={provinces} className="flex-col" />
           </div>
         </div>
-      </section>
-      <section className="container">
-        <PaginatedList
-          items={businesses}
-          renderItem={(business: any) => (
-            <MechanicCard key={business.id} business={business} href={`/mechanic/${business.slug}`} />
-          )}
-          pagination={{
-            currentPage,
-            totalPages: pagination.pages,
-            totalItems: pagination.total,
-            itemsPerPage,
-          }}
-        />
       </section>
     </div>
   );

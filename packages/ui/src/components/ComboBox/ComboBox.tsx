@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -33,18 +32,29 @@ export type ComboBoxProps = {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
+  disabled?: boolean;
+  className?: string;
 };
 
-export function ComboBox({ options, value, onChange, isOpen, setIsOpen, placeholder, searchPlaceholder, emptyMessage }: ComboBoxProps) {
+export function ComboBox({ className, options, value, onChange, isOpen, setIsOpen, placeholder, searchPlaceholder, emptyMessage, disabled = false }: ComboBoxProps) {
+
+  // Si está deshabilitado, nunca abrir el popover
+  const handleOpenChange = (open: boolean) => {
+    if (!disabled) {
+      setIsOpen(open)
+    }
+  }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen && !disabled} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
-          aria-expanded={isOpen}
-          className="w-[200px] justify-between"
+          aria-expanded={isOpen && !disabled}
+          className={cn("w-full justify-between", className, disabled && "opacity-50 cursor-not-allowed pointer-events-none")}
+          disabled={disabled}
+          tabIndex={disabled ? -1 : 0}
         >
           {value
             ? options.find((option) => option?.value === value)?.label
@@ -52,9 +62,9 @@ export function ComboBox({ options, value, onChange, isOpen, setIsOpen, placehol
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-0" hidden={disabled}>
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={searchPlaceholder} disabled={disabled} />
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
@@ -63,9 +73,12 @@ export function ComboBox({ options, value, onChange, isOpen, setIsOpen, placehol
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
-                    setIsOpen(false)
+                    if (!disabled) {
+                      onChange(currentValue === value ? "" : currentValue)
+                      setIsOpen(false)
+                    }
                   }}
+                  disabled={disabled}
                 >
                   <CheckIcon
                     className={cn(

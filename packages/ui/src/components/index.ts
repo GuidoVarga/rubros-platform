@@ -8,3 +8,5 @@ export * from './BussinessCard';
 export * from './NavLink';
 export * from './ComboBox';
 export * from './Skeleton';
+export * from './Select';
+export * from './Spinner';

@@ -4,16 +4,25 @@ import { useState, useEffect } from "react";
 import { ComboBox, ComboBoxOption } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
-import { ProvinceEntity } from "@rubros/db";
+import { CityEntity, ProvinceEntity } from "@rubros/db";
+import { cn } from "@/lib/utils";
 
 type LocationFilterProps = {
   provinces: ProvinceEntity[]
   selectedProvince?: string;
   selectedCity?: string;
+  className?: string;
+  labelClassName?: string;
 }
 
-export function LocationFilter({ provinces, selectedProvince, selectedCity }: LocationFilterProps) {
-  const [citiesOptions, setCitiesOptions] = useState<ComboBoxOption[]>([]);
+export function LocationFilter({
+  className,
+  labelClassName,
+  provinces,
+  selectedProvince,
+  selectedCity
+}: LocationFilterProps) {
+  const [cities, setCities] = useState<CityEntity[]>([]);
   const [currentProvince, setCurrentProvince] = useState(selectedProvince || '');
   const [currentCity, setCurrentCity] = useState(selectedCity || '');
   const [provinceOpen, setProvinceOpen] = useState(false);
@@ -26,47 +35,50 @@ export function LocationFilter({ provinces, selectedProvince, selectedCity }: Lo
     value: province.id,
   }));
 
+  const citiesOptions: ComboBoxOption[] = cities.map((city) => ({
+    label: city.name,
+    value: city.id,
+  }));
+
   // Cargar ciudades cuando cambia la provincia
   useEffect(() => {
     const loadCities = async () => {
-      if (currentProvince) {
-        try {
-          const province = provincesOptions.find(p => p.value === currentProvince);
-          if (province) {
-            const citiesData = await getCitiesByProvince(province.value);
-            setCitiesOptions(citiesData.map((city) => ({
-              label: city.name,
-              value: city.id,
-            })));
-          }
-        } catch (error) {
-          console.error("Error loading cities:", error);
+      try {
+        const province = provincesOptions.find(p => p.value === currentProvince);
+        if (province) {
+          const citiesData = await getCitiesByProvince(province.value);
+          setCities(citiesData);
         }
-      } else {
-        setCitiesOptions([]);
-        setCurrentCity("");
+      } catch (error) {
+        console.error("Error loading cities:", error);
       }
     };
 
-    if (provinces.length > 0) {
-      loadCities();
+    if (currentProvince) {
+      loadCities()
+    }
+    else {
+      setCities([]);
+      setCurrentCity("");
     }
   }, [currentProvince, provinces]);
 
-  const handleProvinceSelect = (provinceSlug: string) => {
-    console.log('provinceSlug', provinceSlug);
-    setCurrentProvince(provinceSlug);
+  const handleProvinceSelect = (provinceId: string) => {
+    console.log('provinceId', provinceId);
+    setCurrentProvince(provinceId);
     setCurrentCity(""); // Reset city when province changes
     setProvinceOpen(false);
   };
 
-  const handleCitySelect = (citySlug: string) => {
-    setCurrentCity(citySlug);
+  const handleCitySelect = (cityId: string) => {
+    setCurrentCity(cityId);
     setCityOpen(false);
 
     // Navigate to the province/city page
-    if (currentProvince && citySlug) {
-      router.push(`/${currentProvince}/${citySlug}`);
+    if (currentProvince && cityId) {
+      const citySlug = cities.find(c => c.id === cityId)?.slug;
+      const provinceSlug = provinces.find(p => p.id === currentProvince)?.slug;
+      router.push(`/${provinceSlug}/${citySlug}`);
     }
   };
 
@@ -74,20 +86,11 @@ export function LocationFilter({ provinces, selectedProvince, selectedCity }: Lo
     (province) => province.value === currentProvince
   )?.label;
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="h-10 bg-muted rounded-lg animate-pulse"></div>
-        <div className="h-10 bg-muted rounded-lg animate-pulse"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
+    <div className={cn("flex flex-row gap-4 items-center", className)}>
       {/* Province Selector */}
       <div>
-        <label className="block text-sm font-medium mb-2">Provincia</label>
+        <label className={cn("block text-sm font-medium mb-2", labelClassName)}>Provincia</label>
         <ComboBox
           onChange={handleProvinceSelect}
           options={provincesOptions}
@@ -100,7 +103,7 @@ export function LocationFilter({ provinces, selectedProvince, selectedCity }: Lo
 
       {/* City Selector */}
       <div>
-        <label className="block text-sm font-medium mb-2">Ciudad</label>
+        <label className={cn("block text-sm font-medium mb-2", labelClassName)}>Ciudad</label>
         <ComboBox
           onChange={handleCitySelect}
           options={citiesOptions}
@@ -110,6 +113,7 @@ export function LocationFilter({ provinces, selectedProvince, selectedCity }: Lo
           placeholder="Selecciona una ciudad"
           searchPlaceholder="Buscar ciudad..."
           emptyMessage="No se encontraron ciudades."
+          disabled={!currentProvince}
         />
       </div>
 
