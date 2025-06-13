@@ -16,6 +16,9 @@
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
 
+    --primary-hover: 0 0% 96.1%;
+    --primary-selected: 0 0% 90.1%;
+
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
 
@@ -27,6 +30,11 @@
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+
+    --cancel: 184 9% 62%;    /* #95A5A6 */
+    --success: 145 63% 42%;     /* #27AE60 */
+    --error: 6 78% 57%;       /* #E74C3C */
+    --warning: 48 89% 50%;    /* #F1C40F */
 
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
@@ -57,6 +65,8 @@
 
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
+
+    --primary-hover: 0 0% 14.9%;
 
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;

@@ -87,7 +87,7 @@ export function LocationFilter({
     <div className={cn("flex flex-row gap-4 items-center", className)}>
       {/* Province Selector */}
       <div className="w-full">
-        <label className={cn("block text-md font-medium mb-2 pr-4", labelClassName)}>Provincia</label>
+        <label className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Provincia</label>
         <Select
           options={provincesOptions}
           value={currentProvince}
@@ -98,7 +98,7 @@ export function LocationFilter({
 
       {/* City Selector */}
       <div className="w-full">
-        <label className={cn("block text-md font-medium mb-2 pr-4", labelClassName)}>Ciudad</label>
+        <label className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Ciudad</label>
         <Select
           options={citiesOptions}
           value={currentCity}
@@ -110,7 +110,7 @@ export function LocationFilter({
         />
       </div>
       <div className="w-full mt-4 pr-4">
-        <Button variant="primary" size="lg" onClick={handleSearch} disabled={!currentProvince || !currentCity}>
+        <Button variant="primary" size="lg" onClick={handleSearch} disabled={!currentProvince || !currentCity} className="text-lg">
           Ver talleres
         </Button>
       </div>

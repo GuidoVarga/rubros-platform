@@ -9,19 +9,15 @@ export const getSelectStyles = <T extends SelectOption>(
     ...base,
     minHeight: '40px',
     backgroundColor: state.isDisabled
-      ? 'rgb(var(--card-bg))'
-      : 'rgb(var(--white))',
+      ? 'hsl(var(--card-bg))'
+      : 'hsl(var(--white))',
     border: hasError
-      ? '1px solid rgb(var(--error))'
-      : state.isFocused
-        ? '2px solid rgb(var(--primary))'
-        : '1px solid rgb(var(--border))',
+      ? '1px solid hsl(var(--error))'
+      : '1px solid hsl(var(--border))',
     borderRadius: 'calc(var(--radius) - 2px)',
-    boxShadow: state.isFocused
-      ? '0 0 0 2px rgb(var(--background)), 0 0 0 4px rgb(var(--ring))'
-      : 'none',
+    boxShadow: 'none',
     '&:hover': {
-      borderColor: hasError ? 'rgb(var(--error))' : 'rgb(var(--border))',
+      borderColor: hasError ? 'hsl(var(--error))' : 'hsl(var(--border))',
       cursor: 'pointer',
     },
     padding: '0',
@@ -37,36 +33,36 @@ export const getSelectStyles = <T extends SelectOption>(
   }),
   multiValue: (base) => ({
     ...base,
-    backgroundColor: 'rgb(var(--primary))',
-    color: 'rgb(var(--white))',
+    backgroundColor: 'hsl(var(--primary-foreground))',
+    color: 'hsl(var(--primary))',
     borderRadius: '4px',
     padding: '0 2px',
 
     ':hover': {
-      backgroundColor: 'rgb(var(--primary-hover))',
+      backgroundColor: 'hsl(var(--primary-hover))',
     },
   }),
   multiValueLabel: (base) => ({
     ...base,
     fontSize: '14px',
     lineHeight: '20px',
-    color: 'rgb(var(--primary-foreground))',
+    color: 'hsl(var(--primary-foreground))',
     padding: '0 4px',
   }),
   multiValueRemove: (base) => ({
     ...base,
-    color: 'rgb(var(--primary-foreground))',
+    color: 'hsl(var(--primary-foreground))',
     padding: '0 2px',
     ':hover': {
-      backgroundColor: 'rgb(var(--primary))',
-      color: 'rgb(var(--primary-foreground))',
+      backgroundColor: 'hsl(var(--primary))',
+      color: 'hsl(var(--primary-foreground))',
       opacity: '0.8',
     },
   }),
   menu: (base) => ({
     ...base,
-    backgroundColor: 'rgb(var(--popover))',
-    border: '1px solid rgb(var(--border))',
+    backgroundColor: 'hsl(var(--popover))',
+    border: '1px solid hsl(var(--border))',
     borderRadius: 'calc(var(--radius) - 2px)',
     boxShadow: 'var(--shadow)',
     zIndex: 50,
@@ -82,44 +78,44 @@ export const getSelectStyles = <T extends SelectOption>(
     display: 'flex',
     alignItems: 'center',
     padding: '6px',
-    fontSize: '14px',
+    fontSize: '1rem',
     lineHeight: '20px',
     borderRadius: '4px',
     cursor: 'pointer',
     userSelect: 'none',
     backgroundColor: state.isSelected
-      ? 'rgb(var(--primary-hover))'
+      ? 'hsl(var(--primary-selected))'
       : state.isFocused
-        ? 'rgb(var(--primary-hover))'
+        ? 'hsl(var(--primary-hover))'
         : 'transparent',
     color: state.isSelected
-      ? 'rgb(var(--primary-foreground))'
+      ? 'hsl(var(--primary))'
       : state.isFocused
-        ? 'rgb(var(--white))'
-        : 'rgb(var(--popover-foreground))',
+        ? 'hsl(var(--primary))'
+        : 'hsl(var(--popover-foreground))',
     fontWeight: state.isSelected ? '500' : '400',
     ':active': {
       backgroundColor: state.isSelected
-        ? 'rgb(var(--primary))'
-        : 'rgb(var(--primary-hover) / 0.1)',
+        ? 'hsl(var(--primary-selected))'
+        : 'hsl(var(--primary-hover))',
     },
   }),
   input: (base) => ({
     ...base,
-    color: 'rgb(var(--foreground))',
+    color: 'hsl(var(--foreground))',
     margin: '0',
     padding: '0',
   }),
   placeholder: (base) => ({
     ...base,
-    color: 'rgb(var(--cancel) / 0.7)',
-    fontSize: '14px',
+    color: 'hsl(var(--cancel) / 0.7)',
+    fontSize: '1rem',
     lineHeight: '20px',
   }),
   singleValue: (base) => ({
     ...base,
-    color: 'rgb(var(--foreground))',
-    fontSize: '14px',
+    color: 'hsl(var(--primary))',
+    fontSize: '1rem',
     lineHeight: '20px',
   }),
   indicatorSeparator: () => ({
@@ -127,7 +123,7 @@ export const getSelectStyles = <T extends SelectOption>(
   }),
   loadingIndicator: (base) => ({
     ...base,
-    color: 'rgb(var(--muted-foreground))',
+    color: 'hsl(var(--muted-foreground))',
     padding: '8px',
   }),
   dropdownIndicator: (base) => ({
@@ -136,9 +132,9 @@ export const getSelectStyles = <T extends SelectOption>(
     marginRight: '8px',
     width: '16px',
     height: '16px',
-    color: 'rgb(var(--foreground) / 0.5)',
+    color: 'hsl(var(--foreground) / 0.5)',
     ':hover': {
-      color: 'rgb(var(--foreground))',
+      color: 'hsl(var(--foreground))',
     },
     display: isLoading ? 'none' : 'flex',
   }),
@@ -148,7 +144,7 @@ export const getSelectStyles = <T extends SelectOption>(
     width: '16px',
     height: '16px',
     marginRight: '8px',
-    color: 'rgb(var(--foreground) / 0.5)',
+    color: 'hsl(var(--foreground) / 0.5)',
   }),
 });
 

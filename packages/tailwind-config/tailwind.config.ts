@@ -32,6 +32,8 @@ const config = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          hover: 'hsl(var(--primary-hover))',
+          selected: 'hsl(var(--primary-selected))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -64,6 +66,10 @@ const config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        cancel: 'hsl(var(--cancel))',
+        success: 'hsl(var(--success))',
+        error: 'hsl(var(--error))',
+        warning: 'hsl(var(--warning))',
       },
       borderRadius: {
         lg: 'var(--radius)',
