@@ -10,3 +10,4 @@ export * from './ComboBox';
 export * from './Skeleton';
 export * from './Select';
 export * from './Spinner';
+export * from './EmptyState';

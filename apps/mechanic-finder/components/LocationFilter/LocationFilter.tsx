@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Button, ComboBox, ComboBoxOption, Select, SelectOption } from "@rubros/ui";
+import { Button, Select, SelectOption } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
 import { CityEntity, ProvinceEntity } from "@rubros/db";
@@ -19,8 +19,6 @@ export function LocationFilter({
   className,
   labelClassName,
   provinces,
-  selectedProvince,
-  selectedCity
 }: LocationFilterProps) {
   const [cities, setCities] = useState<CityEntity[]>([]);
   const [currentProvince, setCurrentProvince] = useState<SelectOption | undefined>(undefined);
@@ -28,12 +26,12 @@ export function LocationFilter({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const provincesOptions: ComboBoxOption[] = provinces.map((province) => ({
+  const provincesOptions: SelectOption[] = provinces.map((province) => ({
     label: province.name,
     value: province.id,
   }));
 
-  const citiesOptions: ComboBoxOption[] = cities.map((city) => ({
+  const citiesOptions: SelectOption[] = cities.map((city) => ({
     label: city.name,
     value: city.id,
   }));
@@ -62,7 +60,6 @@ export function LocationFilter({
   }, [currentProvince, provinces]);
 
   const handleProvinceSelect = (province: any) => {
-    console.log('province', province);
     setCurrentProvince(province);
     setCurrentCity(undefined); // Reset city when province changes
   };

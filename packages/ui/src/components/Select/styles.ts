@@ -146,6 +146,10 @@ export const getSelectStyles = <T extends SelectOption>(
     marginRight: '8px',
     color: 'hsl(var(--foreground) / 0.5)',
   }),
+  container: (base) => ({
+    ...base,
+    backgroundColor: 'hsl(var(--background))',
+  }),
 });
 
 export const selectAnimationStyles = `

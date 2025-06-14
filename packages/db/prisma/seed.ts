@@ -74,6 +74,18 @@ async function main() {
         slug: 'capital-federal',
       },
     }),
+    prisma.province.create({
+      data: {
+        name: 'Santa Cruz',
+        slug: 'santa-cruz',
+      },
+    }),
+    prisma.province.create({
+      data: {
+        name: 'La Pampa',
+        slug: 'la-pampa',
+      },
+    }),
   ]);
 
   // Create cities
@@ -118,6 +130,13 @@ async function main() {
         name: 'Colegiales',
         slug: 'colegiales',
         provinceId: provinces[2].id,
+      },
+    }),
+    prisma.city.create({
+      data: {
+        name: 'Santa Cruz',
+        slug: 'santa-cruz',
+        provinceId: provinces[3].id,
       },
     }),
   ]);
@@ -227,6 +246,175 @@ async function main() {
       data: {
         name: 'Mecánica Express Palermo7',
         slug: 'mecanica-express-palermo7',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo8',
+        slug: 'mecanica-express-palermo8',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo9',
+        slug: 'mecanica-express-palermo9',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo10',
+        slug: 'mecanica-express-palermo10',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo11',
+        slug: 'mecanica-express-palermo11',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo12',
+        slug: 'mecanica-express-palermo12',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo13',
+        slug: 'mecanica-express-palermo13',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo14',
+        slug: 'mecanica-express-palermo14',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo15',
+        slug: 'mecanica-express-palermo15',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo16',
+        slug: 'mecanica-express-palermo16',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo17',
+        slug: 'mecanica-express-palermo17',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo18',
+        slug: 'mecanica-express-palermo18',
+        description:
+          'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
+        address: 'Thames 1234',
+        phone: '11-5678-1234',
+        email: 'contacto@mecanicaexpress.com',
+        website: 'https://mecanicaexpress.com',
+        categoryId: categories[0].id,
+        cityId: cities[0].id,
+      },
+    }),
+    prisma.business.create({
+      data: {
+        name: 'Mecánica Express Palermo19',
+        slug: 'mecanica-express-palermo19',
         description:
           'Servicio rápido de mecánica. Diagnóstico en 1 hora. Reparaciones el mismo día.',
         address: 'Thames 1234',

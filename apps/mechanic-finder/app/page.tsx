@@ -34,6 +34,31 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      <section className="container py-16">
+        <h2 className="text-3xl font-bold tracking-tight text-center mb-8">
+          ¿Por qué elegirnos?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Servicios Verificados</h3>
+            <p className="text-muted-foreground">
+              Todos los servicios son verificados por nuestro equipo.
+            </p>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Reseñas Reales</h3>
+            <p className="text-muted-foreground">
+              Lee opiniones de clientes reales antes de elegir.
+            </p>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Contacto Directo</h3>
+            <p className="text-muted-foreground">
+              Contacta directamente con los profesionales sin intermediarios.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

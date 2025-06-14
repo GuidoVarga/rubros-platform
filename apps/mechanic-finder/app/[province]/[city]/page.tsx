@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { getBusinesses } from "@/actions/business";
-import { getProvinceBySlug } from "@/actions/province";
+import { getBusinesses, getMechanicsCount } from "@/actions/business";
+import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
 import { PaginatedList } from "@/components/PaginatedList/PaginatedList";
 import { prisma } from "@/lib/db";
-import { BusinessEntity } from "@rubros/db/entities";
-import { Categories } from "@rubros/db";
+import { BusinessEntity, ProvinceEntity } from "@rubros/db/entities";
+import { ITEMS_PER_PAGE } from "@/constants/pagination";
+import Link from "next/link";
+import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
+import { EmptyState } from "@/components/EmptyState/EmptyState";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -17,15 +20,7 @@ type Props = {
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
   try {
-    const provinces = await prisma.province.findMany({
-      where: { status: true },
-      include: {
-        cities: {
-          where: { status: true },
-          select: { slug: true },
-        },
-      },
-    });
+    const provinces = await getProvinces({ includeCities: true });
 
     const params = provinces.flatMap((province) =>
       province.cities.map((city) => ({
@@ -82,29 +77,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Función auxiliar para contar mecánicos
-async function getMechanicsCount(cityId: string) {
-  try {
-    return await prisma.business.count({
-      where: {
-        cityId,
-        status: true,
-        category: {
-          slug: Categories.MECHANICS,
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Error counting mechanics:", error);
-    return 0;
-  }
-}
-
 export default async function CityPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
   const { page } = await searchParams;
   const currentPage = Number(page) || 1;
-  const itemsPerPage = 16;
 
   const [province, city] = await Promise.all([
     getProvinceBySlug(provinceSlug),
@@ -124,12 +100,14 @@ export default async function CityPage({ params, searchParams }: Props) {
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
       page: currentPage,
-      limit: itemsPerPage,
+      limit: ITEMS_PER_PAGE - 1,
     },
     filters: {
       cityId: city.id,
     },
   });
+
+  const provinces: ProvinceEntity[] = await getProvinces();
 
   return (
     <div className="flex flex-col gap-8">
@@ -141,15 +119,15 @@ export default async function CityPage({ params, searchParams }: Props) {
             <nav className="mb-4 text-sm text-muted-foreground">
               <ol className="flex items-center justify-center space-x-2">
                 <li>
-                  <a href="/" className="hover:text-foreground">
+                  <Link href="/" className="hover:text-primary-cta-hover">
                     Inicio
-                  </a>
+                  </Link>
                 </li>
                 <li>/</li>
                 <li>
-                  <a href={`/${province.slug}`} className="hover:text-foreground">
+                  <Link href={`/${province.slug}`} className="hover:text-primary-cta-hover">
                     {province.name}
-                  </a>
+                  </Link>
                 </li>
                 <li>/</li>
                 <li className="font-medium text-foreground">{city.name}</li>
@@ -175,15 +153,15 @@ export default async function CityPage({ params, searchParams }: Props) {
       <section className="container">
         {mechanics.length > 0 ? (
           <>
-            <div className="mb-6">
+            <LocationFilter provinces={provinces} className="items-end mb-10" />
+            <div className="mb-6 mt-12">
               <h2 className="text-2xl font-semibold mb-2">
                 Talleres Mecánicos en {city.name}
               </h2>
               <p className="text-muted-foreground">
-                Mostrando {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, pagination.total)} de {pagination.total} resultados
+                Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de {pagination.total} resultados
               </p>
             </div>
-
             <PaginatedList
               items={mechanics}
               renderItem={(mechanic: BusinessEntity) => (
@@ -197,25 +175,12 @@ export default async function CityPage({ params, searchParams }: Props) {
                 currentPage,
                 totalPages: pagination.pages,
                 totalItems: pagination.total,
-                itemsPerPage,
+                itemsPerPage: ITEMS_PER_PAGE - 1,
               }}
             />
           </>
         ) : (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold mb-4">
-              No hay mecánicos en {city.name}
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Aún no tenemos talleres registrados en esta ciudad.
-            </p>
-            <a
-              href="/"
-              className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-            >
-              Ver todos los mecánicos
-            </a>
-          </div>
+          <EmptyState cityName={city.name} />
         )}
       </section>
 

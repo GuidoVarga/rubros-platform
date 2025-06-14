@@ -65,7 +65,7 @@ export async function getTotalMechanicsInProvince(provinceId: string) {
       where: {
         status: true,
         category: {
-          slug: 'mecanicos',
+          slug: Categories.MECHANICS,
         },
         city: {
           provinceId: provinceId,
@@ -74,6 +74,24 @@ export async function getTotalMechanicsInProvince(provinceId: string) {
     });
   } catch (error) {
     console.error('Error counting mechanics in province:', error);
+    return 0;
+  }
+}
+
+// Función auxiliar para contar mecánicos
+export async function getMechanicsCount(cityId: string) {
+  try {
+    return await prisma.business.count({
+      where: {
+        cityId,
+        status: true,
+        category: {
+          slug: Categories.MECHANICS,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error counting mechanics:', error);
     return 0;
   }
 }

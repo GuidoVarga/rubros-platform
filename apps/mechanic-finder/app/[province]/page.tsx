@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getProvinceBySlug } from "@/actions/province";
 import { getProvinces } from "@/actions/province";
-import { getTotalMechanicsInProvince } from "@/actions/business";
-import { prisma } from "@/lib/db";
-import { CitySelector } from "./components/CitySelector";
-import { Categories } from "@rubros/db";
+import { getMechanicsCount, getTotalMechanicsInProvince } from "@/actions/business";
+import { CitySelector } from "@/components/CitySelector/CitySelector";
+import { EmptyState as EmptyStateUI } from "@rubros/ui";
+import Link from "next/link";
 
 type Props = {
   params: Promise<{ province: string }>;
@@ -60,6 +60,7 @@ export default async function ProvincePage({ params }: Props) {
   const { province: provinceSlug } = await params;
 
   const province = await getProvinceBySlug(provinceSlug);
+  const totalMechanicsInProvince = await getTotalMechanicsInProvince(province?.id || '');
 
   if (!province) {
     notFound();
@@ -68,15 +69,7 @@ export default async function ProvincePage({ params }: Props) {
   // Obtener conteo de mecánicos por ciudad
   const citiesWithCounts = await Promise.all(
     province.cities.map(async (city) => {
-      const mechanicsCount = await prisma.business.count({
-        where: {
-          cityId: city.id,
-          status: true,
-          category: {
-            slug: Categories.MECHANICS,
-          },
-        },
-      });
+      const mechanicsCount = await getMechanicsCount(city.id);
       return {
         ...city,
         mechanicsCount,
@@ -111,81 +104,66 @@ export default async function ProvincePage({ params }: Props) {
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
               Mecánicos en {province.name}
             </h1>
-
-            <p className="text-lg leading-8 text-muted-foreground mb-8">
-              {totalMechanics} mecánicos en {province.cities.length} ciudades.
-              Selecciona tu ciudad para encontrar los mejores talleres cerca de ti.
-            </p>
-
-            <div className="bg-card border rounded-lg p-6 max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-4">
-                Selecciona tu ciudad
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Elige la ciudad donde necesitas un mecánico
-              </p>
-              <CitySelector
-                cities={citiesWithCounts}
-                provinceSlug={province.slug}
-              />
-            </div>
+            {province.cities.length > 0 && totalMechanicsInProvince > 0 && (
+              <>
+                <p className="text-lg leading-8 text-muted-foreground mb-8">
+                  {totalMechanics} mecánicos en {province.cities.length} ciudades.
+                  Selecciona tu ciudad para encontrar los mejores talleres cerca de ti.
+                </p>
+                <CitySelector
+                  cities={citiesWithCounts}
+                  provinceSlug={province.slug}
+                />
+              </>
+            )}
           </div>
         </div>
       </section>
 
       {/* Cities Grid Section */}
-      <section className="container">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-semibold mb-6 text-center">
-            Ciudades disponibles en {province.name}
-          </h2>
+      {province.cities.length > 0 && totalMechanicsInProvince > 0 ? (
+        <section className="container">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-semibold mb-6 text-center">
+              Ciudades disponibles en {province.name}
+            </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {citiesWithCounts.map((city) => (
-              <a
-                key={city.id}
-                href={`/${province.slug}/${city.slug}`}
-                className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold group-hover:text-primary">
-                    {city.name}
-                  </h3>
-                  <span className="text-2xl">🏙️</span>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {citiesWithCounts.map((city) => (
+                <a
+                  key={city.id}
+                  href={`/${province.slug}/${city.slug}`}
+                  className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-semibold group-hover:text-primary">
+                      {city.name}
+                    </h3>
+                    <span className="text-2xl">🏙️</span>
+                  </div>
 
-                <p className="text-muted-foreground text-sm mb-3">
-                  {city.mechanicsCount} talleres mecánicos disponibles
-                </p>
+                  <p className="text-muted-foreground text-sm mb-3">
+                    {city.mechanicsCount} talleres mecánicos disponibles
+                  </p>
 
-                <div className="flex items-center text-sm text-primary">
-                  <span>Ver talleres</span>
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-
-          {province.cities.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-4">
-                No hay ciudades disponibles
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Aún no tenemos ciudades registradas en esta provincia.
-              </p>
-              <a
-                href="/"
-                className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-              >
-                Volver al inicio
-              </a>
+                  <div className="flex items-center text-sm text-primary">
+                    <span>Ver talleres</span>
+                    <span className="ml-2 transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
+                  </div>
+                </a>
+              ))}
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : (
+        <EmptyStateUI title={`No hay ${!totalMechanicsInProvince ? 'mecánicos' : 'ciudades'} disponibles`} description={`Aún no tenemos ${!totalMechanicsInProvince ? 'mecánicos registrados' : 'ciudades registradas'} en esta provincia.`} linkComponent={
+          <Link href="/" className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+            Volver al inicio
+          </Link>
+        } />
+      )}
     </div>
   );
 }

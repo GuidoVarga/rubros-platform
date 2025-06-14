@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { PaginationBar } from "../PaginationBar/PaginationBar";
 import { AdComponent } from "@/components/ads/ads";
+import { ITEMS_PER_PAGE } from "@/constants/pagination";
 
 export type PaginatedListProps<T> = {
   items: T[];
@@ -22,13 +23,17 @@ export function PaginatedList<T>({
   pagination,
   gridClassName = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6",
   showItemCount = true,
-  adPosition = 7,
+  adPosition = Math.floor(ITEMS_PER_PAGE / 2),
 }: PaginatedListProps<T>) {
+
+  const parsedItems = [...items.slice(0, adPosition), {} as T, ...items.slice(adPosition)];
+
   return (
     <div className="space-y-8">
       <div className={gridClassName}>
-        {items.map((item, index) => {
-          const isAdd = index === adPosition;
+        {parsedItems.map((item, index) => {
+          //@ts-ignore
+          const isAdd = !item?.id;
           //@ts-ignore
           const key = isAdd ? `${index}-ad` : item?.id;
           return (
