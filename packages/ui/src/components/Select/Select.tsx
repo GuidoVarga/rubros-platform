@@ -12,7 +12,7 @@ type SelectProps<T extends SelectOption> = Props<T, true> & {
   hasError?: boolean;
 };
 
-export const Select = <T extends SelectOption>(props: SelectProps<T>) => {
+const Select = <T extends SelectOption>(props: SelectProps<T>) => {
   return (
     <ReactSelect<T, true>
       {...props}
@@ -21,3 +21,5 @@ export const Select = <T extends SelectOption>(props: SelectProps<T>) => {
     />
   );
 };
+
+export default Select;

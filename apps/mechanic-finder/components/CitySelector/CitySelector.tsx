@@ -1,9 +1,15 @@
 'use client';
 
 import { useState } from "react";
-import { Button, Select, SelectOption } from "@rubros/ui";
+import { Button, SelectOption, Skeleton } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { CityEntity } from "@rubros/db";
+import dynamic from 'next/dynamic'
+
+const Select = dynamic(() => import('@rubros/ui/select'), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-10" />
+})
 
 type CitySelectorProps = {
   cities: CityEntity[];

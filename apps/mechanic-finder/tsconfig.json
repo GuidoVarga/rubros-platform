@@ -9,7 +9,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@rubros/ui": ["../packages/ui/src"]
+      "@rubros/ui": ["../packages/ui/dist"]
     }
   },
   "include": [

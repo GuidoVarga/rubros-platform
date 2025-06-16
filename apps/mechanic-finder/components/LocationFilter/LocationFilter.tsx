@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
 import { CityEntity, ProvinceEntity } from "@rubros/db";
 import { cn } from "@/lib/utils";
-
 import dynamic from 'next/dynamic'
 
-const Select = dynamic(() => import('@rubros/ui').then(mod => mod.Select), { ssr: false, loading: () => <Skeleton className="w-full h-10" /> })
-
+const Select = dynamic(() => import('@rubros/ui/select'), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-10" />
+})
 
 type LocationFilterProps = {
   provinces: ProvinceEntity[]

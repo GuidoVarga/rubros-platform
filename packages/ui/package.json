@@ -3,26 +3,36 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./select": {
+      "import": "./dist/components/Select/Select.js",
+      "types": "./dist/components/Select/Select.d.ts",
+      "default": "./dist/components/Select/Select.js"
     }
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1",
     "@rubros/db": "workspace:*",
     "@rubros/eslint-config": "workspace:*",
     "@rubros/types": "workspace:*",
     "@rubros/typescript-config": "workspace:*",
     "@turbo/gen": "^2.5.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
     "eslint": "^9.27.0",
+    "tsup": "^8.5.0",
     "typescript": "5.8.2"
   },
   "dependencies": {
