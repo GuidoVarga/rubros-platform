@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
-import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
-import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
-
-import { getBusinesses } from "@/actions/business";
-import { PaginatedList } from "@/components/PaginatedList/PaginatedList";
 import { getProvinces } from "@/actions/province";
 import { ProvinceEntity } from "@rubros/db";
+import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 
 export const metadata: Metadata = {
   title: "Rubros - Encuentra tu Mecánico de Confianza",
@@ -30,7 +26,7 @@ export default async function Home() {
       <section className="container bg-muted/30 py-12">
         <div className="max-w-3xl mx-auto text-center">
           <div className="mt-8 w-full">
-            <LocationFilter provinces={provinces} className="flex-col" />
+            <LocationFilter provinces={provinces} />
           </div>
         </div>
       </section>

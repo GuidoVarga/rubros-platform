@@ -11,6 +11,7 @@ import { ITEMS_PER_PAGE } from "@/constants/pagination";
 import Link from "next/link";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
+import { Breadcrumb } from "@rubros/ui";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -109,31 +110,23 @@ export default async function CityPage({ params, searchParams }: Props) {
 
   const provinces: ProvinceEntity[] = await getProvinces();
 
+  const breadcrumbElements = [
+    <Link href="/" className="hover:text-primary-cta-hover">
+      Inicio
+    </Link>,
+    <Link href={`/${province.slug}`} className="hover:text-primary-cta-hover">
+      {province.name}
+    </Link>,
+    <span className="font-medium text-foreground">{city.name}</span>,
+  ];
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Breadcrumb */}
-            <nav className="mb-4 text-sm text-muted-foreground">
-              <ol className="flex items-center justify-center space-x-2">
-                <li>
-                  <Link href="/" className="hover:text-primary-cta-hover">
-                    Inicio
-                  </Link>
-                </li>
-                <li>/</li>
-                <li>
-                  <Link href={`/${province.slug}`} className="hover:text-primary-cta-hover">
-                    {province.name}
-                  </Link>
-                </li>
-                <li>/</li>
-                <li className="font-medium text-foreground">{city.name}</li>
-              </ol>
-            </nav>
-
+            <Breadcrumb elements={breadcrumbElements} />
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
               Mecánicos en {city.name}
               <span className="block text-3xl text-muted-foreground mt-2">
@@ -153,7 +146,7 @@ export default async function CityPage({ params, searchParams }: Props) {
       <section className="container">
         {mechanics.length > 0 ? (
           <>
-            <LocationFilter provinces={provinces} className="items-end mb-10" />
+            <LocationFilter provinces={provinces} className="items-end mb-10 lg:flex-row" />
             <div className="mb-6 mt-12">
               <h2 className="text-2xl font-semibold mb-2">
                 Talleres Mecánicos en {city.name}

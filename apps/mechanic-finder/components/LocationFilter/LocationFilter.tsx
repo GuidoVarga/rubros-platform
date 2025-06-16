@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Button, Select, SelectOption } from "@rubros/ui";
+import { Button, SelectOption, Skeleton } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
 import { CityEntity, ProvinceEntity } from "@rubros/db";
 import { cn } from "@/lib/utils";
+
+import dynamic from 'next/dynamic'
+
+const Select = dynamic(() => import('@rubros/ui').then(mod => mod.Select), { ssr: false, loading: () => <Skeleton className="w-full h-10" /> })
+
 
 type LocationFilterProps = {
   provinces: ProvinceEntity[]
@@ -81,21 +86,22 @@ export function LocationFilter({
   )?.label;
 
   return (
-    <div className={cn("flex flex-row gap-4 items-center", className)}>
+    <div className={cn("flex flex-col gap-4 items-center", className)}>
       {/* Province Selector */}
       <div className="w-full">
-        <label className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Provincia</label>
+        <label htmlFor="province" className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Provincia</label>
         <Select
           options={provincesOptions}
           value={currentProvince}
           onChange={(province) => handleProvinceSelect(province)}
           placeholder="Selecciona una provincia"
+          name="province"
         />
       </div>
 
       {/* City Selector */}
       <div className="w-full">
-        <label className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Ciudad</label>
+        <label htmlFor="city" className={cn("block text-lg font-medium mb-2 pr-4", labelClassName)}>Ciudad</label>
         <Select
           options={citiesOptions}
           value={currentCity}
@@ -104,6 +110,7 @@ export function LocationFilter({
           isLoading={loading}
           isDisabled={!currentProvince}
           isSearchable={true}
+          name="city"
         />
       </div>
       <div className="w-full mt-4 pr-4">
