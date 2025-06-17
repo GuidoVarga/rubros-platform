@@ -4,7 +4,7 @@ import { getProvinceBySlug } from "@/actions/province";
 import { getProvinces } from "@/actions/province";
 import { getMechanicsCount, getTotalMechanicsInProvince } from "@/actions/business";
 import { CitySelector } from "@/components/CitySelector/CitySelector";
-import { EmptyState as EmptyStateUI } from "@rubros/ui";
+import { Breadcrumb, BreadcrumbProps, EmptyState as EmptyStateUI } from "@rubros/ui";
 import Link from "next/link";
 
 type Props = {
@@ -82,24 +82,26 @@ export default async function ProvincePage({ params }: Props) {
     0
   );
 
+  const breadcrumbElements: BreadcrumbProps['elements'] = [
+    {
+      id: 'inicio',
+      content: <Link href="/" className="hover:text-primary-cta-hover">
+        Inicio
+      </Link>,
+    },
+    {
+      id: 'provincia',
+      content: <span className="font-medium text-foreground">{province.name}</span>,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Breadcrumb */}
-            <nav className="mb-4 text-sm text-muted-foreground">
-              <ol className="flex items-center justify-center space-x-2">
-                <li>
-                  <a href="/" className="hover:text-foreground">
-                    Inicio
-                  </a>
-                </li>
-                <li>/</li>
-                <li className="font-medium text-foreground">{province.name}</li>
-              </ol>
-            </nav>
+            <Breadcrumb elements={breadcrumbElements} />
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
               Mecánicos en {province.name}

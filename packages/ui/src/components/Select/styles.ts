@@ -9,7 +9,7 @@ export const getSelectStyles = <T extends SelectOption>(
     ...base,
     minHeight: '40px',
     backgroundColor: state.isDisabled
-      ? 'hsl(var(--card-bg))'
+      ? 'hsl(var(--border))'
       : 'hsl(var(--white))',
     border: hasError
       ? '1px solid hsl(var(--error))'

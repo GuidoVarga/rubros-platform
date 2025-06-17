@@ -11,7 +11,7 @@ import { ITEMS_PER_PAGE } from "@/constants/pagination";
 import Link from "next/link";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
-import { Breadcrumb } from "@rubros/ui";
+import { Breadcrumb, BreadcrumbProps } from "@rubros/ui";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -110,14 +110,23 @@ export default async function CityPage({ params, searchParams }: Props) {
 
   const provinces: ProvinceEntity[] = await getProvinces();
 
-  const breadcrumbElements = [
-    <Link href="/" className="hover:text-primary-cta-hover">
-      Inicio
-    </Link>,
-    <Link href={`/${province.slug}`} className="hover:text-primary-cta-hover">
-      {province.name}
-    </Link>,
-    <span className="font-medium text-foreground">{city.name}</span>,
+  const breadcrumbElements: BreadcrumbProps['elements'] = [
+    {
+      id: 'inicio',
+      content: <Link href="/" className="hover:text-primary-cta-hover">
+        Inicio
+      </Link>,
+    },
+    {
+      id: 'provincia',
+      content: <Link href={`/${province.slug}`} className="hover:text-primary-cta-hover">
+        {province.name}
+      </Link>,
+    },
+    {
+      id: 'ciudad',
+      content: <span className="font-medium text-foreground">{city.name}</span>,
+    },
   ];
 
   return (

@@ -41,7 +41,6 @@ export function MockTopAd(props: MockAdProps) {
 }
 
 export function MockSideAd(props: MockAdProps) {
-  console.log('MockSideAd', props);
   const style = {
     ...props.style,
     height: props.style?.height || "600px",
@@ -58,7 +57,6 @@ export function MockSideAd(props: MockAdProps) {
 }
 
 export function MockInFeedAd(props: MockAdProps) {
-  console.log('MockInFeedAd', props);
   const style = {
     ...props.style,
     height: props.style?.height || "300px",
