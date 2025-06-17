@@ -170,7 +170,7 @@ export default async function CityPage({ params, searchParams }: Props) {
                 <MechanicCard
                   key={mechanic.id}
                   business={mechanic}
-                  href={`/mechanic/${mechanic.slug}`}
+                  href={`/${province.slug}/${city.slug}/${mechanic.slug}`}
                 />
               )}
               pagination={{
