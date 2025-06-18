@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { getProvinces } from "@/actions/province";
 import { ProvinceEntity } from "@rubros/db";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
+import { ORGANIZATION } from "@/constants/org";
 
 export const metadata: Metadata = {
-  title: "Rubros - Encuentra tu Mecánico de Confianza",
-  description: "Encuentra los mejores mecánicos en tu zona",
+  title: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
+  description: ORGANIZATION.description,
 };
 
 export default async function Home() {

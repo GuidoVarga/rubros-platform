@@ -5,6 +5,7 @@ import { prisma } from '@rubros/db'
 import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
 import { MapPin, Phone, Mail, Globe, Calendar, Clock } from 'lucide-react'
 import { generateLocalBusinessSchema } from '../../../../lib/schema'
+import { ORGANIZATION } from '@/constants/org'
 
 type Props = {
   params: {
@@ -51,11 +52,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     telephone: business.phone || undefined,
     email: business.email || undefined,
     url: businessUrl,
+    openingHours: business?.openingHours || undefined,
   })
 
   return {
     title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
     description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
+    openGraph: {
+      title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
+      description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
+      images: [
+        {
+          url: ORGANIZATION.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
+      description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
+      images: [
+        {
+          url: ORGANIZATION.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
     alternates: {
       canonical: businessUrl,
     },

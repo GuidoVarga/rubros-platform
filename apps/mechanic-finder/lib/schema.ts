@@ -12,6 +12,7 @@ type LocalBusiness = {
   telephone?: string;
   url: string;
   email?: string;
+  openingHours?: string;
 };
 
 export function generateOrganizationSchema(org: Organization) {

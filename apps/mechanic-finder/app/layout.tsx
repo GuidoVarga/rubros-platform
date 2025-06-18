@@ -7,39 +7,38 @@ import { AdComponent } from "@/components/ads/ads";
 import { Suspense } from "react";
 import { SkeletonPage } from "@rubros/ui";
 import { generateOrganizationSchema } from '../lib/schema'
+import { ORGANIZATION } from "@/constants/org";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export function generateMetadata(): Metadata {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  const org = {
-    name: 'Mecánicos Rubros',
-    url: baseUrl,
-    description: 'Encuentra los mejores mecánicos en tu ciudad',
-    logo: `${baseUrl}/logo.png`,
-  }
+  const org = ORGANIZATION;
 
   return {
     metadataBase: new URL(baseUrl),
     title: {
-      default: "Rubros - Encuentra los mejores servicios en tu zona",
-      template: "%s | Rubros",
+      default: `${org.name} - Encuentra los mejores mecánicos en tu zona`,
+      template: `%s | ${org.name}`,
     },
-    description:
-      "Encuentra los mejores servicios en tu zona. Mecánicos, electricistas, plomeros y más. Compara precios, lee reseñas y contacta directamente.",
+    description: org.description,
     keywords: [
-      "servicios",
       "mecánicos",
-      "electricistas",
-      "plomeros",
-      "argentina",
-      "buenos aires",
-      "córdoba",
-      "rosario",
+      "taller mecánico",
+      "reparación auto",
+      "reparación moto",
+      "cambio de aceite",
+      "servicio técnico auto",
+      "servicio técnico moto",
+      "servicio 24hs",
+      "Argentina",
+      "Buenos Aires",
+      "Córdoba",
+      "Rosario",
     ],
     authors: [{ name: "Rubros" }],
-    creator: "Rubros",
-    publisher: "Rubros",
+    creator: org.name,
+    publisher: org.name,
     formatDetection: {
       email: false,
       address: false,
@@ -48,18 +47,30 @@ export function generateMetadata(): Metadata {
     openGraph: {
       type: "website",
       locale: "es_AR",
-      url: "https://rubros.com.ar",
-      title: "Rubros - Encuentra los mejores servicios en tu zona",
-      description:
-        "Encuentra los mejores servicios en tu zona. Mecánicos, electricistas, plomeros y más. Compara precios, lee reseñas y contacta directamente.",
-      siteName: "Rubros",
+      url: baseUrl,
+      title: `${org.name} - ${org.shortDescription}`,
+      description: org.description,
+      siteName: org.name,
+      images: [
+        {
+          url: org.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Rubros - Encuentra los mejores servicios en tu zona",
-      description:
-        "Encuentra los mejores servicios en tu zona. Mecánicos, electricistas, plomeros y más. Compara precios, lee reseñas y contacta directamente.",
-      creator: "@rubros",
+      title: `${org.name} - ${org.shortDescription}`,
+      description: org.description,
+      creator: `@${org.name}`,
+      images: [
+        {
+          url: org.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     robots: {
       index: true,

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
 import { Breadcrumb, BreadcrumbProps } from "@rubros/ui";
+import { ORGANIZATION } from "@/constants/org";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -63,17 +64,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-    description: `Encuentra los mejores mecánicos en ${city.name}, ${province.name}. ${mechanicsCount} talleres verificados con precios, horarios y contacto directo.`,
+    description: `Encontrá los mejores mecánicos en ${city.name}, ${province.name}. ${mechanicsCount} talleres en tu ciudad con reseñas, horarios y contacto directo.`,
     keywords: [
       `mecánicos ${city.name.toLowerCase()}`,
       `taller mecánico ${city.name.toLowerCase()}`,
       `reparación auto ${city.name.toLowerCase()}`,
-      `mecánicos ${province.name.toLowerCase()}`,
+      `reparación moto ${city.name.toLowerCase()}`,
+      `servicio 24hs ${city.name.toLowerCase()}`,
     ],
     openGraph: {
       title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
       description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
       type: "website",
+      images: [
+        {
+          url: ORGANIZATION.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
+      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
+      images: [
+        {
+          url: ORGANIZATION.logo,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   };
 }
