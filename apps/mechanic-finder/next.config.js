@@ -4,6 +4,7 @@ const nextConfig = {
   experimental: {
     serverSourceMaps: true,
   },
+  reactStrictMode: false,
   /*experimental: {
     serverComponentsExternalPackages: ['@rubros/ui']
   }*/

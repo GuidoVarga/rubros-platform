@@ -14,6 +14,11 @@
       "import": "./dist/components/Select/Select.js",
       "types": "./dist/components/Select/Select.d.ts",
       "default": "./dist/components/Select/Select.js"
+    },
+    "./map": {
+      "import": "./dist/components/Map/Map.js",
+      "types": "./dist/components/Map/Map.d.ts",
+      "default": "./dist/components/Map/Map.js"
     }
   },
   "scripts": {
@@ -28,6 +33,7 @@
     "@rubros/types": "workspace:*",
     "@rubros/typescript-config": "workspace:*",
     "@turbo/gen": "^2.5.0",
+    "@types/leaflet": "^1.9.8",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
@@ -44,6 +50,8 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^0.359.0",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "^1.3.4"

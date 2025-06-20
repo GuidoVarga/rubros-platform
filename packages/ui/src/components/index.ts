@@ -7,7 +7,6 @@ export * from './Code';
 export * from './BussinessCard';
 export * from './NavLink';
 export * from './Skeleton';
-export * from './Select';
 export * from './Spinner';
 export * from './EmptyState';
 export * from './Breadcrumb';

@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@rubros/db'
-import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
-import { MapPin, Phone, Mail, Globe, Calendar, Clock } from 'lucide-react'
+import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, LatLngExpression } from '@rubros/ui'
+import { MapPin, Phone, Mail, Globe } from 'lucide-react'
 import { generateLocalBusinessSchema } from '../../../../lib/schema'
 import { ORGANIZATION } from '@/constants/org'
+import { CustomMap } from '@/components/CustomMap/CustomMap'
 
 type Props = {
   params: {
@@ -91,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BusinessPage({ params }: Props) {
-  const { province, city, business: businessSlug } = await params;
+  const { province, city, business: businessSlug } = params
 
   const business = await prisma.business.findFirst({
     where: {
@@ -116,6 +117,10 @@ export default async function BusinessPage({ params }: Props) {
   if (!business) {
     notFound()
   }
+
+  // Extract coordinates from address using a geocoding service
+  // For now, we'll use a default location
+  const location = [-34.6037, -58.3816] // Default to Buenos Aires
 
   const breadcrumbItems = [
     {
@@ -173,15 +178,25 @@ export default async function BusinessPage({ params }: Props) {
             </CardContent>
           </Card>
 
-          {/* Map Placeholder */}
+          {/* Map Card */}
           <Card>
             <CardHeader>
               <CardTitle>Ubicación</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted w-full h-[300px] rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground">Mapa próximamente</span>
-              </div>
+              <CustomMap
+                center={location as LatLngExpression}
+                zoom={15}
+                markers={[
+                  {
+                    id: business.id,
+                    position: location as LatLngExpression,
+                    title: business.name,
+                    description: business.address || undefined,
+                  },
+                ]}
+                showCurrentLocation
+              />
             </CardContent>
           </Card>
         </div>
