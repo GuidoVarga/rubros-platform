@@ -22,8 +22,9 @@
     --primary-cta: 217 100% 18.5%;
     --primary-cta-hover: 217 100% 11%;
 
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 229 100% 75.3%;
+    --secondary-hover: 229 100% 79%;
+    --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;

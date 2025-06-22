@@ -9,6 +9,8 @@ import { cn } from '../../lib/utils'
 import 'leaflet/dist/leaflet.css'
 
 import { LatLngExpression as LeafletLatLngExpression } from 'leaflet';
+import { Button } from '../Button/button'
+import { MapPin } from 'lucide-react'
 
 export type LatLngExpression = LeafletLatLngExpression;
 
@@ -17,6 +19,7 @@ export type MapMarker = {
   position: LatLngExpression;
   title: string;
   description?: string;
+  link?: string;
   onClick?: () => void;
 };
 
@@ -50,7 +53,6 @@ function CurrentLocationMarker({ onPositionChange }: { onPositionChange?: (posit
       if (onPositionChange) {
         onPositionChange([e.latlng.lat, e.latlng.lng])
       }
-      map.flyTo(e.latlng, map.getZoom())
     })
   }, [map, onPositionChange])
 
@@ -99,6 +101,14 @@ const Map = ({
               <h3 className="font-semibold">{marker.title}</h3>
               {marker.description && (
                 <p className="text-sm text-muted-foreground mt-1">{marker.description}</p>
+              )}
+              {marker.link && (
+                <a href={marker.link} target="_blank" rel="noopener noreferrer">
+                  <Button variant="primary" className="w-full" size="lg">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Ver en Google Maps
+                  </Button>
+                </a>
               )}
             </div>
           </Popup>

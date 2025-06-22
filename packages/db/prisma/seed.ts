@@ -224,6 +224,11 @@ async function main() {
         phone: '11-5678-1234',
         email: 'contacto@mecanicaexpress.com',
         website: 'https://mecanicaexpress.com',
+        openingHours: 'Lunes a Viernes: 8:00 - 18:00',
+        latitude: -38.026376,
+        longitude: -57.5585,
+        googleMapsLink:
+          'https://www.google.com/maps/place/Car+Service/@-38.025977,-57.5978744,14z/data=!4m10!1m2!2m1!1staller+mecanico!3m6!1s0x9584de846c54d761:0xcaf23b255bdecf6a!8m2!3d-38.0259759!4d-57.5597682!15sCg90YWxsZXIgbWVjYW5pY29aESIPdGFsbGVyIG1lY2FuaWNvkgERYXV0b19tYWNoaW5lX3Nob3CaASNDaFpEU1VoTk1HOW5TMFZKUTBGblNVTkdOMlp1U0ZsM0VBRaoBbQoJL20vMDI2enNfCgkvbS8wM2ZfczMKCS9tLzBkZ2MzdBABKhMiD3RhbGxlciBtZWNhbmljbygOMh4QASIat5-AOOGRP-c1465bdeZz2l_Rx86lK8MSCGIyExACIg90YWxsZXIgbWVjYW5pY2_gAQD6AQQIABAk!16s%2Fg%2F11g6b0fd3l?entry=ttu&g_ep=EgoyMDI1MDYxNy4wIKXMDSoASAFQAw%3D%3D',
         categoryId: categories[0].id,
         cityId: cities[0].id,
       },

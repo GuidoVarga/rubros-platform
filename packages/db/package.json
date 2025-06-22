@@ -36,7 +36,7 @@
     "seed": "tsx prisma/seed.ts",
     "init-docker": "docker compose up -d",
     "build": "tsc -p tsconfig.json",
-    "postbuild-ts": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/"
+    "postbuild": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/"
   },
   "keywords": [],
   "author": "",

@@ -2,11 +2,12 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@rubros/db'
-import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, LatLngExpression } from '@rubros/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
 import { MapPin, Phone, Mail, Globe } from 'lucide-react'
 import { generateLocalBusinessSchema } from '../../../../lib/schema'
 import { ORGANIZATION } from '@/constants/org'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
+import { LatLngExpression } from '@rubros/ui/map'
 
 type Props = {
   params: {
@@ -39,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
   })
+
 
   if (!business) {
     return {}
@@ -120,7 +122,10 @@ export default async function BusinessPage({ params }: Props) {
 
   // Extract coordinates from address using a geocoding service
   // For now, we'll use a default location
-  const location = [-34.6037, -58.3816] // Default to Buenos Aires
+  console.log('business', business);
+  const location = business.latitude && business.longitude ? [business.latitude, business.longitude] : [-34.6037, -58.3816] // Default to Buenos Aires
+
+  console.log('location', location);
 
   const breadcrumbItems = [
     {
@@ -149,6 +154,8 @@ export default async function BusinessPage({ params }: Props) {
     },
   ]
 
+  console.log('business', business);
+
   return (
     <div className="container py-8">
       {/* Breadcrumb Navigation */}
@@ -162,10 +169,9 @@ export default async function BusinessPage({ params }: Props) {
           <span>{business.city.name}, {business.city.province.name}</span>
         </div>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Info Section */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {/* Description Card */}
           <Card>
             <CardHeader>
@@ -183,7 +189,7 @@ export default async function BusinessPage({ params }: Props) {
             <CardHeader>
               <CardTitle>Ubicación</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="sm:h-[500px] h-[300px]">
               <CustomMap
                 center={location as LatLngExpression}
                 zoom={15}
@@ -193,6 +199,7 @@ export default async function BusinessPage({ params }: Props) {
                     position: location as LatLngExpression,
                     title: business.name,
                     description: business.address || undefined,
+                    link: business.googleMapsLink || undefined,
                   },
                 ]}
                 showCurrentLocation
@@ -279,6 +286,18 @@ export default async function BusinessPage({ params }: Props) {
                 Enviar email
               </Button>
             )}
+            {
+              business.googleMapsLink && (
+                <div className="mt-4">
+                  <a href={business.googleMapsLink} target="_blank" rel="noopener noreferrer">
+                    <Button variant="secondary" className="w-full" size="lg">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Ver en Google Maps
+                    </Button>
+                  </a>
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
