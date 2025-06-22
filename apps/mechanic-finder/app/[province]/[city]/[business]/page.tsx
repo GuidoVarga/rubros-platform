@@ -130,23 +130,21 @@ export default async function BusinessPage({ params }: Props) {
   const breadcrumbItems = [
     {
       id: 'home',
-      content: <Link href="/" className="hover:text-primary">Inicio</Link>,
+      href: '/',
+      className: 'hover:text-primary',
+      content: 'Inicio',
     },
     {
       id: 'province',
-      content: (
-        <Link href={`/${business.city.province.slug}`} className="hover:text-primary">
-          {business.city.province.name}
-        </Link>
-      ),
+      href: `/${business.city.province.slug}`,
+      className: 'hover:text-primary',
+      content: business.city.province.name,
     },
     {
       id: 'city',
-      content: (
-        <Link href={`/${business.city.province.slug}/${business.city.slug}`} className="hover:text-primary">
-          {business.city.name}
-        </Link>
-      ),
+      href: `/${business.city.province.slug}/${business.city.slug}`,
+      className: 'hover:text-primary',
+      content: business.city.name,
     },
     {
       id: 'business',
@@ -159,7 +157,11 @@ export default async function BusinessPage({ params }: Props) {
   return (
     <div className="container py-8">
       {/* Breadcrumb Navigation */}
-      <Breadcrumb elements={breadcrumbItems} />
+      <Breadcrumb elements={breadcrumbItems} renderLink={({ href, children, className }) => (
+        <Link href={href} className={className}>
+          {children}
+        </Link>
+      )} />
 
       {/* Header Section */}
       <div className="mb-8">

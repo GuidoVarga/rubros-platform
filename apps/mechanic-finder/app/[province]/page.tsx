@@ -107,9 +107,9 @@ export default async function ProvincePage({ params }: Props) {
   const breadcrumbElements: BreadcrumbProps['elements'] = [
     {
       id: 'inicio',
-      content: <Link href="/" className="hover:text-primary-cta-hover">
-        Inicio
-      </Link>,
+      href: '/',
+      className: 'hover:text-primary-cta-hover',
+      content: 'Inicio',
     },
     {
       id: 'provincia',
@@ -123,7 +123,11 @@ export default async function ProvincePage({ params }: Props) {
       <section className="bg-muted/50 py-16">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <Breadcrumb elements={breadcrumbElements} />
+            <Breadcrumb elements={breadcrumbElements} renderLink={({ href, children, className }) => (
+              <Link href={href} className={className}>
+                {children}
+              </Link>
+            )} />
 
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
               Mecánicos en {province.name}

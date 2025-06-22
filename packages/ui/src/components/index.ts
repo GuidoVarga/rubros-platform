@@ -5,7 +5,6 @@ export * from './Popover';
 export * from './Command';
 export * from './Code';
 export * from './BussinessCard';
-export * from './NavLink';
 export * from './Skeleton';
 export * from './Spinner';
 export * from './EmptyState';
