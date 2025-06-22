@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Button, SelectOption, Skeleton } from "@rubros/ui";
+import { Button, Skeleton } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { getCitiesByProvince } from "@/actions/cities";
 import { CityEntity, ProvinceEntity } from "@rubros/db";
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic'
+import { SelectOption } from "@rubros/ui/select";
 
 const Select = dynamic(() => import('@rubros/ui/select'), {
   ssr: false,

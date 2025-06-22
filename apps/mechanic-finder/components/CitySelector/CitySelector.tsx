@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from "react";
-import { Button, SelectOption, Skeleton } from "@rubros/ui";
+import { Button, Skeleton } from "@rubros/ui";
 import { useRouter } from "next/navigation";
 import { CityEntity } from "@rubros/db";
 import dynamic from 'next/dynamic'
+import { SelectOption } from "@rubros/ui/select";
 
 const Select = dynamic(() => import('@rubros/ui/select'), {
   ssr: false,

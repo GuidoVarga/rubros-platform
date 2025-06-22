@@ -8,13 +8,10 @@ import { generateLocalBusinessSchema } from '../../../../lib/schema'
 import { ORGANIZATION } from '@/constants/org'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
+import { getBusinessBySlug } from '@/actions/business'
 
 type Props = {
-  params: {
-    province: string
-    city: string
-    business: string
-  }
+  params: Promise<{ province: string; city: string; business: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -94,27 +91,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BusinessPage({ params }: Props) {
-  const { province, city, business: businessSlug } = params
+  const { business: businessSlug } = await params;
 
-  const business = await prisma.business.findFirst({
-    where: {
-      slug: businessSlug,
-      city: {
-        slug: city,
-        province: {
-          slug: province,
-        },
-      },
-    },
-    include: {
-      category: true,
-      city: {
-        include: {
-          province: true,
-        },
-      },
-    },
-  })
+  const business = await getBusinessBySlug(businessSlug);
 
   if (!business) {
     notFound()

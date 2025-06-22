@@ -11,7 +11,7 @@ import { ORGANIZATION } from "@/constants/org";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const org = ORGANIZATION;
 
@@ -36,7 +36,7 @@ export function generateMetadata(): Metadata {
       "Córdoba",
       "Rosario",
     ],
-    authors: [{ name: "Rubros" }],
+    authors: [{ name: org.name }],
     creator: org.name,
     publisher: org.name,
     formatDetection: {

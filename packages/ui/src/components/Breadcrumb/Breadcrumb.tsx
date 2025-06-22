@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { Fragment } from "react/jsx-runtime";
 import { ChevronLeft } from "lucide-react";
 

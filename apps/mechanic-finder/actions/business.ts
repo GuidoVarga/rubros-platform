@@ -95,3 +95,19 @@ export async function getMechanicsCount(cityId: string) {
     return 0;
   }
 }
+
+export async function getBusinessBySlug(slug: string) {
+  return await prisma.business.findFirst({
+    where: {
+      slug,
+    },
+    include: {
+      category: true,
+      city: {
+        include: {
+          province: true,
+        },
+      },
+    },
+  });
+}
