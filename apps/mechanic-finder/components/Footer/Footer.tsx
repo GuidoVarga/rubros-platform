@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdComponent } from "../ads/ads";
+import { ORGANIZATION } from "@/constants/org";
 
 export function Footer() {
   return (
@@ -7,9 +7,9 @@ export function Footer() {
       <div className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Rubros</h3>
+            <h3 className="text-lg font-semibold mb-4">{ORGANIZATION.name}</h3>
             <p className="text-sm text-muted-foreground">
-              Encuentra los mejores servicios en tu zona.
+              {ORGANIZATION.shortDescription}
             </p>
           </div>
           <div>
@@ -80,7 +80,7 @@ export function Footer() {
         </div>
         <div className="border-t mt-8 pt-8">
           <p className="text-sm text-muted-foreground text-center">
-            © {new Date().getFullYear()} Rubros. Todos los derechos reservados.
+            © {new Date().getFullYear()} {ORGANIZATION.name}. Todos los derechos reservados.
           </p>
         </div>
       </div>
