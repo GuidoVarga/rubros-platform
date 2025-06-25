@@ -182,7 +182,7 @@ export default async function CityPage({ params, searchParams }: Props) {
       <section className="container">
         {mechanics.length > 0 ? (
           <>
-            <LocationFilter provinces={provinces} className="items-end mb-10 lg:flex-row" />
+            <LocationFilter provinces={provinces} showHelpText={false} className="items-end mb-10 lg:flex-row" />
             <div className="mb-6 mt-12">
               <h2 className="text-2xl font-semibold mb-2">
                 Talleres Mecánicos en {city.name}

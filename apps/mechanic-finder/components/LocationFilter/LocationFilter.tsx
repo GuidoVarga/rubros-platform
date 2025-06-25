@@ -20,16 +20,18 @@ type LocationFilterProps = {
   selectedCity?: string;
   className?: string;
   labelClassName?: string;
+  showHelpText?: boolean;
 }
 
 export function LocationFilter({
   className,
   labelClassName,
   provinces,
+  showHelpText = true,
 }: LocationFilterProps) {
   const [cities, setCities] = useState<CityEntity[]>([]);
-  const [currentProvince, setCurrentProvince] = useState<SelectOption | undefined>(undefined);
-  const [currentCity, setCurrentCity] = useState<SelectOption | undefined>(undefined);
+  const [currentProvince, setCurrentProvince] = useState<SelectOption | null>(null);
+  const [currentCity, setCurrentCity] = useState<SelectOption | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -62,13 +64,13 @@ export function LocationFilter({
     }
     else {
       setCities([]);
-      setCurrentCity(undefined);
+      setCurrentCity(null);
     }
   }, [currentProvince, provinces]);
 
   const handleProvinceSelect = (province: any) => {
     setCurrentProvince(province);
-    setCurrentCity(undefined); // Reset city when province changes
+    setCurrentCity(null); // Reset city when province changes
   };
 
   const handleCitySelect = (city: any) => {
@@ -113,6 +115,7 @@ export function LocationFilter({
           isDisabled={!currentProvince}
           isSearchable={true}
           name="city"
+          noOptionsMessage={() => 'No hay ciudades disponibles'}
         />
       </div>
       <div className="w-full mt-4 pr-4">
@@ -122,7 +125,7 @@ export function LocationFilter({
       </div>
 
       {/* Show current selection */}
-      {currentProvince && !currentCity && (
+      {currentProvince && !currentCity && showHelpText && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
             <strong>{selectedProvinceName}</strong> seleccionada.
