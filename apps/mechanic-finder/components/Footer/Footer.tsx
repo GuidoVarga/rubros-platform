@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ORGANIZATION } from "@/constants/org";
+import { APP_DESCRIPTION, APP_NAME } from "@/constants/app";
 
 export function Footer() {
   return (
@@ -7,9 +8,9 @@ export function Footer() {
       <div className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">{ORGANIZATION.name}</h3>
+            <h3 className="text-lg font-semibold mb-4">{APP_NAME}</h3>
             <p className="text-sm text-muted-foreground">
-              {ORGANIZATION.shortDescription}
+              {APP_DESCRIPTION}
             </p>
           </div>
           <div>

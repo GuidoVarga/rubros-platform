@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@rubros/ui";
-import { ORGANIZATION } from "@/constants/org";
+import { APP_NAME } from "@/constants/app";
 
 
 export function Header() {
@@ -9,7 +9,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="text-xl font-bold">{ORGANIZATION.name}</span>
+            <span className="text-xl font-bold">{APP_NAME}</span>
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
