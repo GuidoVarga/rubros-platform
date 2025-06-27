@@ -27,6 +27,8 @@ model Business {
   latitude Float?
   longitude Float?
   googleMapsLink String?
+  closedOn String?
+  googlePlaceId String?
   status      Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
