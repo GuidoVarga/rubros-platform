@@ -3,12 +3,13 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@rubros/db'
 import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
-import { MapPin, Phone, Mail, Globe } from 'lucide-react'
+import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { generateLocalBusinessSchema } from '../../../../lib/schema'
 import { ORGANIZATION } from '@/constants/org'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { getBusinessBySlug } from '@/actions/business'
+import { getOpenDays } from '@rubros/ui/utils'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
@@ -104,7 +105,9 @@ export default async function BusinessPage({ params }: Props) {
   console.log('business', business);
   const location = business.latitude && business.longitude ? [business.latitude, business.longitude] : [-34.6037, -58.3816] // Default to Buenos Aires
 
-  console.log('location', location);
+  console.log('business.closedOn', business.closedOn);
+  const openDays = getOpenDays(business.closedOn);
+  console.log('openDays', openDays);
 
   const breadcrumbItems = [
     {
@@ -214,6 +217,18 @@ export default async function BusinessPage({ params }: Props) {
                   >
                     {business.phone}
                   </a>
+                </div>
+              )}
+              {openDays && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{openDays}</span>
+                </div>
+              )}
+              {business.openingHours && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{business.openingHours}</span>
                 </div>
               )}
               {business.email && (

@@ -19,6 +19,16 @@
       "import": "./dist/components/Map/Map.js",
       "types": "./dist/components/Map/Map.d.ts",
       "default": "./dist/components/Map/Map.js"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./constants": {
+      "import": "./dist/constants/index.js",
+      "types": "./dist/constants/index.d.ts",
+      "default": "./dist/constants/index.js"
     }
   },
   "scripts": {

@@ -23,10 +23,7 @@ export const Breadcrumb = ({
   )
 }: BreadcrumbProps) => {
   // Only show back if we have more than one element and the previous has an href
-  console.log('elements', elements);
   const previousElement = elements.length > 2 ? elements[elements.length - 2] : null;
-
-  console.log('previousElement', previousElement);
 
   return (
     <nav className="mb-8 text-muted-foreground" aria-label="breadcrumb">
