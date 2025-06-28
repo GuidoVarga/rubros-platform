@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  openingHours String?
+  latitude Float?
+  longitude Float?
+  googleMapsLink String?
+  closedOn String?
+  googlePlaceId String?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  city        City      @relation(fields: [cityId], references: [id])
+  cityId      String
+
+  @@index([categoryId])
+  @@index([cityId])
+  @@index([slug])
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  icon        String?
+  status      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  businesses  Business[]
+
+  @@index([slug])
+}
+
+model Province {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cities      City[]
+
+  @@index([slug])
+}
+
+model City {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  province    Province  @relation(fields: [provinceId], references: [id])
+  provinceId  String
+  businesses  Business[]
+
+  @@index([slug])
+  @@index([provinceId])
+}

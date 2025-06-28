@@ -1,0 +1,13 @@
+{
+  "extends": "@rubros/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "",
+    "baseUrl": "",
+    "paths": {
+      "@/*": ["./*"],
+    }
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "dist"]
+}

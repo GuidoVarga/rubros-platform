@@ -1,7 +1,17 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "@rubros/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+    },
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

@@ -1,7 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description:
+globs:
+alwaysApply: true
 ---
 # 📌 Technical Architecture & Code Guidelines
 
@@ -13,11 +13,11 @@ Our tech stack is designed to maximize performance, maintainability, and scalabi
 
 ## 🧱 Tech Stack Overview
 
-- **Monorepo**: Managed with [Turborepo](https://turbo.build/repo)
-- **Package Manager**: [pnpm](https://pnpm.io)
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/docs)
-- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/)
-- **ORM**: [Prisma](https://www.prisma.io/)
+- **Monorepo**: Managed with [Turborepo](mdc:https:/turbo.build/repo)
+- **Package Manager**: [pnpm](mdc:https:/pnpm.io)
+- **Framework**: [Next.js 15 (App Router)](mdc:https:/nextjs.org/docs)
+- **Styling**: [Tailwind CSS v3](mdc:https:/tailwindcss.com) with [shadcn/ui](mdc:https:/ui.shadcn.com)
+- **ORM**: [Prisma](mdc:https:/www.prisma.io)
 - **Database**: PostgreSQL
 - **Rendering Strategy**:
   - Prefer **SSG (Static Site Generation)** for most listings and pages
@@ -33,17 +33,22 @@ Our tech stack is designed to maximize performance, maintainability, and scalabi
 Each app should follow a modular structure and respect the monorepo workspace separation:
 ```bash
 apps/
-└── web/                        # Main Next.js 15 app
+└── mechanic-finder/           # Main Next.js 15 app
     ├── app/                   # App Router pages
     │   ├── (public)/          # Public pages like home, contact, etc. (optional)
-    │   │   ├── page.tsx       # Main landing page
     │   │   └── contact/
     │   │       └── page.tsx
     │   │
-    │   ├── [city]/[category]/ # Dynamic listing pages by city and category
-    │   │   └── page.tsx
+    │   ├── [province]/ # Dynamic listing pages by province, city and category
+    │   │   └── [city]/
+                  └── [category]/
+                      └── page.tsx
+                  └── page.tsx
+            └── page.tsx
     │   │
     │   └── layout.tsx         # Root layout for the app
+        ├── page.tsx           # Main landing page
+        └── global.css         # Import global.css from tailwind config and overrides colors and fonts for its theme
     │
     ├── components/            # Reusable project components
     ├── lib/                   # Utility functions, validators, etc.
@@ -51,16 +56,35 @@ apps/
     ├── styles/                # Global styles
     ├── i18n/                  # Translation files (es, en, etc.)
     └── middleware.ts          # Middleware for redirects, auth, etc.
-
+└── other-app-finder           # Another Next.js 15 app
 packages/
-├── ui/                        # Shared UI components (based on shadcn/ui)
-├── types/                     # Shared TypeScript types
-├── config/                    # Shared config (eslint, tailwind, tsconfig)
+├── ui/                         # Shared UI components and utils (based on shadcn/ui)
+  ├── src/
+      ├── components/    #export
+          ├── Button/ #(example)
+            ├── Button.tsx
+            ├── types.ts
+            ├── index.ts
+          ├── Command/ #(example)
+            ├── command.tsx
+            ├── index.ts
+          ├── index.ts
+      ├── ads/ #export
+      ├── utils/ #export
+      ├── lib/
+      ├── styles/
+├── typescript-config/          # Shared TypeScript types
+├── tailwind-config/           # Shared tailwind config (All Tailwind configuration shared across apps and the ui package is here. If new classes are needed per app, it will be extended within that app).
 └── scraper/                   # Scrapers for seeding and updating listings
+└── db/                        # Shared ORM client
+    └── prisma/
+          └── schema.prisma
+    └── client.ts
+    └── index.ts
 ```
 
 > ✅ Reuse components from `packages/ui` whenever possible. If a component is tied to a domain or layout section, place it in `components/`.
-
+- We use shadcn components.
 ---
 
 ## 🌍 Internationalization
@@ -91,8 +115,7 @@ packages/
 
  - Use tailwind CSS V3.
 
-## Tailwind CSS Best Practices for Clean, Maintainable, and Scalable Code
-
+## Tailwind CSS Generals Best Practices for Clean, Maintainable, and Scalable Code
 
 ### 0. **Read documentation**
 
@@ -209,19 +232,23 @@ module.exports = {
 - All additions must aim to be reusable, scalable, and maintainable.
 
 
-## 🧠 Aditional Instructions
+## 🧠 Guia de desarrollo
 
 ### When generating new code:
 
-- Read project rules
+- Each app has its own tailwind.config.ts and global.css which extend from the tailwind.config.ts and global.css of @rubros/tailwind-config, which contains the global configuration for the apps and the @rubros/ui package.
+  The apps extend these files and add properties for their theme (colors and fonts).
+  The @rubros/ui package does not need to include Tailwind configuration because it inherits what the apps use.
+- Use shadcn/ui where applicable (these components should go in the @rubros/ui package).
+- Whenever a component from shadcn/ui needs to be installed, it must go into @rubros/ui because it will be shared among the apps.
+  If a component needs to be created that abstracts a UI package component for use only in a specific app,
+  it must go in the app’s components directory (Example: MechanicCard that abstracts from BusinessCard).
 - Use Next.js App Router conventions
 - Prioritize server components and static rendering
 - Use Tailwind CSS with class-based styling
-- Use shadcn/ui where applicable
 - Favor prisma for data access
 - Do not client state managment by default
 - Always follow the folder structure defined above
 - Extract constants and translations properly
 - Follow SEO best practices (metadata, H1s, OpenGraph)
 - Structure code in a way that can scale to multiple zones and business categories
-
