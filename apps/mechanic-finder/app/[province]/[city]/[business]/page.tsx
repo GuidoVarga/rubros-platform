@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { prisma } from '@rubros/db'
 import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
 import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { generateLocalBusinessSchema } from '../../../../lib/schema'
