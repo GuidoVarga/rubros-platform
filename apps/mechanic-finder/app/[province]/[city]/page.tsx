@@ -13,11 +13,14 @@ import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
 import { Breadcrumb, BreadcrumbProps } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
+import { REVALIDATE_TIME_DATA } from "@/constants/config";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
   searchParams: Promise<{ page?: string }>;
 };
+
+export const revalidate = REVALIDATE_TIME_DATA;
 
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {

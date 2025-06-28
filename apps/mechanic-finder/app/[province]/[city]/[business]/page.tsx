@@ -10,35 +10,20 @@ import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { getBusinessBySlug } from '@/actions/business'
 import { getOpenDays } from '@rubros/ui/utils'
+import { REVALIDATE_TIME_DATA } from '@/constants/config'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
 }
+
+export const revalidate = REVALIDATE_TIME_DATA;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
 
   const { province, city, business: businessSlug } = await params;
 
-  const business = await prisma.business.findFirst({
-    where: {
-      slug: businessSlug,
-      city: {
-        slug: city,
-        province: {
-          slug: province,
-        },
-      },
-    },
-    include: {
-      city: {
-        include: {
-          province: true,
-        },
-      },
-    },
-  })
-
+  const business = await getBusinessBySlug(businessSlug)
 
   if (!business) {
     return {}
