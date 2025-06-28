@@ -10,13 +10,12 @@ import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { getBusinessBySlug } from '@/actions/business'
 import { getOpenDays } from '@rubros/ui/utils'
-import { REVALIDATE_TIME_DATA } from '@/constants/config'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
 }
 
-export const revalidate = REVALIDATE_TIME_DATA;
+export const revalidate = 60 * 60;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''

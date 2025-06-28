@@ -7,14 +7,13 @@ import { CitySelector } from "@/components/CitySelector/CitySelector";
 import { Breadcrumb, BreadcrumbProps, EmptyState as EmptyStateUI } from "@rubros/ui";
 import Link from "next/link";
 import { ORGANIZATION } from "@/constants/org";
-import { REVALIDATE_TIME_DATA } from "@/constants/config";
 
 type Props = {
   params: Promise<{ province: string }>;
   searchParams: Promise<{ page?: string }>;
 };
 
-export const revalidate = REVALIDATE_TIME_DATA;
+export const revalidate = 60 * 60;;
 
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {

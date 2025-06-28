@@ -5,7 +5,6 @@ import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
 import { PaginatedList } from "@/components/PaginatedList/PaginatedList";
-import { prisma } from "@/lib/db";
 import { BusinessEntity, ProvinceEntity } from "@rubros/db/entities";
 import { ITEMS_PER_PAGE } from "@/constants/pagination";
 import Link from "next/link";
@@ -13,14 +12,13 @@ import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
 import { Breadcrumb, BreadcrumbProps } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
-import { REVALIDATE_TIME_DATA } from "@/constants/config";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
   searchParams: Promise<{ page?: string }>;
 };
 
-export const revalidate = REVALIDATE_TIME_DATA;
+export const revalidate = 60 * 60;
 
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
