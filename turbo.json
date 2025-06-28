@@ -10,7 +10,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "dist/**"],
-      "env": ["DATABASE_URL"]
+      "env": ["DATABASE_URL", "NEXT_PUBLIC_BASE_URL", "ADSENSE_KEY"]
     },
     "lint": {
       "dependsOn": ["^lint"]

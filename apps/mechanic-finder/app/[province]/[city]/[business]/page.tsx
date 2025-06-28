@@ -14,7 +14,7 @@ type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
 }
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
