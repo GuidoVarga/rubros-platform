@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "apps/mechanic-finder/next.config.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/mechanic-finder/$1"
+    }
+  ]
+}
