@@ -5,7 +5,9 @@ const nextConfig = {
     serverSourceMaps: true,
   },
   reactStrictMode: false,
-  serverExternalPackages: ['@prisma/client', 'prisma'],
+  /*experimental: {
+    serverComponentsExternalPackages: ['@rubros/ui']
+  }*/
 };
 
 export default nextConfig;
