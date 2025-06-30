@@ -12,7 +12,6 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "globalEnv": ["DATABASE_URL"],
     "lint": {
       "dependsOn": ["^lint"]
     },
@@ -23,5 +22,6 @@
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalEnv": ["DATABASE_URL"]
 }
