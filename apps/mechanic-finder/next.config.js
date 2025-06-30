@@ -5,10 +5,8 @@ const nextConfig = {
     serverSourceMaps: true,
   },
   reactStrictMode: false,
-  experimental: {
-    outputFileTracingIncludes: {
-      '/*': ['node_modules/@rubros/db/dist/generated/prisma/**/*'],
-    },
+  outputFileTracingIncludes: {
+    '/*': ['node_modules/@rubros/db/dist/generated/prisma/**/*'],
   },
 };
 
