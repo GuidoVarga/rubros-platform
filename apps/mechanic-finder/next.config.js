@@ -5,9 +5,11 @@ const nextConfig = {
     serverSourceMaps: true,
   },
   reactStrictMode: false,
-  /*experimental: {
-    serverComponentsExternalPackages: ['@rubros/ui']
-  }*/
+  experimental: {
+    outputFileTracingIncludes: {
+      '/*': ['../../packages/db/generated/prisma/**/*'],
+    },
+  },
 };
 
 export default nextConfig;
