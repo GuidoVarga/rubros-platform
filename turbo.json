@@ -2,16 +2,17 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "tasks": {
-    "mechanic-finder:build": {
+    "mechanic-finder#build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["NEXT_PUBLIC_BASE_URL", "ADSENSE_KEY"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"],
-      "env": ["DATABASE_URL", "NEXT_PUBLIC_BASE_URL", "ADSENSE_KEY"]
+      "outputs": ["dist/**"]
     },
+    "globalEnv": ["DATABASE_URL"],
     "lint": {
       "dependsOn": ["^lint"]
     },
