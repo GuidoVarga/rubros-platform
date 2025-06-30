@@ -23,5 +23,5 @@
       "persistent": true
     }
   },
-  "globalEnv": ["DATABASE_URL", "PRISMA_CLIENT_ENGINE_TYPE"]
+  "globalEnv": ["DATABASE_URL", "PRISMA_CLIENT_ENGINE_TYPE", "PRISMA_CLI_BINARY_TARGETS"]
 }
