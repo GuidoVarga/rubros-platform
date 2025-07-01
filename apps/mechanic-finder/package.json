@@ -9,7 +9,7 @@
     "start": "next start -p 3002",
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "vercel:prepare": "mkdir -p .next/server/.prisma/client && cp -r node_modules/@rubros/db/dist/generated/prisma/* .next/server/.prisma/client/"
+    "postinstall": "mkdir -p generated/prisma && cp -r node_modules/@rubros/db/dist/generated/prisma/* generated/prisma/"
   },
   "dependencies": {
     "@rubros/db": "workspace:*",
