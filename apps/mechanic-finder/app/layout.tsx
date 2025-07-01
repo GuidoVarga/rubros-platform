@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(baseUrl),
     title: {
-      default: `${org.name} - Encuentra los mejores mecánicos en tu zona`,
+      default: `${org.name} - ${org.shortDescription}`,
       template: `%s | ${org.name}`,
     },
     description: org.description,
@@ -43,6 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
       email: false,
       address: false,
       telephone: false,
+    },
+    icons: {
+      icon: '/favicon.ico',
+      shortcut: '/favicon-16x16.png',
+      apple: '/apple-touch-icon.png',
     },
     openGraph: {
       type: "website",
@@ -103,6 +108,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className={inter.className}>
         <div className="relative flex min-h-screen flex-col">
           <Header />
