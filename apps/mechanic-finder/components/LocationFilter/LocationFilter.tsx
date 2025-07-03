@@ -100,6 +100,7 @@ export function LocationFilter({
           onChange={(province) => handleProvinceSelect(province)}
           placeholder="Selecciona una provincia"
           name="province"
+          inputId="province"
         />
       </div>
 
@@ -116,6 +117,7 @@ export function LocationFilter({
           isSearchable={true}
           name="city"
           noOptionsMessage={() => 'No hay ciudades disponibles'}
+          inputId="city"
         />
       </div>
       <div className="w-full mt-4 pr-4">
