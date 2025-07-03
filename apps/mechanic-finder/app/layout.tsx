@@ -11,94 +11,97 @@ import { ORGANIZATION } from "@/constants/org";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  const org = ORGANIZATION;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: ORGANIZATION.name,
+  url: ORGANIZATION.url,
+  logo: `${ORGANIZATION.url}/logo.png`,
+  description: ORGANIZATION.description,
+  foundingDate: "2024",
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+54-11-1234-5678",
+    contactType: "customer service",
+    availableLanguage: ["Spanish"]
+  },
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "AR"
+  },
+  sameAs: [
+    "https://facebook.com/encontramecanico",
+    "https://twitter.com/encontramecanico",
+    "https://instagram.com/encontramecanico"
+  ]
+};
 
-  return {
-    metadataBase: new URL(baseUrl),
-    title: {
-      default: `${org.name} - ${org.shortDescription}`,
-      template: `%s | ${org.name}`,
-    },
-    description: org.description,
-    keywords: [
-      "mecánicos",
-      "taller mecánico",
-      "reparación auto",
-      "reparación moto",
-      "cambio de aceite",
-      "servicio técnico auto",
-      "servicio técnico moto",
-      "servicio 24hs",
-      "Argentina",
-      "Buenos Aires",
-      "Córdoba",
-      "Rosario",
-    ],
-    authors: [{ name: org.name }],
-    creator: org.name,
-    publisher: org.name,
-    formatDetection: {
-      email: false,
-      address: false,
-      telephone: false,
-    },
-    icons: {
-      icon: '/favicon.ico',
-      shortcut: '/favicon-16x16.png',
-      apple: '/apple-touch-icon.png',
-    },
-    openGraph: {
-      type: "website",
-      locale: "es_AR",
-      url: baseUrl,
-      title: `${org.name} - ${org.shortDescription}`,
-      description: org.description,
-      siteName: org.name,
-      images: [
-        {
-          url: org.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${org.name} - ${org.shortDescription}`,
-      description: org.description,
-      creator: `@${org.name}`,
-      images: [
-        {
-          url: org.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    robots: {
+export const metadata: Metadata = {
+  metadataBase: new URL(ORGANIZATION.url),
+  title: {
+    default: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
+    template: `%s | ${ORGANIZATION.name}`
+  },
+  description: ORGANIZATION.description,
+  keywords: [
+    'mecánicos Argentina',
+    'talleres mecánicos',
+    'servicio automotriz',
+    'reparación auto',
+    'mecánico cerca',
+    'taller Buenos Aires',
+    'servicio mecánico',
+    'diagnóstico auto',
+    'mecánica general',
+    'cambio aceite'
+  ],
+  authors: [{ name: ORGANIZATION.name }],
+  creator: ORGANIZATION.name,
+  publisher: ORGANIZATION.name,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    url: ORGANIZATION.url,
+    title: ORGANIZATION.name,
+    description: ORGANIZATION.description,
+    siteName: ORGANIZATION.name,
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: `${ORGANIZATION.name} - Directorio de mecánicos en Argentina`,
       },
-
-    },
-    verification: {
-      google: "google-site-verification-code",
-    },
-    alternates: {
-      canonical: baseUrl,
-    },
-    other: {
-      'script:ld+json': JSON.stringify(generateOrganizationSchema(org)),
-    },
-  }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: ORGANIZATION.name,
+    description: ORGANIZATION.description,
+    site: '@encontramecanico',
+    creator: '@encontramecanico',
+    images: ['/og-image.jpg'],
+  },
+  verification: {
+    google: 'your-google-verification-code',
+  },
+  alternates: {
+    canonical: ORGANIZATION.url,
+  },
+  other: {
+    'application/ld+json': JSON.stringify(jsonLd),
+  },
 };
 
 export default function RootLayout({
@@ -117,7 +120,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="relative flex min-h-screen flex-col">
           <Header />
-          <div className="flex-1">
+          <main className="flex-1">
             <div className="flex flex-col gap-8">
               <Suspense>
                 <AdComponent type="top" />
@@ -131,7 +134,7 @@ export default function RootLayout({
                 </section>
               </Suspense>
             </div>
-          </div>
+          </main>
           <Footer />
         </div>
       </body>

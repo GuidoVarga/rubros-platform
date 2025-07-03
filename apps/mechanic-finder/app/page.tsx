@@ -44,21 +44,21 @@ export default async function Home() {
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-2xl font-bold mb-2">500+</h3>
+          <h2 className="text-2xl font-bold mb-2">500+</h2>
           <p className="text-muted-foreground">Talleres listados</p>
         </div>
         <div className="text-center">
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <MapPin className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-2xl font-bold mb-2">50+</h3>
+          <h2 className="text-2xl font-bold mb-2">50+</h2>
           <p className="text-muted-foreground">Ciudades cubiertas</p>
         </div>
         <div className="text-center">
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-2xl font-bold mb-2">24/7</h3>
+          <h2 className="text-2xl font-bold mb-2">24/7</h2>
           <p className="text-muted-foreground">Disponibilidad</p>
         </div>
       </section>
@@ -190,7 +190,7 @@ export default async function Home() {
 
       {/* CTA Section */}
       <section className="text-center bg-primary/5 p-8 rounded-lg">
-        <h2 className="text-3xl font-bold mb-4">¿Necesitás un mecánico ahora?</h2>
+        <h3 className="text-3xl font-bold mb-4">¿Necesitás un mecánico ahora?</h3>
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
           Empezá tu búsqueda seleccionando tu provincia y encontrá el <strong>taller mecánico</strong>
           más cercano a tu ubicación. Información actualizada las 24 horas.
