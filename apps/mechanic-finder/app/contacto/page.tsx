@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@rubros/ui';
-import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
-import { ORGANIZATION } from '@/constants/org';
+import { Mail, Phone, MapPin, Clock, MessageCircle, HelpCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Contacto - Encontra Mecánico',
-  description: 'Ponte en contacto con nuestro equipo. Resolvemos tus dudas sobre mecánicos y talleres en Argentina.',
+  description: 'Contactate con Encontra Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
+  keywords: ['contacto', 'encontra mecánico', 'soporte', 'ayuda', 'talleres mecánicos'],
 };
 
 export default function ContactPage() {
@@ -13,114 +13,170 @@ export default function ContactPage() {
     <div className="container py-16">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Contacto</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            ¿Tenés alguna consulta? Nuestro equipo está disponible para ayudarte a encontrar el mejor servicio mecánico.
+          <h1 className="text-4xl font-bold mb-4">Contactanos</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            ¿Tenés preguntas sobre nuestro directorio? ¿Querés sugerir mejoras?
+            Estamos acá para ayudarte.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Información General
+                <Mail className="h-5 w-5 text-primary" />
+                Email
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="font-medium">Email</p>
-                    <a href="mailto:info@encontramecanico.com" className="text-primary hover:underline">
-                      info@encontramecanico.com
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="font-medium">Teléfono</p>
-                    <a href="tel:+5411234567890" className="text-primary hover:underline">
-                      +54 11 2345-6789
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="font-medium">Oficinas</p>
-                    <p className="text-muted-foreground">Buenos Aires, Argentina</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h3 className="font-semibold mb-3">Horarios de atención</h3>
-                <div className="space-y-1 text-sm">
-                  <p><span className="font-medium">Lunes a Viernes:</span> 9:00 - 18:00</p>
-                  <p><span className="font-medium">Sábados:</span> 9:00 - 13:00</p>
-                  <p><span className="font-medium">Domingos:</span> Cerrado</p>
-                </div>
-              </div>
+            <CardContent>
+              <p className="text-muted-foreground mb-2">Para consultas generales y soporte:</p>
+              <a href="mailto:contacto@encontramecanico.com" className="text-primary font-medium hover:underline">
+                contacto@encontramecanico.com
+              </a>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Preguntas Frecuentes</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                WhatsApp
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="font-semibold mb-2">¿Cómo puedo agregar mi taller a la plataforma?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Envianos un email con la información de tu taller y nos pondremos en contacto para el proceso de verificación.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">¿Los servicios son gratuitos para los usuarios?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Sí, la búsqueda y contacto con mecánicos es completamente gratuita para los usuarios.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">¿Cómo verifican a los mecánicos?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Verificamos documentación, experiencia y realizamos controles de calidad periódicos.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">¿Puedo dejar reseñas?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Próximamente implementaremos un sistema de reseñas verificadas para mejorar la experiencia.
-                </p>
-              </div>
+            <CardContent>
+              <p className="text-muted-foreground mb-2">Respuesta rápida por mensaje:</p>
+              <a href="https://wa.me/5491234567890" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">
+                +54 9 11 2345-6789
+              </a>
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-12 text-center">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="pt-6">
-              <h3 className="text-xl font-semibold mb-2">¿Sos mecánico y querés sumarte?</h3>
-              <p className="text-muted-foreground mb-4">
-                Únite a nuestra red de profesionales verificados y aumentá tu visibilidad.
-              </p>
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-center mb-8">Preguntas Frecuentes</h2>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿De dónde obtienen la información de los talleres?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Recopilamos información pública disponible en internet desde diversas fuentes como
+                  directorios comerciales, sitios web oficiales, plataformas de mapas y redes sociales.
+                  Toda la información es de carácter público.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿Verifican la calidad de los talleres listados?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Actualmente funcionamos como un directorio informativo. No verificamos ni garantizamos
+                  la calidad de los servicios listados. Recomendamos siempre verificar la información
+                  directamente con cada taller antes de solicitar servicios.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿Puedo dejar reseñas o comentarios sobre los talleres?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Esta funcionalidad estará disponible en futuras versiones de la plataforma.
+                  Por ahora, nuestro enfoque está en proporcionar información básica de contacto
+                  y ubicación de los talleres.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿Cómo puedo contactar directamente con un taller?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Cuando la información de contacto está disponible públicamente, la mostramos en
+                  la página del taller. Podés llamar o enviar un mensaje directamente. No intermediamos
+                  en la comunicación entre usuarios y talleres.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿El servicio tiene algún costo?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  No, el acceso a nuestro directorio es completamente gratuito para todos los usuarios.
+                  No cobramos comisiones ni tarifas por el uso de la plataforma.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  ¿Cómo puedo reportar información incorrecta?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Si encontrás información incorrecta o desactualizada, envianos un email a
+                  contacto@encontramecanico.com con los detalles y trabajaremos para corregirla
+                  en la próxima actualización.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-8 pb-8">
+            <h3 className="text-2xl font-bold text-center mb-4">¿Tenés un taller mecánico?</h3>
+            <p className="text-muted-foreground text-center mb-6 max-w-2xl mx-auto">
+              Si sos propietario de un taller y querés asegurarte de que tu información esté
+              actualizada en nuestro directorio, o si querés que removamos tu listado, contactanos.
+            </p>
+            <div className="text-center">
               <a
-                href="mailto:talleres@encontramecanico.com?subject=Quiero sumar mi taller"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4"
+                href="mailto:talleres@encontramecanico.com"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
               >
-                <Mail className="h-4 w-4 mr-2" />
-                Contactar
+                <Mail className="h-4 w-4" />
+                talleres@encontramecanico.com
               </a>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-lg">
+            <Clock className="h-4 w-4" />
+            Tiempo de respuesta: 24-48 horas
+          </div>
         </div>
       </div>
     </div>

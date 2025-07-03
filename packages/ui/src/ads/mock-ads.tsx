@@ -12,7 +12,7 @@ export function MockAd({ style, label = "Anuncio", className }: MockAdProps) {
   return (
     <div
       className={`bg-muted/30 border border-dashed border-muted-foreground/25 flex items-center justify-center ${className}`}
-      style={{ width, height, ...style }}
+      style={{ width, height, ...style, maxWidth: "1100px" }}
     >
       <div className="text-center">
         <p className="text-muted-foreground text-sm">{label}</p>
@@ -30,7 +30,7 @@ export function MockTopAd(props: MockAdProps) {
     height: props.style?.height || "90px",
   }
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center items-center">
       <MockAd
         style={style}
         label="Anuncio Superior"
@@ -46,7 +46,7 @@ export function MockSideAd(props: MockAdProps) {
     height: props.style?.height || "600px",
   }
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center items-center">
       <MockAd
         style={style}
         label="Anuncio Lateral"
@@ -62,7 +62,7 @@ export function MockInFeedAd(props: MockAdProps) {
     height: props.style?.height || "300px",
   }
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center items-center">
       <MockAd
         style={style}
         label="Anuncio en Feed"
@@ -78,7 +78,7 @@ export function MockSquareAd(props: MockAdProps) {
     height: props.style?.height || "250px",
   }
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center items-center">
       <MockAd
         style={style}
         label="Anuncio Cuadrado"
@@ -94,7 +94,7 @@ export function MockFooterAd(props: MockAdProps) {
     height: props.style?.height || "150px",
   }
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center items-center">
       <MockAd
         style={style}
         label="Anuncio Footer"

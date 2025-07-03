@@ -4,6 +4,10 @@ import Script from "next/script";
 import { AdSenseProps } from "@rubros/types";
 
 export function AdSense({ slot, style, className }: AdSenseProps) {
+  const parsedStyle = {
+    ...style,
+    maxWidth: "1100px",
+  }
   return (
     <>
       <Script
@@ -12,8 +16,8 @@ export function AdSense({ slot, style, className }: AdSenseProps) {
         crossOrigin="anonymous"
       />
       <ins
-        className={`adsbygoogle ${className}`}
-        style={style}
+        className={`adsbygoogle ${className} max-w-[1100px]`}
+        style={parsedStyle}
         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
         data-ad-slot={slot}
         data-ad-format="auto"
