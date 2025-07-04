@@ -198,7 +198,7 @@ export default async function BusinessPage({ params }: Props) {
                   )}
                 </div>
 
-                <div className="flex gap-2 pt-4">
+                <div className="flex gap-2 pt-4 flex-wrap">
                   {business.phone && (
                     <Button asChild>
                       <a href={`tel:${business.phone}`}>
