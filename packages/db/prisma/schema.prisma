@@ -24,6 +24,8 @@ model Business {
   phone       String?
   email       String?
   website     String?
+  image String?
+  postalCode String?
   openingHours String?
   latitude Float?
   longitude Float?
@@ -73,6 +75,7 @@ model City {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
+  postalCode String?
   status      Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

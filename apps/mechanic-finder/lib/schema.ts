@@ -1,3 +1,5 @@
+import { BusinessEntity } from '@rubros/db';
+
 type Organization = {
   name: string;
   url: string;
@@ -5,14 +7,8 @@ type Organization = {
   description?: string;
 };
 
-type LocalBusiness = {
-  name: string;
-  description?: string;
-  address?: string;
-  telephone?: string;
+type LocalBusiness = BusinessEntity & {
   url: string;
-  email?: string;
-  openingHours?: string;
 };
 
 export function generateOrganizationSchema(org: Organization) {
@@ -34,13 +30,27 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
     name: business.name,
     url: business.url,
     ...(business.description && { description: business.description }),
+    ...(business.image && { image: business.image }), // SEO-friendly
+    ...(business.phone && { telephone: business.phone }),
+    ...(business.email && { email: business.email }),
     ...(business.address && {
       address: {
         '@type': 'PostalAddress',
         streetAddress: business.address,
+        addressLocality: business.city?.name,
+        addressRegion: business.city?.province?.name,
+        postalCode: business.postalCode || business.city?.postalCode,
+        addressCountry: 'AR',
       },
     }),
-    ...(business.telephone && { telephone: business.telephone }),
-    ...(business.email && { email: business.email }),
+    ...(business.openingHours && { openingHours: business.openingHours }), // formato "Mo-Fr 09:00-18:00"
+    ...(business.latitude &&
+      business.longitude && {
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: business.latitude,
+          longitude: business.longitude,
+        },
+      }),
   };
 }

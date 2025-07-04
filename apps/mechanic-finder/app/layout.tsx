@@ -6,7 +6,6 @@ import { Footer } from "@/components/Footer/Footer";
 import { AdComponent } from "@/components/ads/ads";
 import { Suspense } from "react";
 import { SkeletonPage } from "@rubros/ui";
-import { generateOrganizationSchema } from '../lib/schema'
 import { ORGANIZATION } from "@/constants/org";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -36,73 +35,72 @@ const jsonLd = {
   ]
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(ORGANIZATION.url),
-  title: {
-    default: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
-    template: `%s | ${ORGANIZATION.name}`
-  },
-  description: ORGANIZATION.description,
-  keywords: [
-    'mecánicos Argentina',
-    'talleres mecánicos',
-    'servicio automotriz',
-    'reparación auto',
-    'mecánico cerca',
-    'taller Buenos Aires',
-    'servicio mecánico',
-    'diagnóstico auto',
-    'mecánica general',
-    'cambio aceite'
-  ],
-  authors: [{ name: ORGANIZATION.name }],
-  creator: ORGANIZATION.name,
-  publisher: ORGANIZATION.name,
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(ORGANIZATION.url),
+    title: {
+      default: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
+      template: `%s | ${ORGANIZATION.name}`,
+    },
+    description: ORGANIZATION.description,
+    keywords: [
+      'mecánicos Argentina',
+      'talleres mecánicos',
+      'servicio automotriz',
+      'reparación auto',
+      'mecánico cerca',
+      'taller Buenos Aires',
+      'servicio mecánico',
+      'diagnóstico auto',
+      'mecánica general',
+      'cambio aceite',
+    ],
+    authors: [{ name: ORGANIZATION.name }],
+    creator: ORGANIZATION.name,
+    publisher: ORGANIZATION.name,
+    robots: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'es_AR',
-    url: ORGANIZATION.url,
-    title: ORGANIZATION.name,
-    description: ORGANIZATION.description,
-    siteName: ORGANIZATION.name,
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: `${ORGANIZATION.name} - Directorio de mecánicos en Argentina`,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
       },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: ORGANIZATION.name,
-    description: ORGANIZATION.description,
-    site: '@encontramecanico',
-    creator: '@encontramecanico',
-    images: ['/og-image.jpg'],
-  },
-  verification: {
-    google: 'your-google-verification-code',
-  },
-  alternates: {
-    canonical: ORGANIZATION.url,
-  },
-  other: {
-    'application/ld+json': JSON.stringify(jsonLd),
-  },
-};
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'es_AR',
+      url: ORGANIZATION.url,
+      title: ORGANIZATION.name,
+      description: ORGANIZATION.description,
+      siteName: ORGANIZATION.name,
+      images: [
+        {
+          url: '/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${ORGANIZATION.name} - Directorio de mecánicos en Argentina`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ORGANIZATION.name,
+      description: ORGANIZATION.description,
+      site: '@encontramecanico',
+      creator: '@encontramecanico',
+      images: ['/og-image.jpg'],
+    },
+    verification: {
+      google: 'your-google-verification-code',
+    },
+    alternates: {
+      canonical: ORGANIZATION.url,
+    },
+  };
+}
 
 export default function RootLayout({
   children,
@@ -116,6 +114,10 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <meta name="theme-color" content="#000000" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className={inter.className}>
         <div className="relative flex min-h-screen flex-col">
