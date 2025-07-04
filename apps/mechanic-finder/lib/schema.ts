@@ -36,10 +36,15 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
     ...(business.address && {
       address: {
         '@type': 'PostalAddress',
-        streetAddress: business.address,
-        addressLocality: business.city?.name,
-        addressRegion: business.city?.province?.name,
-        postalCode: business.postalCode || business.city?.postalCode,
+        ...(business.address && { streetAddress: business.address }),
+        ...(business.city?.name && { addressLocality: business.city?.name }),
+        ...(business.city?.province?.name && {
+          addressRegion: business.city?.province?.name,
+        }),
+        ...(business.postalCode && { postalCode: business.postalCode }),
+        ...(business.city?.postalCode && {
+          postalCode: business.city?.postalCode,
+        }),
         addressCountry: 'AR',
       },
     }),

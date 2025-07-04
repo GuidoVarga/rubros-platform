@@ -95,6 +95,7 @@ async function main() {
         name: 'Mar del Plata',
         slug: 'mar-del-plata',
         provinceId: provinces[0].id,
+        postalCode: '7600',
       },
     }),
     prisma.city.create({
@@ -102,6 +103,7 @@ async function main() {
         name: 'Miramar',
         slug: 'miramar',
         provinceId: provinces[0].id,
+        postalCode: '7650',
       },
     }),
     prisma.city.create({
@@ -109,6 +111,7 @@ async function main() {
         name: 'Rosario',
         slug: 'rosario',
         provinceId: provinces[1].id,
+        postalCode: '2000',
       },
     }),
     prisma.city.create({
@@ -116,6 +119,7 @@ async function main() {
         name: 'Santa Fe',
         slug: 'santa-fe',
         provinceId: provinces[1].id,
+        postalCode: '2010',
       },
     }),
     prisma.city.create({
@@ -123,6 +127,7 @@ async function main() {
         name: 'Palermo',
         slug: 'palermo',
         provinceId: provinces[2].id,
+        postalCode: '1000',
       },
     }),
     prisma.city.create({
@@ -130,6 +135,7 @@ async function main() {
         name: 'Colegiales',
         slug: 'colegiales',
         provinceId: provinces[2].id,
+        postalCode: '1010',
       },
     }),
     prisma.city.create({
@@ -137,6 +143,7 @@ async function main() {
         name: 'Santa Cruz',
         slug: 'santa-cruz',
         provinceId: provinces[3].id,
+        postalCode: '5000',
       },
     }),
   ]);
