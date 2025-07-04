@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const mechanicsCount = await getMechanicsCount(city.id);
 
   return {
-    title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
+    title: `Mecánicos ${city.name} | ${mechanicsCount} talleres`,
     description: `Encontrá los mejores mecánicos en ${city.name}, ${province.name}. ${mechanicsCount} talleres en tu ciudad con reseñas, horarios y contacto directo.`,
     keywords: [
       `mecánicos ${city.name.toLowerCase()}`,
@@ -173,7 +173,7 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             <p className="text-lg leading-8 text-muted-foreground">
               {pagination.total} mecánicos encontrados en {city.name}.
-              Compara servicios, precios y contacta directamente.
+              Consulta información de contacto y ubicación disponible.
             </p>
           </div>
         </div>
@@ -208,6 +208,79 @@ export default async function CityPage({ params, searchParams }: Props) {
                 itemsPerPage: ITEMS_PER_PAGE - 1,
               }}
             />
+
+            {/* Información adicional sobre mecánicos en la ciudad */}
+            <section className="mt-16 bg-muted/30 p-8 rounded-lg">
+              <h2 className="text-2xl font-bold mb-6">Guía para Encontrar Mecánicos en {city.name}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Servicios Comunes</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Los talleres mecánicos suelen ofrecer diversos servicios automotrices.
+                    Es recomendable consultar directamente con cada taller sobre su disponibilidad
+                    y especialidades específicas.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Cambio de aceite y filtros</li>
+                    <li>• Reparación de frenos y suspensión</li>
+                    <li>• Diagnóstico computarizado</li>
+                    <li>• Reparación de motor y transmisión</li>
+                    <li>• Aire acondicionado automotriz</li>
+                    <li>• Alineación y balanceo</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Qué Preguntar al Contactar</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
+                    para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• ¿Trabajan con mi marca de vehículo?</li>
+                    <li>• ¿Qué servicios específicos ofrecen?</li>
+                    <li>• ¿Cuáles son sus horarios de atención?</li>
+                    <li>• ¿Proporcionan presupuestos detallados?</li>
+                    <li>• ¿Ofrecen garantías en sus trabajos?</li>
+                    <li>• ¿Tienen disponibilidad de repuestos?</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            {/* Preguntas frecuentes */}
+            <section className="mt-16">
+              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas Frecuentes sobre Mecánicos en {city.name}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="font-semibold mb-2">¿Cómo verificar la información de un taller?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Recomendamos contactar directamente con cada taller para confirmar servicios,
+                    horarios y precios, ya que la información puede cambiar sin previo aviso.
+                  </p>
+                </div>
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="font-semibold mb-2">¿De dónde proviene esta información?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Los datos mostrados provienen de fuentes públicas como directorios comerciales
+                    y plataformas de mapas. Siempre verifica la información directamente.
+                  </p>
+                </div>
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Los servicios varían según cada taller. Algunos se especializan en ciertos tipos
+                    de reparación mientras otros ofrecen servicios más generales.
+                  </p>
+                </div>
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="font-semibold mb-2">¿Cómo elegir el mejor taller?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Considera factores como ubicación, horarios, servicios ofrecidos, y siempre
+                    solicita presupuestos detallados antes de autorizar cualquier trabajo.
+                  </p>
+                </div>
+              </div>
+            </section>
           </>
         ) : (
           <EmptyState cityName={city.name} />

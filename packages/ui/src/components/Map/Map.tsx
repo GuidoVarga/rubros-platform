@@ -106,7 +106,7 @@ const Map = ({
                 <a href={marker.link} target="_blank" rel="noopener noreferrer">
                   <Button variant="primary" className="w-full" size="lg">
                     <MapPin className="h-4 w-4 mr-2" />
-                    Ver en Google Maps
+                    Ver como llegar
                   </Button>
                 </a>
               )}

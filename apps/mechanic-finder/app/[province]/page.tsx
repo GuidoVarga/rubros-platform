@@ -138,7 +138,7 @@ export default async function ProvincePage({ params }: Props) {
               <>
                 <p className="text-lg leading-8 text-muted-foreground mb-8">
                   {totalMechanics} mecánicos en {province.cities.length} ciudades.
-                  Selecciona tu ciudad para encontrar los mejores talleres cerca de ti.
+                  Selecciona tu ciudad para ver talleres disponibles en tu zona.
                 </p>
                 <CitySelector
                   cities={citiesWithCounts}
@@ -152,48 +152,129 @@ export default async function ProvincePage({ params }: Props) {
 
       {/* Cities Grid Section */}
       {province.cities.length > 0 && totalMechanicsInProvince > 0 ? (
-        <section className="container">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-6 text-center">
-              Ciudades disponibles en {province.name}
-            </h2>
+        <>
+          <section className="container">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-semibold mb-6 text-center">
+                Ciudades disponibles en {province.name}
+              </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {citiesWithCounts.map((city) => (
-                <a
-                  key={city.id}
-                  href={`/${province.slug}/${city.slug}`}
-                  className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold group-hover:text-primary">
-                      {city.name}
-                    </h3>
-                    <span className="text-2xl">🏙️</span>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {citiesWithCounts.map((city) => (
+                  <a
+                    key={city.id}
+                    href={`/${province.slug}/${city.slug}`}
+                    className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-semibold group-hover:text-primary">
+                        {city.name}
+                      </h3>
+                      <span className="text-2xl">🏙️</span>
+                    </div>
 
-                  <p className="text-muted-foreground text-sm mb-3">
-                    {city.mechanicsCount} talleres mecánicos disponibles
-                  </p>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      {city.mechanicsCount} talleres mecánicos disponibles
+                    </p>
 
-                  <div className="flex items-center text-sm text-primary">
-                    <span>Ver talleres</span>
-                    <span className="ml-2 transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
-                  </div>
-                </a>
-              ))}
+                    <div className="flex items-center text-sm text-primary">
+                      <span>Ver talleres</span>
+                      <span className="ml-2 transition-transform group-hover:translate-x-1">
+                        →
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      ) : (
+          </section>
+
+          {/* Información sobre mecánicos en la provincia */}
+          <section className="container mt-16">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold mb-8 text-center">
+                Información sobre Talleres Mecánicos en {province.name}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="text-xl font-semibold mb-4">Servicios Comunes</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Los talleres mecánicos suelen ofrecer diversos servicios para el mantenimiento
+                    y reparación de vehículos. Es recomendable consultar directamente con cada taller
+                    sobre su disponibilidad y especialidades.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• Mantenimiento preventivo y correctivo</li>
+                    <li>• Reparación de motores y transmisiones</li>
+                    <li>• Sistemas de frenos y suspensión</li>
+                    <li>• Diagnóstico computarizado</li>
+                    <li>• Servicios de electricidad automotriz</li>
+                    <li>• Reparación de aire acondicionado</li>
+                  </ul>
+                </div>
+
+                <div className="bg-card p-6 rounded-lg border">
+                  <h3 className="text-xl font-semibold mb-4">Información del Directorio</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Nuestro directorio recopila información pública disponible de talleres mecánicos
+                    en {province.name}. Los datos se actualizan regularmente desde fuentes públicas.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• {province.cities.length} ciudades con información</li>
+                    <li>• {totalMechanics} talleres registrados</li>
+                    <li>• Datos de fuentes públicas</li>
+                    <li>• Información de contacto cuando disponible</li>
+                    <li>• Actualización regular de datos</li>
+                    <li>• Acceso gratuito al directorio</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-8 rounded-lg">
+                <h3 className="text-xl font-semibold mb-4 text-center">
+                  Cómo usar nuestro directorio en {province.name}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-primary font-bold">1</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">Selecciona tu Ciudad</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Elige la ciudad de {province.name} donde necesitas encontrar un taller mecánico.
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-primary font-bold">2</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">Revisa la Información</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Consulta los datos disponibles: ubicación, horarios y contacto cuando esté disponible públicamente.
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-primary font-bold">3</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">Contacta Directamente</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Llama o visita el taller para confirmar servicios, precios y disponibilidad.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      ) :
         <EmptyStateUI title={`No hay ${!totalMechanicsInProvince ? 'mecánicos' : 'ciudades'} disponibles`} description={`Aún no tenemos ${!totalMechanicsInProvince ? 'mecánicos registrados' : 'ciudades registradas'} en esta provincia.`} linkComponent={
           <Link href="/" className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
             Volver al inicio
           </Link>
         } />
-      )}
+      }
     </div>
   );
 }

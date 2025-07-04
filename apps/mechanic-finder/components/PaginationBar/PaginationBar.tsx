@@ -93,6 +93,7 @@ export function PaginationBar({
         <Button
           variant="outline"
           disabled={currentPage === 1}
+          aria-label="Página anterior"
           onClick={() => router.push(createPageURL(currentPage - 1))}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -126,6 +127,7 @@ export function PaginationBar({
 
         <Button
           variant="outline"
+          aria-label="Siguiente página"
           disabled={currentPage === totalPages}
           onClick={() => router.push(createPageURL(currentPage + 1))}
         >
