@@ -36,7 +36,6 @@ export function CitySelector({ cities, provinceSlug }: CitySelectorProps) {
   }));
 
   return (
-
     <div className="bg-card border rounded-lg p-6 max-w-md mx-auto">
       <div className="pr-2">
         <h3 className="text-lg font-semibold mb-4">
@@ -47,21 +46,31 @@ export function CitySelector({ cities, provinceSlug }: CitySelectorProps) {
         </p>
       </div>
       <div>
+        <label htmlFor="city-selector" className="block text-sm font-medium mb-2 sr-only">
+          Seleccionar ciudad
+        </label>
         <Select
           options={citiesOptions}
           value={selectedCity}
           onChange={(city) => handleSelect(city)}
           placeholder="Selecciona una ciudad"
           isSearchable={true}
+          name="city-selector"
+          inputId="city-selector"
+          aria-label="Seleccionar ciudad"
         />
         <div className="pr-5">
-
-          <Button variant="primary" size="lg" onClick={handleSearch} disabled={!selectedCity} className="text-lg mt-5">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleSearch}
+            disabled={!selectedCity}
+            className="text-lg mt-5 min-h-[44px]"
+          >
             Ver talleres
           </Button>
         </div>
       </div>
     </div>
-
   );
 }

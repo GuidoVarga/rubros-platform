@@ -1,12 +1,8 @@
-import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb } from '@rubros/ui'
-import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
-import { generateLocalBusinessSchema } from '../../../../lib/schema'
-import { ORGANIZATION } from '@/constants/org'
-import { CustomMap } from '@/components/CustomMap/CustomMap'
-import { LatLngExpression } from '@rubros/ui/map'
+import { MapPin, Phone, Mail, Globe, Clock, Share2, Facebook, Twitter } from 'lucide-react'
+import { notFound } from 'next/navigation'
 import { getBusinessBySlug } from '@/actions/business'
 import { getOpenDays } from '@rubros/ui/utils'
 
@@ -16,268 +12,233 @@ type Props = {
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+// Simple social share component inline
+const SocialShare = ({ url, title, description, className }: { url: string; title: string; description?: string; className?: string }) => {
+  const shareLinks = {
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+  };
 
+  return (
+    <div className={`flex items-center gap-2 ${className}`}>
+      <span className="text-sm font-medium text-muted-foreground">Compartir:</span>
+      <div className="flex gap-1">
+        <Button variant="outline" size="sm" asChild>
+          <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook">
+            <Facebook className="h-4 w-4" />
+          </a>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" aria-label="Compartir en Twitter">
+            <Twitter className="h-4 w-4" />
+          </a>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { province, city, business: businessSlug } = await params;
 
   const business = await getBusinessBySlug(businessSlug)
 
   if (!business) {
-    return {}
+    return {
+      title: 'Negocio no encontrado',
+      description: 'El negocio que buscas no existe.',
+    }
   }
 
-  const businessUrl = `${baseUrl}/${province}/${city}/${businessSlug}`
-
-  const schema = generateLocalBusinessSchema({
-    name: business.name,
-    description: business.description || undefined,
-    address: business.address || undefined,
-    telephone: business.phone || undefined,
-    email: business.email || undefined,
-    url: businessUrl,
-    openingHours: business?.openingHours || undefined,
-  })
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+  const canonicalUrl = `${baseUrl}/${province}/${city}/${businessSlug}`;
 
   return {
-    title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
-    description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
+    title: `${business.name} - ${business.city?.name}, ${business.city?.province?.name}`,
+    description: business.description || `${business.name} en ${business.city?.name}, ${business.city?.province?.name}. Contacta directamente para más información.`,
+    keywords: [
+      business.name,
+      'mecánico',
+      business.city?.name || '',
+      business.city?.province?.name || '',
+      'taller',
+      'reparación',
+      'servicio automotriz'
+    ],
     openGraph: {
-      title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
-      description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
-      images: [
-        {
-          url: ORGANIZATION.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
+      title: `${business.name} - ${business.city?.name}`,
+      description: business.description || `${business.name} en ${business.city?.name}, ${business.city?.province?.name}`,
+      url: canonicalUrl,
+      siteName: 'Encontra Mecánico',
+      locale: 'es_AR',
+      type: 'website',
     },
     twitter: {
-      card: "summary_large_image",
-      title: `${business.name} - Taller Mecánico en ${business.city.name}, ${business.city.province.name}`,
-      description: business.description || `${business.name} es un taller mecánico ubicado en ${business.city.name}, ${business.city.province.name}. Contacta directamente para consultas y presupuestos.`,
-      images: [
-        {
-          url: ORGANIZATION.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
+      card: 'summary_large_image',
+      title: `${business.name} - ${business.city?.name}`,
+      description: business.description || `${business.name} en ${business.city?.name}`,
     },
     alternates: {
-      canonical: businessUrl,
-    },
-    other: {
-      'script:ld+json': JSON.stringify(schema),
+      canonical: canonicalUrl,
     },
   }
 }
 
 export default async function BusinessPage({ params }: Props) {
-  const { business: businessSlug } = await params;
+  const { province, city, business: businessSlug } = await params;
 
-  const business = await getBusinessBySlug(businessSlug);
+  const business = await getBusinessBySlug(businessSlug)
 
   if (!business) {
     notFound()
   }
 
-  // Extract coordinates from address using a geocoding service
-  // For now, we'll use a default location
-  console.log('business', business);
-  const location = business.latitude && business.longitude ? [business.latitude, business.longitude] : [-34.6037, -58.3816] // Default to Buenos Aires
+  const breadcrumbElements = [
+    { id: 'home', content: 'Inicio', href: '/' },
+    { id: 'province', content: business.city?.province?.name || '', href: `/${province}` },
+    { id: 'city', content: business.city?.name || '', href: `/${province}/${city}` },
+    { id: 'category', content: 'Mecánicos', href: `/${province}/${city}/mecanicos` },
+    { id: 'business', content: business.name },
+  ];
 
-  console.log('business.closedOn', business.closedOn);
   const openDays = getOpenDays(business.closedOn);
-  console.log('openDays', openDays);
-
-  const breadcrumbItems = [
-    {
-      id: 'home',
-      href: '/',
-      className: 'hover:text-primary',
-      content: 'Inicio',
-    },
-    {
-      id: 'province',
-      href: `/${business.city.province.slug}`,
-      className: 'hover:text-primary',
-      content: business.city.province.name,
-    },
-    {
-      id: 'city',
-      href: `/${business.city.province.slug}/${business.city.slug}`,
-      className: 'hover:text-primary',
-      content: business.city.name,
-    },
-    {
-      id: 'business',
-      content: <span className="font-medium text-foreground">{business.name}</span>,
-    },
-  ]
-
-  console.log('business', business);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+  const currentUrl = `${baseUrl}/${province}/${city}/${businessSlug}`;
 
   return (
     <div className="container py-8">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb elements={breadcrumbItems} renderLink={({ href, children, className }) => (
-        <Link href={href} className={className}>
-          {children}
-        </Link>
-      )} />
+      <Breadcrumb elements={breadcrumbElements} />
 
-      {/* Header Section */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">{business.name}</h1>
-        <div className="flex items-center text-muted-foreground">
-          <MapPin className="h-4 w-4 mr-1" />
-          <span>{business.city.name}, {business.city.province.name}</span>
-        </div>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Info Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Description Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Acerca del Taller</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                {business.description || 'No hay descripción disponible.'}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Map Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ubicación</CardTitle>
-            </CardHeader>
-            <CardContent className="sm:h-[500px] h-[300px]">
-              <CustomMap
-                center={location as LatLngExpression}
-                zoom={15}
-                markers={[
-                  {
-                    id: business.id,
-                    position: location as LatLngExpression,
-                    title: business.name,
-                    description: business.address || undefined,
-                    link: business.googleMapsLink || undefined,
-                  },
-                ]}
-                showCurrentLocation
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Contact Info Sidebar */}
-        <div className="space-y-6">
-          {/* Contact Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Información de Contacto</CardTitle>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-2xl">{business.name}</CardTitle>
+                  <p className="text-muted-foreground mt-2">
+                    {business.city?.name}, {business.city?.province?.name}
+                  </p>
+                </div>
+                <SocialShare
+                  url={currentUrl}
+                  title={`${business.name} - Mecánico en ${business.city?.name}`}
+                  description={business.description || `Contacta con ${business.name} para servicios de mecánica en ${business.city?.name}`}
+                  className="flex-shrink-0"
+                />
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {business.address && (
-                <div className="flex items-start gap-2">
-                  <div className="mt-1">
+              {business.description && (
+                <p className="text-muted-foreground leading-relaxed">{business.description}</p>
+              )}
+
+              <div className="space-y-3">
+                {business.address && (
+                  <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{business.address}</span>
                   </div>
-                  <span>{business.address}</span>
-                </div>
-              )}
+                )}
+                {business.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <a href={`tel:${business.phone}`} className="text-primary hover:underline">
+                      {business.phone}
+                    </a>
+                  </div>
+                )}
+                {business.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <a href={`mailto:${business.email}`} className="text-primary hover:underline">
+                      {business.email}
+                    </a>
+                  </div>
+                )}
+                {business.website && (
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <a
+                      href={business.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Sitio web
+                    </a>
+                  </div>
+                )}
+                {openDays && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span>{openDays}</span>
+                  </div>
+                )}
+                {business.openingHours && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span>{business.openingHours}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                {business.phone && (
+                  <Button asChild>
+                    <a href={`tel:${business.phone}`}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Llamar
+                    </a>
+                  </Button>
+                )}
+                {business.website && (
+                  <Button variant="outline" asChild>
+                    <a href={business.website} target="_blank" rel="noopener noreferrer">
+                      <Globe className="h-4 w-4 mr-2" />
+                      Sitio web
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Información de contacto</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
               {business.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`tel:${business.phone}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {business.phone}
-                  </a>
-                </div>
-              )}
-              {openDays && (
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{openDays}</span>
-                </div>
-              )}
-              {business.openingHours && (
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{business.openingHours}</span>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Teléfono</span>
+                  <p className="font-medium">{business.phone}</p>
                 </div>
               )}
               {business.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`mailto:${business.email}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {business.email}
-                  </a>
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Email</span>
+                  <p className="font-medium">{business.email}</p>
                 </div>
               )}
-              {business.website && (
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={business.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Visitar sitio web
-                  </a>
+              {business.address && (
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Dirección</span>
+                  <p className="font-medium">{business.address}</p>
+                </div>
+              )}
+              {openDays && (
+                <div>
+                  <span className="text-sm font-medium text-muted-foreground">Días de atención</span>
+                  <p className="font-medium">{openDays}</p>
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Category Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Categoría</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-muted-foreground">{business.category.name}</span>
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            {business.phone && (
-              <Button className="w-full" size="lg">
-                <Phone className="h-4 w-4 mr-2" />
-                Llamar
-              </Button>
-            )}
-            {business.email && (
-              <Button variant="outline" className="w-full" size="lg">
-                <Mail className="h-4 w-4 mr-2" />
-                Enviar email
-              </Button>
-            )}
-            {
-              business.googleMapsLink && (
-                <div className="mt-4">
-                  <a href={business.googleMapsLink} target="_blank" rel="noopener noreferrer">
-                    <Button variant="secondary" className="w-full" size="lg">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Ver en Google Maps
-                    </Button>
-                  </a>
-                </div>
-              )
-            }
-          </div>
         </div>
       </div>
     </div>
