@@ -26,9 +26,21 @@ export async function GET(): Promise<Response> {
       changefreq: 'weekly',
       priority: '1.0',
     },
+    {
+      loc: `${baseUrl}/acerca`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'monthly',
+      priority: '0.7',
+    },
+    {
+      loc: `${baseUrl}/contacto`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'monthly',
+      priority: '0.7',
+    },
   ];
 
-  // Add province and city routes
+  // Add province, city, and category routes
   for (const province of provinces) {
     // Province route
     urls.push({
@@ -42,6 +54,14 @@ export async function GET(): Promise<Response> {
     for (const city of province.cities) {
       urls.push({
         loc: `${baseUrl}/${province.slug}/${city.slug}`,
+        lastmod: city.updatedAt.toISOString(),
+        changefreq: 'weekly',
+        priority: '0.6',
+      });
+
+      // Category routes (mecánicos)
+      urls.push({
+        loc: `${baseUrl}/${province.slug}/${city.slug}/mecanicos`,
         lastmod: city.updatedAt.toISOString(),
         changefreq: 'weekly',
         priority: '0.6',
