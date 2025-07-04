@@ -5,7 +5,8 @@ export type BusinessEntity = Business & {
   city: CityEntity & { province: ProvinceEntity };
 };
 
-export type CityEntity = Pick<City, 'id' | 'name' | 'slug' | 'postalCode'>;
+export type CityEntity = Pick<City, 'id' | 'name' | 'slug'> &
+  Partial<Pick<City, 'postalCode'>>;
 
 export type ProvinceEntity = Pick<Province, 'id' | 'name' | 'slug'>;
 export type CategoryEntity = Pick<Category, 'id' | 'name' | 'slug'>;
