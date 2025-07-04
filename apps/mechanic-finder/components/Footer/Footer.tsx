@@ -19,16 +19,16 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Facebook"
               >
-                <Facebook className="h-5 w-5" />
+                <img src="/facebook.svg" alt="Facebook" className="h-5 w-5" />
               </a>
               <a
-                href="https://twitter.com/encontramecanico"
+                href="https://x.com/encontramecanico"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
-                aria-label="Seguinos en Twitter"
+                aria-label="Seguinos en X"
               >
-                <Twitter className="h-5 w-5" />
+                <img src="/x.svg" alt="X" className="h-5 w-5" />
               </a>
               <a
                 href="https://instagram.com/encontramecanico"
@@ -37,7 +37,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Instagram"
               >
-                <Instagram className="h-5 w-5" />
+                <img src="/instagram.svg" alt="Instagram" className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -57,8 +57,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><a href="https://www.argentina.gob.ar/transporte/vehiculos" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Registro Nacional de Vehículos</a></li>
               <li><a href="https://www.dnrpa.gov.ar/portal_dnrpa/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">DNRPA Oficial</a></li>
-              <li><Link href="/blog" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Blog de Mantenimiento</Link></li>
-              <li><Link href="/consejos-mecanicos" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Consejos para Conductores</Link></li>
+              <li><a href="https://www.argentina.gob.ar/seguridadvial" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Seguridad Vial</a></li>
             </ul>
           </div>
 
