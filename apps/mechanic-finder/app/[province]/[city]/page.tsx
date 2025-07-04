@@ -173,7 +173,7 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             <p className="text-lg leading-8 text-muted-foreground">
               {pagination.total} mecánicos encontrados en {city.name}.
-              Compara servicios, precios y contacta directamente.
+              Consulta información de contacto y ubicación disponible.
             </p>
           </div>
         </div>
@@ -211,14 +211,14 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             {/* Información adicional sobre mecánicos en la ciudad */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6">¿Por qué elegir un mecánico en {city.name}?</h2>
+              <h2 className="text-2xl font-bold mb-6">Guía para Encontrar Mecánicos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Servicios Disponibles</h3>
+                  <h3 className="text-lg font-semibold mb-3">Servicios Comunes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Los talleres mecánicos en {city.name} ofrecen una amplia gama de servicios automotrices.
-                    Desde mantenimiento preventivo hasta reparaciones complejas, encontrarás profesionales
-                    capacitados para atender tu vehículo.
+                    Los talleres mecánicos suelen ofrecer diversos servicios automotrices.
+                    Es recomendable consultar directamente con cada taller sobre su disponibilidad
+                    y especialidades específicas.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Cambio de aceite y filtros</li>
@@ -230,18 +230,18 @@ export default async function CityPage({ params, searchParams }: Props) {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Cómo Elegir el Mejor Taller</h3>
+                  <h3 className="text-lg font-semibold mb-3">Qué Preguntar al Contactar</h3>
                   <p className="text-muted-foreground mb-4">
-                    Al buscar un mecánico en {city.name}, es importante considerar varios factores para
-                    asegurar que recibas el mejor servicio para tu vehículo.
+                    Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
+                    para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Verifica la experiencia y certificaciones</li>
-                    <li>• Consulta horarios de atención</li>
-                    <li>• Pregunta sobre garantías de trabajo</li>
-                    <li>• Solicita presupuestos detallados</li>
-                    <li>• Confirma la disponibilidad de repuestos</li>
-                    <li>• Evalúa la ubicación y accesibilidad</li>
+                    <li>• ¿Trabajan con mi marca de vehículo?</li>
+                    <li>• ¿Qué servicios específicos ofrecen?</li>
+                    <li>• ¿Cuáles son sus horarios de atención?</li>
+                    <li>• ¿Proporcionan presupuestos detallados?</li>
+                    <li>• ¿Ofrecen garantías en sus trabajos?</li>
+                    <li>• ¿Tienen disponibilidad de repuestos?</li>
                   </ul>
                 </div>
               </div>
@@ -252,31 +252,31 @@ export default async function CityPage({ params, searchParams }: Props) {
               <h2 className="text-2xl font-bold mb-6 text-center">Preguntas Frecuentes sobre Mecánicos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Cuál es el costo promedio de los servicios?</h3>
+                  <h3 className="font-semibold mb-2">¿Cómo verificar la información de un taller?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Los precios varían según el tipo de servicio y la complejidad del trabajo.
-                    Te recomendamos solicitar presupuestos a varios talleres en {city.name} para comparar.
+                    Recomendamos contactar directamente con cada taller para confirmar servicios,
+                    horarios y precios, ya que la información puede cambiar sin previo aviso.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Hay talleres que trabajen los fines de semana?</h3>
+                  <h3 className="font-semibold mb-2">¿De dónde proviene esta información?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Algunos talleres en {city.name} ofrecen servicios los sábados y algunos incluso los domingos.
-                    Verifica los horarios de cada taller en su información de contacto.
+                    Los datos mostrados provienen de fuentes públicas como directorios comerciales
+                    y plataformas de mapas. Siempre verifica la información directamente.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Ofrecen servicio de grúa o auxilio mecánico?</h3>
+                  <h3 className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Muchos talleres en {city.name} cuentan con servicio de grúa y auxilio mecánico las 24 horas.
-                    Contacta directamente para confirmar disponibilidad.
+                    Los servicios varían según cada taller. Algunos se especializan en ciertos tipos
+                    de reparación mientras otros ofrecen servicios más generales.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Trabajan con todas las marcas de vehículos?</h3>
+                  <h3 className="font-semibold mb-2">¿Cómo elegir el mejor taller?</h3>
                   <p className="text-sm text-muted-foreground">
-                    La mayoría de los mecánicos en {city.name} están capacitados para trabajar con diversas marcas.
-                    Algunos se especializan en marcas específicas para brindar un servicio más especializado.
+                    Considera factores como ubicación, horarios, servicios ofrecidos, y siempre
+                    solicita presupuestos detallados antes de autorizar cualquier trabajo.
                   </p>
                 </div>
               </div>

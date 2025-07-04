@@ -138,7 +138,7 @@ export default async function ProvincePage({ params }: Props) {
               <>
                 <p className="text-lg leading-8 text-muted-foreground mb-8">
                   {totalMechanics} mecánicos en {province.cities.length} ciudades.
-                  Selecciona tu ciudad para encontrar los mejores talleres cerca de ti.
+                  Selecciona tu ciudad para ver talleres disponibles en tu zona.
                 </p>
                 <CitySelector
                   cities={citiesWithCounts}
@@ -193,46 +193,47 @@ export default async function ProvincePage({ params }: Props) {
           <section className="container mt-16">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-8 text-center">
-                Servicios Mecánicos en {province.name}
+                Información sobre Talleres Mecánicos en {province.name}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="text-xl font-semibold mb-4">Tipos de Servicios</h3>
+                  <h3 className="text-xl font-semibold mb-4">Servicios Comunes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Los talleres mecánicos en {province.name} ofrecen servicios completos para el mantenimiento
-                    y reparación de vehículos. Desde servicios básicos hasta reparaciones especializadas.
+                    Los talleres mecánicos suelen ofrecer diversos servicios para el mantenimiento
+                    y reparación de vehículos. Es recomendable consultar directamente con cada taller
+                    sobre su disponibilidad y especialidades.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-2">
                     <li>• Mantenimiento preventivo y correctivo</li>
                     <li>• Reparación de motores y transmisiones</li>
                     <li>• Sistemas de frenos y suspensión</li>
-                    <li>• Diagnóstico computarizado avanzado</li>
+                    <li>• Diagnóstico computarizado</li>
                     <li>• Servicios de electricidad automotriz</li>
                     <li>• Reparación de aire acondicionado</li>
                   </ul>
                 </div>
 
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="text-xl font-semibold mb-4">Cobertura Regional</h3>
+                  <h3 className="text-xl font-semibold mb-4">Información del Directorio</h3>
                   <p className="text-muted-foreground mb-4">
-                    Nuestra red de talleres en {province.name} cubre las principales ciudades y localidades,
-                    asegurando que encuentres servicios mecánicos cerca de tu ubicación.
+                    Nuestro directorio recopila información pública disponible de talleres mecánicos
+                    en {province.name}. Los datos se actualizan regularmente desde fuentes públicas.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-2">
-                    <li>• {province.cities.length} ciudades con cobertura</li>
+                    <li>• {province.cities.length} ciudades con información</li>
                     <li>• {totalMechanics} talleres registrados</li>
-                    <li>• Servicios las 24 horas disponibles</li>
-                    <li>• Atención de emergencias</li>
-                    <li>• Servicio de grúa y auxilio</li>
-                    <li>• Repuestos originales y alternativos</li>
+                    <li>• Datos de fuentes públicas</li>
+                    <li>• Información de contacto cuando disponible</li>
+                    <li>• Actualización regular de datos</li>
+                    <li>• Acceso gratuito al directorio</li>
                   </ul>
                 </div>
               </div>
 
               <div className="bg-muted/30 p-8 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4 text-center">
-                  ¿Cómo encontrar el mejor mecánico en {province.name}?
+                  Cómo usar nuestro directorio en {province.name}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
@@ -241,16 +242,16 @@ export default async function ProvincePage({ params }: Props) {
                     </div>
                     <h4 className="font-semibold mb-2">Selecciona tu Ciudad</h4>
                     <p className="text-sm text-muted-foreground">
-                      Elige la ciudad de {province.name} donde necesitas el servicio mecánico para ver talleres cercanos.
+                      Elige la ciudad de {province.name} donde necesitas encontrar un taller mecánico.
                     </p>
                   </div>
                   <div className="text-center">
                     <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                       <span className="text-primary font-bold">2</span>
                     </div>
-                    <h4 className="font-semibold mb-2">Compara Opciones</h4>
+                    <h4 className="font-semibold mb-2">Revisa la Información</h4>
                     <p className="text-sm text-muted-foreground">
-                      Revisa la información de cada taller: servicios, horarios, ubicación y datos de contacto disponibles.
+                      Consulta los datos disponibles: ubicación, horarios y contacto cuando esté disponible públicamente.
                     </p>
                   </div>
                   <div className="text-center">
@@ -259,7 +260,7 @@ export default async function ProvincePage({ params }: Props) {
                     </div>
                     <h4 className="font-semibold mb-2">Contacta Directamente</h4>
                     <p className="text-sm text-muted-foreground">
-                      Llama o visita el taller seleccionado para consultar precios y agendar tu cita de servicio.
+                      Llama o visita el taller para confirmar servicios, precios y disponibilidad.
                     </p>
                   </div>
                 </div>
