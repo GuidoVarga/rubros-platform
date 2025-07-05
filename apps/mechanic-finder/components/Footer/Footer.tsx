@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Twitter, Instagram } from "lucide-react";
+import Image from "next/image";
 
 export const Footer = () => {
   return (
@@ -19,7 +19,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Facebook"
               >
-                <img src="/facebook.svg" alt="Facebook" className="h-5 w-5" />
+                <Image src="/facebook.svg" alt="Facebook" className="h-5 w-5" />
               </a>
               <a
                 href="https://x.com/encontramecanico"
@@ -28,7 +28,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en X"
               >
-                <img src="/x.svg" alt="X" className="h-5 w-5" />
+                <Image src="/x.svg" alt="X" className="h-5 w-5" />
               </a>
               <a
                 href="https://instagram.com/encontramecanico"
@@ -37,7 +37,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Instagram"
               >
-                <img src="/instagram.svg" alt="Instagram" className="h-5 w-5" />
+                <Image src="/instagram.svg" alt="Instagram" className="h-5 w-5" />
               </a>
             </div>
           </div>

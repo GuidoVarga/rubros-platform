@@ -8,6 +8,7 @@ import { generateLocalBusinessSchema } from '@/lib/schema'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { Suspense } from 'react'
+import Image from 'next/image'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
@@ -28,12 +29,12 @@ const SocialShare = ({ url, title, description, className }: { url: string; titl
       <div className="flex gap-1">
         <Button variant="outline" size="sm" asChild>
           <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook">
-            <img src="/facebook.svg" alt="Facebook" className="h-4 w-4" />
+            <Image src="/facebook.svg" alt="Facebook" className="h-4 w-4" />
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" aria-label="Compartir en X">
-            <img src="/x.svg" alt="X" className="h-4 w-4" />
+            <Image src="/x.svg" alt="X" className="h-4 w-4" />
           </a>
         </Button>
       </div>
