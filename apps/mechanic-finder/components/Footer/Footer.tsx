@@ -19,7 +19,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Facebook"
               >
-                <Image src="/facebook.svg" alt="Facebook" className="h-5 w-5" />
+                <Image width={16} height={16} src="/facebook.svg" alt="Facebook" className="h-5 w-5" />
               </a>
               <a
                 href="https://x.com/encontramecanico"
@@ -28,7 +28,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en X"
               >
-                <Image src="/x.svg" alt="X" className="h-5 w-5" />
+                <Image width={16} height={16} src="/x.svg" alt="X" className="h-5 w-5" />
               </a>
               <a
                 href="https://instagram.com/encontramecanico"
@@ -37,7 +37,7 @@ export const Footer = () => {
                 className="text-muted-foreground hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label="Seguinos en Instagram"
               >
-                <Image src="/instagram.svg" alt="Instagram" className="h-5 w-5" />
+                <Image width={16} height={16} src="/instagram.svg" alt="Instagram" className="h-5 w-5" />
               </a>
             </div>
           </div>

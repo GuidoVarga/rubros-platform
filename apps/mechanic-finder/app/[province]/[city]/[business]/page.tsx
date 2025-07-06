@@ -29,12 +29,12 @@ const SocialShare = ({ url, title, description, className }: { url: string; titl
       <div className="flex gap-1">
         <Button variant="outline" size="sm" asChild>
           <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook">
-            <Image src="/facebook.svg" alt="Facebook" className="h-4 w-4" />
+            <Image width={16} height={16} src="/facebook.svg" alt="Facebook" className="h-4 w-4" />
           </a>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" aria-label="Compartir en X">
-            <Image src="/x.svg" alt="X" className="h-4 w-4" />
+            <Image width={16} height={16} src="/x.svg" alt="X" className="h-4 w-4" />
           </a>
         </Button>
       </div>
