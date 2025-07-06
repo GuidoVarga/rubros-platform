@@ -48,6 +48,7 @@ export function LocationFilter({
   // Cargar ciudades cuando cambia la provincia
   useEffect(() => {
     const loadCities = async () => {
+      setLoading(true);
       try {
         const province = provincesOptions.find(p => p.value === currentProvince?.value);
         if (province) {
@@ -56,6 +57,9 @@ export function LocationFilter({
         }
       } catch (error) {
         console.error("Error loading cities:", error);
+      }
+      finally {
+        setLoading(false);
       }
     };
 
@@ -116,7 +120,7 @@ export function LocationFilter({
           isDisabled={!currentProvince}
           isSearchable={true}
           name="city"
-          noOptionsMessage={() => 'No hay ciudades disponibles'}
+          noOptionsMessage={() => loading ? 'Cargando ciudades...' : 'No hay ciudades disponibles'}
           inputId="city"
         />
       </div>
