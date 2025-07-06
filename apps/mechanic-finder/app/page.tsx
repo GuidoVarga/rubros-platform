@@ -129,7 +129,7 @@ export default async function Home() {
 
       {/* Features */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-12">¿Por qué elegir Encontra Mecánico?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">¿Por qué elegir Encontrá Mecánico?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="flex items-start gap-4">
             <Search className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
@@ -182,7 +182,7 @@ export default async function Home() {
           fuentes de internet como directorios comerciales, sitios web oficiales y plataformas de mapas.
         </p>
         <p className="text-sm text-muted-foreground">
-          <strong>Encontra Mecánico</strong> actúa como un directorio informativo y no garantiza la exactitud,
+          <strong>Encontrá Mecánico</strong> actúa como un directorio informativo y no garantiza la exactitud,
           actualización o calidad de los servicios listados. Recomendamos verificar la información directamente
           con cada establecimiento antes de solicitar servicios.
         </p>

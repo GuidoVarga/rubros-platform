@@ -211,10 +211,10 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             {/* Información adicional sobre mecánicos en la ciudad */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6">Guía para Encontrar Mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6">Guía para encontrar mecánicos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Servicios Comunes</h3>
+                  <h3 className="text-lg font-semibold mb-3">Servicios comunes</h3>
                   <p className="text-muted-foreground mb-4">
                     Los talleres mecánicos suelen ofrecer diversos servicios automotrices.
                     Es recomendable consultar directamente con cada taller sobre su disponibilidad
@@ -230,7 +230,7 @@ export default async function CityPage({ params, searchParams }: Props) {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Qué Preguntar al Contactar</h3>
+                  <h3 className="text-lg font-semibold mb-3">Qué preguntar al contactar</h3>
                   <p className="text-muted-foreground mb-4">
                     Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
                     para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
@@ -249,7 +249,7 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             {/* Preguntas frecuentes */}
             <section className="mt-16">
-              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas Frecuentes sobre Mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas frecuentes sobre mecánicos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
                   <h3 className="font-semibold mb-2">¿Cómo verificar la información de un taller?</h3>

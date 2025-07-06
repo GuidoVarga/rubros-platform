@@ -7,7 +7,7 @@ export const Footer = () => {
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold mb-4">Encontra Mecánico</h3>
+            <h3 className="font-semibold mb-4">Encontrá Mecánico</h3>
             <p className="text-sm text-muted-foreground mb-4">
               El directorio más completo de talleres mecánicos en Argentina. Información pública actualizada las 24 horas.
             </p>
@@ -73,7 +73,7 @@ export const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Encontra Mecánico. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Encontrá Mecánico. Todos los derechos reservados.</p>
           <p className="mt-2">
             Directorio informativo de talleres mecánicos en Argentina basado en información pública.
           </p>

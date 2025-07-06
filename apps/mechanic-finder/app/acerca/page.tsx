@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, Button } from '@rubros/ui';
 import { CheckCircle, Users, Shield, MapPin, Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Acerca de Nosotros - Encontra Mecánico',
-  description: 'Conocé más sobre Encontra Mecánico, el directorio más completo para encontrar talleres mecánicos en Argentina.',
+  title: 'Acerca de Nosotros - Encontrá Mecánico',
+  description: 'Conocé más sobre Encontrá Mecánico, el directorio más completo para encontrar talleres mecánicos en Argentina.',
   keywords: ['encontra mecánico', 'sobre nosotros', 'directorio mecánicos', 'argentina', 'talleres'],
 };
 
@@ -15,7 +15,7 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold mb-6">Acerca de Encontra Mecánico</h1>
+          <h1 className="text-4xl font-bold mb-6">Acerca de Encontrá Mecánico</h1>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
             Somos el <strong>directorio más completo de Argentina</strong> para encontrar
             <strong> talleres mecánicos y servicios automotrices</strong>. Nuestra misión es hacer que encontrar
@@ -50,10 +50,10 @@ export default function AboutPage() {
 
         {/* Main Content */}
         <div className="prose prose-gray max-w-none mb-16">
-          <h2 className="text-3xl font-bold mb-6">Nuestra Historia</h2>
+          <h2 className="text-3xl font-bold mb-6">Nuestra historia</h2>
 
           <p className="text-base leading-relaxed mb-6">
-            <strong>Encontra Mecánico</strong> nació de la necesidad de crear un directorio centralizado
+            <strong>Encontrá Mecánico</strong> nació de la necesidad de crear un directorio centralizado
             donde los conductores argentinos puedan encontrar fácilmente <strong>talleres mecánicos y servicios automotrices</strong>.
             Sabemos lo difícil que puede ser encontrar un mecánico cuando tu vehículo tiene una avería
             inesperada o necesita mantenimiento preventivo.
@@ -71,7 +71,7 @@ export default function AboutPage() {
             <div className="flex items-start gap-3">
               <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-semibold mb-2">Recopilación de Datos Públicos</h4>
+                <h4 className="font-semibold mb-2">Recopilación de datos públicos</h4>
                 <p className="text-sm text-muted-foreground">
                   Recolectamos información de talleres desde fuentes públicas como directorios comerciales,
                   sitios web oficiales y plataformas de mapas.
@@ -82,7 +82,7 @@ export default function AboutPage() {
             <div className="flex items-start gap-3">
               <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-semibold mb-2">Cobertura Nacional</h4>
+                <h4 className="font-semibold mb-2">Cobertura nacional</h4>
                 <p className="text-sm text-muted-foreground">
                   Tenemos información de talleres en las principales ciudades de Argentina,
                   desde CABA hasta provincias del interior.
@@ -93,7 +93,7 @@ export default function AboutPage() {
             <div className="flex items-start gap-3">
               <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-semibold mb-2">Contacto Directo</h4>
+                <h4 className="font-semibold mb-2">Contacto directo</h4>
                 <p className="text-sm text-muted-foreground">
                   Cuando la información está disponible públicamente, facilitamos el contacto directo
                   entre conductores y talleres.
@@ -104,7 +104,7 @@ export default function AboutPage() {
             <div className="flex items-start gap-3">
               <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-semibold mb-2">Servicio Gratuito</h4>
+                <h4 className="font-semibold mb-2">Servicio gratuito</h4>
                 <p className="text-sm text-muted-foreground">
                   El acceso a nuestro directorio es completamente gratuito para todos los usuarios.
                 </p>
@@ -129,11 +129,11 @@ export default function AboutPage() {
             <li className="flex items-center"><span className="mr-2 text-primary">✓</span> Servicios 24 horas</li>
           </ul>
 
-          <h3 className="text-2xl font-bold mb-4">Información Importante</h3>
+          <h3 className="text-2xl font-bold mb-4">Información importante</h3>
 
           <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6">
             <p className="text-sm text-gray-700 mb-3">
-              <strong>Encontra Mecánico</strong> funciona como un directorio informativo que recopila datos públicos
+              <strong>Encontrá Mecánico</strong> funciona como un directorio informativo que recopila datos públicos
               disponibles en internet. No somos responsables de la exactitud, actualización o calidad de los servicios listados.
             </p>
             <p className="text-sm text-gray-700">

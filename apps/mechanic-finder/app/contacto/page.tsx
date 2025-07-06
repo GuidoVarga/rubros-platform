@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@rubros/ui';
 import { Mail, Phone, MapPin, Clock, MessageCircle, HelpCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Contacto - Encontra Mecánico',
-  description: 'Contactate con Encontra Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
+  title: 'Contacto - Encontrá Mecánico',
+  description: 'Contactate con Encontrá Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
   keywords: ['contacto', 'encontra mecánico', 'soporte', 'ayuda', 'talleres mecánicos'],
 };
 
@@ -53,7 +53,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Preguntas Frecuentes</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Preguntas frecuentes</h2>
 
           <div className="space-y-6">
             <Card>

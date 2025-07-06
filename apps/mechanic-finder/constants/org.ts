@@ -1,5 +1,5 @@
 export const ORGANIZATION = {
-  name: 'Encontra Mecánico',
+  name: 'Encontrá Mecánico',
   url: process.env.NEXT_PUBLIC_BASE_URL || '',
   shortDescription: 'Mecánicos cerca tuyo en Argentina',
   description:

@@ -198,7 +198,7 @@ export default async function ProvincePage({ params }: Props) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="text-xl font-semibold mb-4">Servicios Comunes</h3>
+                  <h3 className="text-xl font-semibold mb-4">Servicios comunes</h3>
                   <p className="text-muted-foreground mb-4">
                     Los talleres mecánicos suelen ofrecer diversos servicios para el mantenimiento
                     y reparación de vehículos. Es recomendable consultar directamente con cada taller
@@ -215,7 +215,7 @@ export default async function ProvincePage({ params }: Props) {
                 </div>
 
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="text-xl font-semibold mb-4">Información del Directorio</h3>
+                  <h3 className="text-xl font-semibold mb-4">Información del directorio</h3>
                   <p className="text-muted-foreground mb-4">
                     Nuestro directorio recopila información pública disponible de talleres mecánicos
                     en {province.name}. Los datos se actualizan regularmente desde fuentes públicas.
@@ -240,7 +240,7 @@ export default async function ProvincePage({ params }: Props) {
                     <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                       <span className="text-primary font-bold">1</span>
                     </div>
-                    <h4 className="font-semibold mb-2">Selecciona tu Ciudad</h4>
+                    <h4 className="font-semibold mb-2">Selecciona tu ciudad</h4>
                     <p className="text-sm text-muted-foreground">
                       Elige la ciudad de {province.name} donde necesitas encontrar un taller mecánico.
                     </p>
@@ -249,7 +249,7 @@ export default async function ProvincePage({ params }: Props) {
                     <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                       <span className="text-primary font-bold">2</span>
                     </div>
-                    <h4 className="font-semibold mb-2">Revisa la Información</h4>
+                    <h4 className="font-semibold mb-2">Revisa la información</h4>
                     <p className="text-sm text-muted-foreground">
                       Consulta los datos disponibles: ubicación, horarios y contacto cuando esté disponible públicamente.
                     </p>
@@ -258,7 +258,7 @@ export default async function ProvincePage({ params }: Props) {
                     <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                       <span className="text-primary font-bold">3</span>
                     </div>
-                    <h4 className="font-semibold mb-2">Contacta Directamente</h4>
+                    <h4 className="font-semibold mb-2">Contacta directamente</h4>
                     <p className="text-sm text-muted-foreground">
                       Llama o visita el taller para confirmar servicios, precios y disponibilidad.
                     </p>
