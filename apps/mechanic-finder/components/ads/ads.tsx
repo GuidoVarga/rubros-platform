@@ -6,7 +6,7 @@ import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from 
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-type AdComponentProps = {
+export type AdComponentProps = {
   type: "top" | "side" | "in-feed" | "square" | "footer";
 } & Omit<AdSenseProps, "slot">;
 

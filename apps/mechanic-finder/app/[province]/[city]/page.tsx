@@ -4,14 +4,15 @@ import { getBusinesses, getMechanicsCount } from "@/actions/business";
 import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
-import { PaginatedList } from "@/components/PaginatedList/PaginatedList";
 import { BusinessEntity, ProvinceEntity } from "@rubros/db/entities";
 import { ITEMS_PER_PAGE } from "@/constants/pagination";
 import Link from "next/link";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { EmptyState } from "@/components/EmptyState/EmptyState";
-import { Breadcrumb, BreadcrumbProps } from "@rubros/ui";
+import { Breadcrumb, BreadcrumbProps, PaginatedList } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
+import { AdComponent, AdComponentProps } from "@/components/ads/ads";
+import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -192,22 +193,26 @@ export default async function CityPage({ params, searchParams }: Props) {
                 Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de {pagination.total} resultados
               </p>
             </div>
-            <PaginatedList
-              items={mechanics}
-              renderItem={(mechanic: BusinessEntity) => (
-                <MechanicCard
-                  key={mechanic.id}
-                  business={mechanic}
-                  href={`/${province.slug}/${city.slug}/${mechanic.slug}`}
-                />
-              )}
-              pagination={{
-                currentPage,
-                totalPages: pagination.pages,
-                totalItems: pagination.total,
-                itemsPerPage: ITEMS_PER_PAGE - 1,
-              }}
-            />
+            <div className="space-y-8">
+              <PaginatedList
+                items={mechanics}
+                renderItem={(mechanic: BusinessEntity) => (
+                  <MechanicCard
+                    key={mechanic.id}
+                    business={mechanic}
+                    href={`/${province.slug}/${city.slug}/${mechanic.slug}`}
+                  />
+                )}
+                renderAd={({ type, style }) => <AdComponent type={type as AdComponentProps['type']} style={style} />}
+                itemsPerPage={ITEMS_PER_PAGE - 1}
+              />
+              <CustomPaginationBar
+                currentPage={currentPage}
+                totalPages={pagination.pages}
+                totalItems={pagination.total}
+                itemsPerPage={ITEMS_PER_PAGE - 1}
+              />
+            </div>
 
             {/* Información adicional sobre mecánicos en la ciudad */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
