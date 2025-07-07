@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const mechanicsCount = await getMechanicsCount(city.id);
 
   return {
@@ -97,6 +98,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           height: 630,
         },
       ],
+    },
+    alternates: {
+      canonical: `${baseUrl}/${province.slug}/${city.slug}`,
     },
   };
 }

@@ -1,12 +1,18 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@rubros/ui';
-import { Mail, Phone, MapPin, Clock, MessageCircle, HelpCircle } from 'lucide-react';
+import { Mail, Clock, MessageCircle, HelpCircle } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Contacto - Encontrá Mecánico',
-  description: 'Contactate con Encontrá Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
-  keywords: ['contacto', 'encontra mecánico', 'soporte', 'ayuda', 'talleres mecánicos'],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+  return {
+    title: 'Contacto - Encontrá Mecánico',
+    description: 'Contactate con Encontrá Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
+    keywords: ['contacto', 'encontra mecánico', 'soporte', 'ayuda', 'talleres mecánicos'],
+    alternates: {
+      canonical: `${baseUrl}/contacto`,
+    },
+  };
+}
 
 export default function ContactPage() {
   return (

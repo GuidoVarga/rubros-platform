@@ -1,13 +1,19 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle, Button } from '@rubros/ui';
+import { Card, CardContent, Button } from '@rubros/ui';
 import { CheckCircle, Users, Shield, MapPin, Phone } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Acerca de Nosotros - Encontrá Mecánico',
-  description: 'Conocé más sobre Encontrá Mecánico, el directorio más completo para encontrar talleres mecánicos en Argentina.',
-  keywords: ['encontra mecánico', 'sobre nosotros', 'directorio mecánicos', 'argentina', 'talleres'],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+  return {
+    title: 'Acerca de Nosotros - Encontrá Mecánico',
+    description: 'Conocé más sobre Encontrá Mecánico, el directorio más completo para encontrar talleres mecánicos en Argentina.',
+    keywords: ['encontra mecánico', 'sobre nosotros', 'directorio mecánicos', 'argentina', 'talleres'],
+    alternates: {
+      canonical: `${baseUrl}/acerca`,
+    },
+  };
+}
 
 export default function AboutPage() {
   return (

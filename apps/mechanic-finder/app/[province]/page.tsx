@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const totalMechanics = await getTotalMechanicsInProvince(province.id);
 
   return {
@@ -76,6 +77,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           height: 630,
         },
       ],
+    },
+    alternates: {
+      canonical: `${baseUrl}/${province.slug}`,
     },
   };
 }

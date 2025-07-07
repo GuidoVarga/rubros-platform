@@ -40,7 +40,7 @@ export async function GET(): Promise<Response> {
     },
   ];
 
-  // Add province, city, and category routes
+  // Add province and city routes
   for (const province of provinces) {
     // Province route
     urls.push({
@@ -54,14 +54,6 @@ export async function GET(): Promise<Response> {
     for (const city of province.cities) {
       urls.push({
         loc: `${baseUrl}/${province.slug}/${city.slug}`,
-        lastmod: city.updatedAt.toISOString(),
-        changefreq: 'weekly',
-        priority: '0.6',
-      });
-
-      // Category routes (mecánicos)
-      urls.push({
-        loc: `${baseUrl}/${province.slug}/${city.slug}/mecanicos`,
         lastmod: city.updatedAt.toISOString(),
         changefreq: 'weekly',
         priority: '0.6',
@@ -87,7 +79,7 @@ ${urls
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
     },
   });
 }

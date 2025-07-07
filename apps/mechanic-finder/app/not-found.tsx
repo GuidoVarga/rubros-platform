@@ -1,6 +1,16 @@
+import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@rubros/ui'
 import { ArrowLeft } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Página no encontrada - Encontrá Mecánico',
+  description: 'La página que buscas no existe. Volvé al directorio de mecánicos y talleres en Argentina.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default function NotFound() {
   return (
