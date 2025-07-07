@@ -43,7 +43,7 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Servicios Principales</h4>
+            <h4 className="font-semibold mb-4">Servicios principales</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/servicios/mecanica-general" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Mecánica General</Link></li>
               <li><Link href="/servicios/cambio-aceite" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Cambio de Aceite</Link></li>
