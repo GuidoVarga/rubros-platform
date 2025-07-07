@@ -1,8 +1,7 @@
 import { BussinessCard, Button } from "@rubros/ui";
-import { DAYS_OF_WEEK } from "@rubros/ui/constants";
 import { BusinessEntity } from "@rubros/db/entities";
 import Link from "next/link";
-import { clearAccents, getOpenDays } from "@rubros/ui/utils";
+import { getOpenDays } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
   business: BusinessEntity;

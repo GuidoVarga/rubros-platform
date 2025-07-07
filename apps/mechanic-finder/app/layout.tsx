@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/Header/Header";
+import { Header } from "@rubros/ui";
 import { Footer } from "@/components/Footer/Footer";
 import { AdComponent } from "@/components/ads/ads";
 import { Suspense } from "react";
 import { SkeletonPage } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
+import Link from "next/link";
+import { APP_NAME } from "@/constants/app";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -121,7 +123,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <div className="relative flex min-h-screen flex-col">
-          <Header />
+          <Header
+            renderLink={({ href, children, className }) => <Link href={href} className={className}>{children}</Link>}
+            appName={APP_NAME}
+          />
           <main className="flex-1">
             <div className="flex flex-col gap-8">
               <Suspense>

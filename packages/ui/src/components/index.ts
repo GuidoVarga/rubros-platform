@@ -10,3 +10,4 @@ export * from './Spinner';
 export * from './EmptyState';
 export * from './Breadcrumb';
 export * from './SocialShare';
+export * from './Header';
