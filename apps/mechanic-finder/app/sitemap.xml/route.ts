@@ -38,6 +38,12 @@ export async function GET(): Promise<Response> {
       changefreq: 'monthly',
       priority: '0.7',
     },
+    {
+      loc: `${baseUrl}/terminos-y-condiciones`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'monthly',
+      priority: '0.5',
+    },
   ];
 
   // Add province and city routes

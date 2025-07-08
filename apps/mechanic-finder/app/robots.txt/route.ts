@@ -21,6 +21,7 @@ Crawl-delay: 1
 Allow: /
 Allow: /acerca
 Allow: /contacto
+Allow: /terminos-y-condiciones
 Allow: /*/*
 Allow: /*/*/*
 Allow: /*/*/*/*

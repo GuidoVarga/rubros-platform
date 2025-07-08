@@ -66,7 +66,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link href="/acerca" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Quiénes Somos</Link></li>
               <li><Link href="/contacto" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Contactanos</Link></li>
-              <li><Link href="/terminos-condiciones" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Términos y Condiciones</Link></li>
+              <li><Link href="/terminos-y-condiciones" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Términos y Condiciones</Link></li>
               <li><Link href="/politica-privacidad" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Política de Privacidad</Link></li>
             </ul>
           </div>
