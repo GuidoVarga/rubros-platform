@@ -44,6 +44,12 @@ export async function GET(): Promise<Response> {
       changefreq: 'monthly',
       priority: '0.5',
     },
+    {
+      loc: `${baseUrl}/politica-privacidad`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'monthly',
+      priority: '0.5',
+    },
   ];
 
   // Add province and city routes

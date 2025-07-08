@@ -22,6 +22,7 @@ Allow: /
 Allow: /acerca
 Allow: /contacto
 Allow: /terminos-y-condiciones
+Allow: /politica-privacidad
 Allow: /*/*
 Allow: /*/*/*
 Allow: /*/*/*/*
