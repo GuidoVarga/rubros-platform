@@ -7,5 +7,5 @@ export type BussinessCardProps = {
   website?: string | null;
   footerButton: React.ReactNode;
   openingHours?: string | null;
-  openDays?: string | null;
+  openDays?: string[] | null;
 };

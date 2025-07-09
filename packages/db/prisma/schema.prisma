@@ -29,6 +29,7 @@ model Business {
   openingHours String?
   latitude Float?
   longitude Float?
+  hours Json?
   googleMapsLink String?
   closedOn String?
   googlePlaceId String?
