@@ -77,6 +77,19 @@ export const Footer = () => {
           <p className="mt-2">
             Directorio informativo de talleres mecánicos en Argentina basado en información pública.
           </p>
+          <div className="mt-4">
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('cookie-consent');
+                  window.location.reload();
+                }
+              }}
+              className="text-xs text-muted-foreground hover:text-primary underline"
+            >
+              ⚙️ Configurar cookies
+            </button>
+          </div>
         </div>
       </div>
     </footer>

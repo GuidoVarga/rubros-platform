@@ -2,12 +2,55 @@
 
 import Script from "next/script";
 import { AdSenseProps } from "@rubros/types";
+import { useEffect, useState } from "react";
+import { canUseAdvertising, getCurrentConsent } from "@/lib/cookies";
 
 export function AdSense({ slot, style, className }: AdSenseProps) {
+  const [hasConsent, setHasConsent] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Verificar consentimiento inicial
+    setHasConsent(canUseAdvertising());
+    setIsLoaded(true);
+
+    // Escuchar cambios en el consentimiento
+    const handleConsentChange = () => {
+      setHasConsent(canUseAdvertising());
+    };
+
+    window.addEventListener('cookieConsentChanged', handleConsentChange);
+    return () => window.removeEventListener('cookieConsentChanged', handleConsentChange);
+  }, []);
+
   const parsedStyle = {
     ...style,
     maxWidth: "1100px",
-  }
+  };
+
+  // No renderizar hasta que se cargue el estado del consentimiento
+  /* if (!isLoaded) {
+     return (
+       <div className={`${className} max-w-[1100px] flex items-center justify-center bg-muted/30`} style={parsedStyle}>
+         <div className="text-sm text-muted-foreground">Cargando...</div>
+       </div>
+     );
+   } */
+
+  // Si no hay consentimiento, mostrar mensaje
+  /*if (!hasConsent) {
+    return (
+      <div className={`${className} max-w-[1100px] flex flex-col items-center justify-center bg-muted/30 p-4 border-2 border-dashed border-muted-foreground/30`} style={parsedStyle}>
+        <div className="text-center space-y-2">
+          <div className="text-sm font-medium text-muted-foreground">Anuncio bloqueado</div>
+          <div className="text-xs text-muted-foreground">
+            Acepta las cookies de publicidad para ver anuncios relevantes
+          </div>
+        </div>
+      </div>
+    );
+  } */
+
   return (
     <>
       <Script

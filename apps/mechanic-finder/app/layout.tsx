@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@rubros/ui";
 import { Footer } from "@/components/Footer/Footer";
 import { AdComponent } from "@/components/ads/ads";
+import { CookieBanner } from "@/components/CookieBanner/CookieBanner";
 import { Suspense } from "react";
 import { SkeletonPage } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
@@ -143,6 +144,9 @@ export default function RootLayout({
             </div>
           </main>
           <Footer />
+          <Suspense>
+            <CookieBanner />
+          </Suspense>
         </div>
       </body>
     </html>
