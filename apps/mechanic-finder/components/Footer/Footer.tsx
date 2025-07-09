@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
+import { CookiesConfigureButton } from "../CookiesConfigureButton/CookiesConfigureButton";
 
 export const Footer = () => {
   return (
@@ -78,17 +80,9 @@ export const Footer = () => {
             Directorio informativo de talleres mecánicos en Argentina basado en información pública.
           </p>
           <div className="mt-4">
-            <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  localStorage.removeItem('cookie-consent');
-                  window.location.reload();
-                }
-              }}
-              className="text-xs text-muted-foreground hover:text-primary underline"
-            >
-              ⚙️ Configurar cookies
-            </button>
+            <Suspense>
+              <CookiesConfigureButton />
+            </Suspense>
           </div>
         </div>
       </div>
