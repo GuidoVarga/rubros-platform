@@ -33,10 +33,11 @@
     "migrate-reset": "prisma migrate reset",
     "generate": "prisma generate",
     "studio": "prisma studio",
+    "push": "prisma db push",
     "seed": "tsx prisma/seed/seed.ts",
     "seed-provinces": "tsx prisma/seed/seedProvinces.ts",
     "seed-categories": "tsx prisma/seed/seedCategories.ts",
-    "seed-test": "node --expose-gc node_modules/.bin/tsx prisma/seed/seed_test.ts",
+    "seed-businesses": "npx --node-options=--expose-gc tsx prisma/seed/seedBusinessAndCities.ts",
     "init-docker": "docker compose up -d",
     "build": "prisma generate && tsc -p tsconfig.json",
     "postbuild": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/ && mkdir -p ../../apps/mechanic-finder/generated/prisma && cp -r dist/generated/prisma/* ../../apps/mechanic-finder/generated/prisma/"
@@ -46,7 +47,9 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.9.0",
-    "prisma": "^6.9.0"
+    "@types/stream-json": "^1.7.8",
+    "prisma": "^6.9.0",
+    "stream-json": "^1.9.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",

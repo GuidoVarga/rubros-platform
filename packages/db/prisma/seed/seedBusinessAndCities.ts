@@ -1,12 +1,13 @@
 import { prisma } from '../../client';
 import fs from 'fs/promises';
-import path from 'path';
 import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { createReadStream } from 'fs';
 import { Business } from '../../generated/prisma';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import streamArray from 'stream-json/streamers/StreamArray.js';
+import streamValues from 'stream-json/streamers/StreamValues.js';
+import streamObject from 'stream-json/streamers/StreamObject.js';
+import parser from 'stream-json';
 
 function slugify(input: string): string {
   return input
@@ -217,91 +218,28 @@ class ProgressTracker {
   }
 }
 
-// Streaming JSON parser para archivos grandes
-class JSONStreamProcessor extends Transform {
-  private buffer = '';
-  private isFirstChunk = true;
-  private objectCount = 0;
-  private bracketCount = 0;
+// Contador de objetos JSON para debugging
+class JSONCounter extends Transform {
+  private count = 0;
 
   constructor() {
     super({ objectMode: true });
   }
 
-  _transform(chunk: Buffer, encoding: string, callback: Function): void {
-    this.buffer += chunk.toString();
+  _transform(chunk: any, encoding: string, callback: Function): void {
+    this.count++;
 
-    // Remover el array inicial '[' si es el primer chunk
-    if (this.isFirstChunk) {
-      this.buffer = this.buffer.replace(/^\s*\[/, '');
-      this.isFirstChunk = false;
+    // Log cada 10k objetos para monitorear
+    if (this.count % 10000 === 0) {
+      console.log(`📊 Objetos JSON procesados: ${this.count.toLocaleString()}`);
     }
 
-    // Procesar objetos JSON completos
-    let startIndex = 0;
-    let inString = false;
-    let escapeNext = false;
-
-    for (let i = 0; i < this.buffer.length; i++) {
-      const char = this.buffer[i];
-
-      if (escapeNext) {
-        escapeNext = false;
-        continue;
-      }
-
-      if (char === '\\') {
-        escapeNext = true;
-        continue;
-      }
-
-      if (char === '"') {
-        inString = !inString;
-        continue;
-      }
-
-      if (inString) continue;
-
-      if (char === '{') {
-        this.bracketCount++;
-      } else if (char === '}') {
-        this.bracketCount--;
-
-        if (this.bracketCount === 0) {
-          // Objeto JSON completo encontrado
-          const objectStr = this.buffer.substring(startIndex, i + 1);
-          try {
-            const obj = JSON.parse(objectStr);
-            this.push(obj);
-            this.objectCount++;
-          } catch (error) {
-            const preview = objectStr.slice(0, 200);
-            console.warn(
-              `❗ Error parseando objeto JSON (${this.objectCount + 1}):`,
-              error
-            );
-            console.warn(
-              `📝 Contenido: ${preview}${objectStr.length > 200 ? '...' : ''}`
-            );
-          }
-
-          // Buscar el próximo objeto
-          let nextStart = i + 1;
-          while (
-            nextStart < this.buffer.length &&
-            (this.buffer[nextStart] === ',' ||
-              this.buffer[nextStart].match(/\s/))
-          ) {
-            nextStart++;
-          }
-          startIndex = nextStart;
-        }
-      }
-    }
-
-    // Conservar el buffer restante
-    this.buffer = this.buffer.substring(startIndex);
+    this.push(chunk);
     callback();
+  }
+
+  getCount(): number {
+    return this.count;
   }
 }
 
@@ -454,10 +392,14 @@ async function processStreamingData(
   let skippedCount = 0;
   let progressTracker: ProgressTracker;
 
+  // Contador para debugging
+  const jsonCounter = new JSONCounter();
+
   const processor = new Transform({
     objectMode: true,
-    async transform(business: any, encoding, callback) {
+    async transform(chunk: any, encoding, callback) {
       try {
+        const business = chunk.value;
         await memoryManager.checkAndCleanup();
 
         // Validar estructura del objeto
@@ -523,8 +465,13 @@ async function processStreamingData(
           openingHours: business?.opening_hours ?? null,
           hours: business.hours ?? null,
           googleMapsLink: business?.link ?? null,
-          closedOn: business?.closed_on ? business?.closed_on.join(', ') : null,
+          closedOn: business?.closed_on
+            ? Array.isArray(business?.closed_on)
+              ? business?.closed_on.join(', ')
+              : business?.closed_on
+            : null,
           googlePlaceId: business?.place_id ?? null,
+          googleMapsRating: business?.rating ?? null,
           status: true,
         });
 
@@ -543,18 +490,50 @@ async function processStreamingData(
     },
   });
 
-  // Procesar archivo usando streams
+  // Crear pipeline robusto con stream-json
   const readStream = createReadStream(filePath, {
     encoding: 'utf8',
     highWaterMark: CONFIG.CHUNK_SIZE,
   });
 
-  const jsonProcessor = new JSONStreamProcessor();
+  // Pipeline optimizado para archivos JSON grandes
+  const jsonStream = streamArray.streamArray();
+  //const jsonStream = streamObject.streamObject();
+  const valuesStream = streamValues.streamValues();
 
-  await pipeline(readStream, jsonProcessor, processor);
+  // Filtrar solo los valores del array principal
+  const valueExtractor = new Transform({
+    objectMode: true,
+    transform(chunk: any, encoding, callback) {
+      if (
+        chunk.key === undefined &&
+        chunk.value &&
+        typeof chunk.value === 'object'
+      ) {
+        this.push(chunk.value);
+      }
+      callback();
+    },
+  });
 
+  console.log('🔄 Iniciando procesamiento del archivo JSON...');
+
+  try {
+    await pipeline(readStream, parser(), jsonStream, jsonCounter, processor);
+  } catch (error) {
+    console.error('❌ Error en el pipeline de procesamiento:', error);
+    throw error;
+  }
+
+  const totalJsonObjects = jsonCounter.getCount();
+  console.log(`📊 Estadísticas del archivo:`);
   console.log(
-    `📊 Datos procesados: ${totalProcessed.toLocaleString()} registros, ${skippedCount.toLocaleString()} omitidos`
+    `   • Objetos JSON totales: ${totalJsonObjects.toLocaleString()}`
+  );
+  console.log(`   • Registros procesados: ${totalProcessed.toLocaleString()}`);
+  console.log(`   • Registros omitidos: ${skippedCount.toLocaleString()}`);
+  console.log(
+    `   • Tasa de procesamiento: ${((totalProcessed / totalJsonObjects) * 100).toFixed(1)}%`
   );
 
   // Crear ciudades necesarias
@@ -589,6 +568,7 @@ async function processStreamingData(
         openingHours: business.openingHours,
         hours: business.hours,
         closedOn: business.closedOn,
+        googleMapsRating: business.googleMapsRating,
       });
     } else {
       console.warn(`❗ No se encontró cityId para key: ${business.cityKey}`);

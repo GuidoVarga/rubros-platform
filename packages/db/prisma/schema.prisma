@@ -33,6 +33,7 @@ model Business {
   googleMapsLink String?
   closedOn String?
   googlePlaceId String?
+  googleMapsRating Float?
   status      Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
