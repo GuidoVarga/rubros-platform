@@ -9,15 +9,17 @@ type MechanicCardProps = {
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, city, phone, email, openingHours, closedOn, website, hours } = business;
+  const { name, description, city, phone, email, openingHours, closedOn, website, hours, address } = business;
 
   const openingDays = getOpenDays(closedOn, openingHours, hours as HourEntry[])
+
+  console.log('openingDays ', openingDays);
 
   return (
     <BussinessCard
       name={name}
       description={description}
-      location={city?.name}
+      address={address}
       phone={phone}
       email={email}
       website={website}

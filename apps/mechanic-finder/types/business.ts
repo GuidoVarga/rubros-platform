@@ -1,5 +1,5 @@
 export type BusinessOrderBy = {
-  field: 'name' | 'createdAt';
+  field: 'name' | 'createdAt' | 'googleMapsRating';
   direction: 'asc' | 'desc';
 };
 

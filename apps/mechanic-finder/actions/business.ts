@@ -8,7 +8,7 @@ import { buildWhereClause } from './utils';
 
 export async function getBusinesses({
   filters,
-  orderBy = { field: 'createdAt', direction: 'desc' },
+  orderBy = { field: 'googleMapsRating', direction: 'desc' },
   pagination = { page: 1, limit: 16 },
 }: GetBusinessesParams = {}) {
   try {

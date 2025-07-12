@@ -8,14 +8,14 @@ export type GroupedHours = {
   times: string[];
 };
 
-// Mapeo de días para orden correcto
+// Mapeo de días para orden correcto (sin acentos para normalización)
 const dayOrder = [
   'lunes',
   'martes',
-  'miércoles',
+  'miercoles',
   'jueves',
   'viernes',
-  'sábado',
+  'sabado',
   'domingo',
 ];
 
@@ -39,23 +39,35 @@ const areTimesEqual = (times1: string[], times2: string[]): boolean => {
   return times1.every((time, index) => time === times2[index]);
 };
 
+// Normalizar nombres de días (remover acentos)
+const normalizeDayName = (day: string): string => {
+  return day
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+};
+
 // Agrupar días consecutivos
 const groupConsecutiveDays = (days: string[]): string | undefined => {
   if (days.length === 0) return '';
   if (days.length === 1) return days[0];
 
-  // Ordenar días según dayOrder
-  const sortedDays = days.sort(
-    (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
-  );
+  // Ordenar días según dayOrder (normalizando para comparación)
+  const sortedDays = days.sort((a, b) => {
+    const normalizedA = normalizeDayName(a);
+    const normalizedB = normalizeDayName(b);
+    return dayOrder.indexOf(normalizedA) - dayOrder.indexOf(normalizedB);
+  });
 
   // Identificar grupos consecutivos
   const groups: string[][] = [];
   let currentGroup = [sortedDays[0]];
 
   for (let i = 1; i < sortedDays.length; i++) {
-    const currentDayIndex = dayOrder.indexOf(sortedDays[i]!);
-    const previousDayIndex = dayOrder.indexOf(sortedDays[i - 1]!);
+    const currentDayIndex = dayOrder.indexOf(normalizeDayName(sortedDays[i]!));
+    const previousDayIndex = dayOrder.indexOf(
+      normalizeDayName(sortedDays[i - 1]!)
+    );
 
     // Si son días consecutivos, agregar al grupo actual
     if (currentDayIndex === previousDayIndex + 1) {
@@ -79,12 +91,8 @@ const groupConsecutiveDays = (days: string[]): string | undefined => {
     if (group.length === 1) {
       // Día individual
       elements.push(group[0]!);
-    } else if (group.length === 2) {
-      // Dos días consecutivos: agregar como días individuales
-      elements.push(group[0]!);
-      elements.push(group[1]!);
     } else {
-      // 3+ días consecutivos: crear rango
+      // 2+ días consecutivos: crear rango
       elements.push(`${group[0]} a ${group[group.length - 1]}`);
     }
   });
