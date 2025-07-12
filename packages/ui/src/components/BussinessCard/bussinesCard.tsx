@@ -1,8 +1,8 @@
-import { MapPin, Phone, Mail, Globe, Clock, Calendar } from "lucide-react";
+import { MapPin, Phone, Mail, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../Card";
 import { BussinessCardProps } from "./types";
 
-export function BussinessCard({ name, description, location, phone, email, website, openingHours, openDays, footerButton }: BussinessCardProps) {
+export function BussinessCard({ name, description, location, phone, email, website, openDays, footerButton, address }: BussinessCardProps) {
 
   return (
     <Card className="flex flex-col w-full h-full">
@@ -27,20 +27,24 @@ export function BussinessCard({ name, description, location, phone, email, websi
             <span className="break-words min-w-0">{phone}</span>
           </div>
         )}
-        {openDays && (
+        {address && (
           <div className="flex items-center gap-2">
             <div>
-              <Calendar className="h-4 w-4" />
+              <MapPin className="h-4 w-4" />
             </div>
-            <span className="break-words min-w-0">{openDays}</span>
+            <span className="break-words min-w-0">{address}</span>
           </div>
         )}
-        {openingHours && (
-          <div className="flex items-center gap-2">
-            <div>
-              <Clock className="h-4 w-4" />
-            </div>
-            <span className="break-words min-w-0">{openingHours}</span>
+        {openDays && (
+          <div>
+            {openDays.map((day) => (
+              <div key={day} className="flex items-center gap-2 mt-2 first:mt-0">
+                <div>
+                  <Clock className="h-4 w-4" />
+                </div>
+                <span className="break-words min-w-0">{day}</span>
+              </div>
+            ))}
           </div>
         )}
         {email && (

@@ -1,7 +1,7 @@
 import { BussinessCard, Button } from "@rubros/ui";
 import { BusinessEntity } from "@rubros/db/entities";
 import Link from "next/link";
-import { getOpenDays } from "@rubros/ui/utils";
+import { getOpenDays, HourEntry } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
   business: BusinessEntity;
@@ -9,20 +9,21 @@ type MechanicCardProps = {
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, city, phone, email, openingHours, closedOn, website } = business;
+  const { name, description, city, phone, email, openingHours, closedOn, website, hours, address } = business;
 
-  const openDays = getOpenDays(closedOn);
+  const openingDays = getOpenDays(closedOn, openingHours, hours as HourEntry[])
+
+  console.log('openingDays ', openingDays);
 
   return (
     <BussinessCard
       name={name}
       description={description}
-      location={city?.name}
+      address={address}
       phone={phone}
       email={email}
       website={website}
-      openingHours={openingHours}
-      openDays={openDays}
+      openDays={openingDays}
       footerButton={(
         <>
           <Link href={href} className="w-full">

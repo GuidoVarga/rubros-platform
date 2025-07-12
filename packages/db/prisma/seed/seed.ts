@@ -1,4 +1,4 @@
-import { prisma } from '../client';
+import { prisma } from '../../client';
 
 async function cleanup() {
   // Delete all records in reverse order of dependencies
@@ -203,6 +203,15 @@ async function main() {
         phone: '11-5678-1234',
         email: 'contacto@mecanicaexpress.com',
         website: 'https://mecanicaexpress.com',
+        hours: [
+          { day: 'lunes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'martes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'miércoles', times: ['8 a. m.-5 p. m.'] },
+          { day: 'jueves', times: ['8 a. m.-5 p. m.'] },
+          { day: 'viernes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'sábado', times: ['Cerrado'] },
+          { day: 'domingo', times: ['Cerrado'] },
+        ],
         openingHours: '9 a.m.-7 p.m.',
         closedOn: 'Sabado, Domingo',
         categoryId: categories[0].id,
@@ -219,6 +228,15 @@ async function main() {
         phone: '11-5678-1234',
         email: 'contacto@mecanicaexpress.com',
         website: 'https://mecanicaexpress.com',
+        hours: [
+          { day: 'lunes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'martes', times: ['9 a. m.-7 p. m.'] },
+          { day: 'miércoles', times: ['8 a. m.-5 p. m.'] },
+          { day: 'jueves', times: ['9 a. m.-7 p. m.'] },
+          { day: 'viernes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'sábado', times: ['Cerrado'] },
+          { day: 'domingo', times: ['Cerrado'] },
+        ],
         openingHours: '9 a.m.-7 p.m.',
         closedOn: 'Sabado, Domingo',
         categoryId: categories[0].id,
@@ -235,9 +253,17 @@ async function main() {
         phone: '11-5678-1234',
         email: 'contacto@mecanicaexpress.com',
         website: 'https://mecanicaexpress.com',
+        hours: [
+          { day: 'lunes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'martes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'miércoles', times: ['8 a. m.-5 p. m.'] },
+          { day: 'jueves', times: ['8 a. m.-5 p. m.'] },
+          { day: 'viernes', times: ['8 a. m.-5 p. m.'] },
+          { day: 'sábado', times: ['9 a. m.-12:30 p. m.'] },
+          { day: 'domingo', times: ['Cerrado'] },
+        ],
         openingHours: '8 a.m.-12:30 p.m., 3-6 p.m.',
         closedOn: 'Domingo',
-
         latitude: -38.026376,
         longitude: -57.5585,
         googleMapsLink:

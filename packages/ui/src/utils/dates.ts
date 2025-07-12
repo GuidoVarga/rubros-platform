@@ -1,7 +1,8 @@
 import { DAYS_OF_WEEK } from '../constants/date';
 import { clearAccents } from './strings';
+import { HourEntry, parseBusinessHours, parseOpeningHours } from './hours';
 
-export const getOpenDays = (
+export const getOpenDaysDeprecated = (
   closedOn: string | null,
   locale: 'es' | 'en' | undefined = 'es'
 ) => {
@@ -80,4 +81,21 @@ export const getOpenDays = (
   }
 
   return result;
+};
+
+export const getOpenDays = (
+  closedOn: string | null,
+  openingHours: string | null,
+  hours: HourEntry[] | null | undefined
+) => {
+  if (!closedOn || closedOn.toLowerCase() === 'open all days') {
+    const openingHoursFormatted = parseOpeningHours(openingHours);
+    return [
+      `Todos los dias ${openingHoursFormatted ? `de ${openingHoursFormatted}` : ''}`,
+    ];
+  }
+  if (hours) {
+    return parseBusinessHours(hours);
+  }
+  return [];
 };
