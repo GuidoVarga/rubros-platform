@@ -4,21 +4,9 @@ async function cleanup() {
   // Delete all records in reverse order of dependencies
   console.log('🧹 Cleaning up database...');
 
-  // First delete businesses as they depend on categories and locations
-  await prisma.business.deleteMany();
-  console.log('Deleted all businesses');
-
-  // Delete cities
-  await prisma.city.deleteMany();
-  console.log('Deleted all cities');
-
   // Then delete provinces
   await prisma.province.deleteMany();
   console.log('Deleted all provinces');
-
-  // Finally delete categories
-  await prisma.category.deleteMany();
-  console.log('Deleted all categories');
 
   console.log('✨ Database cleanup completed');
 }

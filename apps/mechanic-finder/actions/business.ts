@@ -96,18 +96,25 @@ export async function getMechanicsCount(cityId: string) {
   }
 }
 
-export async function getBusinessBySlug(slug: string) {
-  return await prisma.business.findFirst({
-    where: {
-      slug,
-    },
-    include: {
-      category: true,
-      city: {
-        include: {
-          province: true,
+export async function getBusinessBySlug(
+  slug: string
+): Promise<BusinessEntity | null> {
+  try {
+    return (await prisma.business.findFirst({
+      where: {
+        slug,
+      },
+      include: {
+        category: true,
+        city: {
+          include: {
+            province: true,
+          },
         },
       },
-    },
-  });
+    })) as BusinessEntity | null;
+  } catch (error) {
+    console.error('Error fetching business by slug:', error);
+    return null;
+  }
 }

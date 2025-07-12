@@ -3,7 +3,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, SkeletonC
 import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getBusinessBySlug } from '@/actions/business'
-import { getOpenDays } from '@rubros/ui/utils'
+import { getOpenDays, HourEntry } from '@rubros/ui/utils'
 import { generateLocalBusinessSchema } from '@/lib/schema'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
@@ -107,7 +107,7 @@ export default async function BusinessPage({ params }: Props) {
     { id: 'business', content: business.name },
   ];
 
-  const openDays = getOpenDays(business.closedOn);
+  const openDays = getOpenDays(business.closedOn, business.openingHours, business.hours as HourEntry[])
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const currentUrl = `${baseUrl}/${province}/${city}/${businessSlug}`;
 
@@ -186,15 +186,15 @@ export default async function BusinessPage({ params }: Props) {
                     </div>
                   )}
                   {openDays && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{openDays}</span>
-                    </div>
-                  )}
-                  {business.openingHours && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{business.openingHours}</span>
+                    <div>
+                      {openDays.map((day) => (
+                        <div key={day} className="flex items-center gap-2 mt-2 first:mt-0">
+                          <div>
+                            <Clock className="h-4 w-4" />
+                          </div>
+                          <span className="break-words min-w-0">{day}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
