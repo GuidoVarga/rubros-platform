@@ -40,7 +40,12 @@
     "seed-businesses": "npx --node-options=--expose-gc tsx prisma/seed/seedBusinessAndCities.ts",
     "init-docker": "docker compose up -d",
     "build": "prisma generate && tsc -p tsconfig.json",
-    "postbuild": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/ && mkdir -p ../../apps/mechanic-finder/generated/prisma && cp -r dist/generated/prisma/* ../../apps/mechanic-finder/generated/prisma/"
+    "postbuild": "mkdir -p dist/generated/prisma && cp -r generated/prisma/* dist/generated/prisma/ && mkdir -p ../../apps/mechanic-finder/generated/prisma && cp -r dist/generated/prisma/* ../../apps/mechanic-finder/generated/prisma/",
+    "delete-all": "tsx prisma/delete/cleanup.ts all",
+    "delete-cities": "tsx prisma/delete/cleanup.ts cities",
+    "delete-provinces": "tsx prisma/delete/cleanup.ts provinces",
+    "delete-categories": "tsx prisma/delete/cleanup.ts categories",
+    "delete-businesses": "tsx prisma/delete/cleanup.ts businesses"
   },
   "keywords": [],
   "author": "",
