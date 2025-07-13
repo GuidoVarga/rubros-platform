@@ -1,7 +1,7 @@
 import { BussinessCard, Button } from "@rubros/ui";
 import { BusinessEntity } from "@rubros/db/entities";
 import Link from "next/link";
-import { getOpenDays, HourEntry, isOpenNow } from "@rubros/ui/utils";
+import { getOpenDays, HourEntry, isOpenNow, useGeolocation, calculateDistance, formatDistance } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
   business: BusinessEntity;
@@ -9,14 +9,12 @@ type MechanicCardProps = {
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, city, phone, email, openingHours, closedOn, website, hours, address } = business;
+  const { name, description, city, phone, email, openingHours, closedOn, website, hours, address, latitude, longitude } = business;
 
   console.log('business ', business);
 
   const openingDays = getOpenDays(closedOn, openingHours, hours as HourEntry[]);
   const isOpen = isOpenNow(hours as HourEntry[]);
-
-  console.log('isOpen ', isOpen);
 
   return (
     <BussinessCard
@@ -28,6 +26,8 @@ export const MechanicCard = ({ business, href }: MechanicCardProps) => {
       website={website}
       openDays={openingDays}
       isOpen={isOpen}
+      latitude={latitude}
+      longitude={longitude}
       footerButton={(
         <>
           <Link href={href} className="w-full">

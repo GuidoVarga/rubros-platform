@@ -10,4 +10,6 @@ export type BussinessCardProps = {
   openDays?: string[] | null;
   address: string | null;
   isOpen?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 };

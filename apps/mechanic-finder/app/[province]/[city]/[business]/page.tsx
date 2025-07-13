@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, SkeletonCard, OpenText } from '@rubros/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, SkeletonCard, OpenText, Distance } from '@rubros/ui'
 import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getBusinessBySlug } from '@/actions/business'
@@ -150,6 +150,7 @@ export default async function BusinessPage({ params }: Props) {
                 )}
 
                 <OpenText isOpen={isOpen} />
+                <Distance latitude={business.latitude} longitude={business.longitude} />
                 <div className="flex gap-2 pt-4 flex-wrap">
                   {business.phone && (
                     <Button asChild>

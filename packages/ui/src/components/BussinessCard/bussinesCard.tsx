@@ -2,6 +2,7 @@ import { MapPin, Phone, Mail, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../Card";
 import { BussinessCardProps } from "./types";
 import { OpenText } from "../OpenText";
+import { Distance } from "../Distance/Distance";
 
 export function BussinessCard({
   name,
@@ -14,6 +15,8 @@ export function BussinessCard({
   footerButton,
   address,
   isOpen,
+  latitude,
+  longitude,
 }: BussinessCardProps) {
 
   return (
@@ -75,6 +78,7 @@ export function BussinessCard({
             <span className="break-words min-w-0">Sitio web</span>
           </a>
         )}
+        <Distance latitude={latitude} longitude={longitude} />
         <OpenText isOpen={isOpen} />
       </CardContent>
       <CardFooter className="mt-auto">

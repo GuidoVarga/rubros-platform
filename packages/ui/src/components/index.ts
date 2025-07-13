@@ -14,3 +14,4 @@ export * from './Header';
 export * from './PaginationBar';
 export * from './PaginatedList';
 export * from './OpenText';
+export * from './Distance';
