@@ -9,6 +9,7 @@ import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { Suspense } from 'react'
 import Image from 'next/image'
+import { AdComponent } from '@/components/ads/ads'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
@@ -97,13 +98,12 @@ export default async function BusinessPage({ params }: Props) {
     notFound()
   }
 
-  const location = business.latitude && business.longitude ? [business.latitude, business.longitude] : [-34.6037, -58.3816]
+  const location = business.latitude && business.longitude ? [business.latitude, business.longitude] : undefined;
 
   const breadcrumbElements = [
     { id: 'home', content: 'Inicio', href: '/' },
     { id: 'province', content: business.city?.province?.name || '', href: `/${province}` },
     { id: 'city', content: business.city?.name || '', href: `/${province}/${city}` },
-    { id: 'category', content: 'Mecánicos', href: `/${province}/${city}/mecanicos` },
     { id: 'business', content: business.name },
   ];
 
@@ -115,12 +115,10 @@ export default async function BusinessPage({ params }: Props) {
 
   return (
     <>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container py-8">
         <Breadcrumb elements={breadcrumbElements} />
 
@@ -144,60 +142,10 @@ export default async function BusinessPage({ params }: Props) {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pb-0">
                 {business.description && (
                   <p className="text-muted-foreground leading-relaxed">{business.description}</p>
                 )}
-
-                <div className="space-y-3">
-                  {business.address && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span>{business.address}</span>
-                    </div>
-                  )}
-                  {business.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <a href={`tel:${business.phone}`} className="text-primary hover:underline">
-                        {business.phone}
-                      </a>
-                    </div>
-                  )}
-                  {business.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a href={`mailto:${business.email}`} className="text-primary hover:underline">
-                        {business.email}
-                      </a>
-                    </div>
-                  )}
-                  {business.website && (
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href={business.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Sitio web
-                      </a>
-                    </div>
-                  )}
-                  {openDays && (
-                    <div>
-                      {openDays.map((day) => (
-                        <div key={day} className="flex items-center gap-2 mt-2 first:mt-0">
-                          <div>
-                            <Clock className="h-4 w-4" />
-                          </div>
-                          <span className="break-words min-w-0">{day}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 <div className="flex gap-2 pt-4 flex-wrap">
                   {business.phone && (
@@ -266,30 +214,37 @@ export default async function BusinessPage({ params }: Props) {
         </section>
 
         {/* Map Card */}
-        <Suspense fallback={<SkeletonCard />}>
-          <section className="mt-16">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ubicación</CardTitle>
-              </CardHeader>
-              <CardContent className="sm:h-[500px] h-[300px]">
-                <CustomMap
-                  center={location as LatLngExpression}
-                  zoom={15}
-                  markers={[
-                    {
-                      id: business.id,
-                      position: location as LatLngExpression,
-                      title: business.name,
-                      description: business.address || undefined,
-                      link: business.googleMapsLink || undefined,
-                    },
-                  ]}
-                  showCurrentLocation
-                />
-              </CardContent>
-            </Card>
-          </section>
+        {location && (
+          <Suspense fallback={<SkeletonCard />}>
+            <section className="mt-16">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ubicación</CardTitle>
+                </CardHeader>
+                <CardContent className="sm:h-[500px] h-[300px]">
+                  <CustomMap
+                    center={location as LatLngExpression}
+                    zoom={15}
+                    markers={[
+                      {
+                        id: business.id,
+                        position: location as LatLngExpression,
+                        title: business.name,
+                        description: business.address || undefined,
+                        link: business.googleMapsLink || undefined,
+                      },
+                    ]}
+                    showCurrentLocation
+                  />
+                </CardContent>
+              </Card>
+            </section>
+          </Suspense>
+        )}
+        <Suspense>
+          <div className="mt-16">
+            <AdComponent type="in-feed" />
+          </div>
         </Suspense>
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
           {/* Información adicional */}
