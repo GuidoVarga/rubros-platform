@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
-import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, SkeletonCard } from '@rubros/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, Breadcrumb, SkeletonCard, OpenText } from '@rubros/ui'
 import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getBusinessBySlug } from '@/actions/business'
-import { getOpenDays, HourEntry } from '@rubros/ui/utils'
+import { getOpenDays, HourEntry, isOpenNow } from '@rubros/ui/utils'
 import { generateLocalBusinessSchema } from '@/lib/schema'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
@@ -113,6 +113,8 @@ export default async function BusinessPage({ params }: Props) {
 
   const jsonLd = generateLocalBusinessSchema({ url: currentUrl, ...business });
 
+  const isOpen = isOpenNow(business.hours as HourEntry[]);
+
   return (
     <>
       <script
@@ -142,11 +144,12 @@ export default async function BusinessPage({ params }: Props) {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4 pb-0">
+              <CardContent className="space-y-4 h-full">
                 {business.description && (
                   <p className="text-muted-foreground leading-relaxed">{business.description}</p>
                 )}
 
+                <OpenText isOpen={isOpen} />
                 <div className="flex gap-2 pt-4 flex-wrap">
                   {business.phone && (
                     <Button asChild>

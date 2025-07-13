@@ -180,8 +180,10 @@ export const getBusinessHoursString = (
 };
 
 // Función para verificar si está abierto ahora (opcional)
-export const isOpenNow = (hours: HourEntry[] | null | undefined): boolean => {
-  if (!hours || !Array.isArray(hours)) return false;
+export const isOpenNow = (
+  hours: HourEntry[] | null | undefined
+): boolean | undefined => {
+  if (!hours?.length || !Array.isArray(hours)) return undefined;
 
   const now = new Date();
   const currentDay = now

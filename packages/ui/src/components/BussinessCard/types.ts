@@ -9,4 +9,5 @@ export type BussinessCardProps = {
   openingHours?: string | null;
   openDays?: string[] | null;
   address: string | null;
+  isOpen?: boolean;
 };

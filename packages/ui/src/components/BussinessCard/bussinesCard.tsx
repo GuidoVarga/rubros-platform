@@ -1,8 +1,20 @@
 import { MapPin, Phone, Mail, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../Card";
 import { BussinessCardProps } from "./types";
+import { OpenText } from "../OpenText";
 
-export function BussinessCard({ name, description, location, phone, email, website, openDays, footerButton, address }: BussinessCardProps) {
+export function BussinessCard({
+  name,
+  description,
+  location,
+  phone,
+  email,
+  website,
+  openDays,
+  footerButton,
+  address,
+  isOpen,
+}: BussinessCardProps) {
 
   return (
     <Card className="flex flex-col w-full h-full">
@@ -56,13 +68,14 @@ export function BussinessCard({ name, description, location, phone, email, websi
           </div>
         )}
         {website && (
-          <div className="flex items-center gap-2">
+          <a href={website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
             <div>
               <Globe className="h-4 w-4" />
             </div>
-            <span className="break-words min-w-0">{website}</span>
-          </div>
+            <span className="break-words min-w-0">Sitio web</span>
+          </a>
         )}
+        <OpenText isOpen={isOpen} />
       </CardContent>
       <CardFooter className="mt-auto">
         {footerButton}
