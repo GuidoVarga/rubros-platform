@@ -1,18 +1,17 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
   binaryTargets = ["native", "rhel-openssl-3.0.x", "linux-musl"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [postgis(map: "postgis")]
 }
 
 model Business {
@@ -29,6 +28,8 @@ model Business {
   openingHours String?
   latitude Float?
   longitude Float?
+  // Nuevo campo para PostGIS
+  location Unsupported("geometry(Point, 4326)")?
   hours Json?
   googleMapsLink String?
   closedOn String?
@@ -45,6 +46,7 @@ model Business {
   @@index([categoryId])
   @@index([cityId])
   @@index([slug])
+  @@index([location], type: Gist)
 }
 
 model Category {

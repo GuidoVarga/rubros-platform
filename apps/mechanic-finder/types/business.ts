@@ -1,5 +1,5 @@
 export type BusinessOrderBy = {
-  field: 'name' | 'createdAt' | 'googleMapsRating';
+  field: 'name' | 'createdAt' | 'googleMapsRating' | 'distance';
   direction: 'asc' | 'desc';
 };
 
@@ -19,4 +19,9 @@ export type GetBusinessesParams = {
   filters?: BusinessFilters;
   orderBy?: BusinessOrderBy;
   pagination?: PaginationParams;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+  maxDistance?: number;
 };

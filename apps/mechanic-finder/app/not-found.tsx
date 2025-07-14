@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@rubros/ui'
 import { ArrowLeft } from 'lucide-react'
+import { testPostGIS, updateMissingLocations } from '@/actions/postgis'
 
 export const metadata: Metadata = {
   title: 'Página no encontrada - Encontrá Mecánico',
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 }
 
 export default function NotFound() {
+  //updateMissingLocations();
+  //testPostGIS();
   return (
     <div className="container">
       <div className="flex flex-col items-center justify-center min-h-[40vh] text-center space-y-8">
