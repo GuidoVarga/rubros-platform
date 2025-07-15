@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/db';
 import type { GetBusinessesParams } from '@/types/business';
-import { Business, Categories } from '@rubros/db';
+import { Categories } from '@rubros/db';
 import { BusinessEntity } from '@rubros/db/entities';
 import { buildWhereClause } from './utils';
 
@@ -10,7 +10,7 @@ export async function getBusinesses({
   filters,
   orderBy = { field: 'distance', direction: 'desc' },
   pagination = { page: 1, limit: 16 },
-  userLocation = { latitude: -34.6037, longitude: -58.3816 }, // Nuevo parámetro para la ubicación del usuario
+  userLocation,
   maxDistance = 999999999, // Radio máximo en kilómetros
 }: GetBusinessesParams = {}) {
   try {

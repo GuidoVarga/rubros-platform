@@ -12,4 +12,5 @@ export type BussinessCardProps = {
   isOpen?: boolean;
   latitude?: number | null;
   longitude?: number | null;
+  distance?: number | null;
 };

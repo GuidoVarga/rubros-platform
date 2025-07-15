@@ -4,15 +4,12 @@ import Link from "next/link";
 import { getOpenDays, HourEntry, isOpenNow, useGeolocation, calculateDistance, formatDistance } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
-  business: BusinessEntity;
+  business: BusinessEntity & { distance?: number | null };
   href: string;
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, city, phone, email, openingHours, closedOn, website, hours, address, latitude, longitude } = business;
-
-  console.log('business ', business);
-
+  const { name, description, phone, email, openingHours, closedOn, website, hours, address, latitude, longitude, distance } = business;
   const openingDays = getOpenDays(closedOn, openingHours, hours as HourEntry[]);
   const isOpen = isOpenNow(hours as HourEntry[]);
 
@@ -28,6 +25,7 @@ export const MechanicCard = ({ business, href }: MechanicCardProps) => {
       isOpen={isOpen}
       latitude={latitude}
       longitude={longitude}
+      distance={distance ? +distance.toFixed(1) : null}
       footerButton={(
         <>
           <Link href={href} className="w-full">

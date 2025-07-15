@@ -17,6 +17,7 @@ export function BussinessCard({
   isOpen,
   latitude,
   longitude,
+  distance,
 }: BussinessCardProps) {
 
   return (
@@ -78,7 +79,7 @@ export function BussinessCard({
             <span className="break-words min-w-0">Sitio web</span>
           </a>
         )}
-        <Distance latitude={latitude} longitude={longitude} />
+        <Distance distance={distance} latitude={latitude} longitude={longitude} />
         <OpenText isOpen={isOpen} />
       </CardContent>
       <CardFooter className="mt-auto">

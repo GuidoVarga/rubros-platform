@@ -127,7 +127,7 @@ export default async function BusinessPage({ params }: Props) {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
+            <Card className='h-full'>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
@@ -183,7 +183,7 @@ export default async function BusinessPage({ params }: Props) {
             </Card>
           </div>
           <div className="space-y-6">
-            <Card>
+            <Card className='h-full'>
               <CardHeader>
                 <CardTitle>Información de contacto</CardTitle>
               </CardHeader>

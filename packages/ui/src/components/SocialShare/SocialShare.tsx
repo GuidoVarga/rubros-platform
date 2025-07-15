@@ -29,7 +29,7 @@ export const SocialShare = ({ url, title, description, className }: SocialShareP
           url,
         });
       } catch (err) {
-        console.log('Error sharing:', err);
+        console.error('Error sharing:', err);
       }
     }
   };

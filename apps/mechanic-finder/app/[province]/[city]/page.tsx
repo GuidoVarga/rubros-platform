@@ -13,10 +13,12 @@ import { Breadcrumb, BreadcrumbProps, PaginatedList } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
 import { AdComponent, AdComponentProps } from "@/components/ads/ads";
 import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
+import { ResultsHeader } from "@/components/ResultsHeader";
+import { Suspense } from "react";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 };
 
 export const revalidate = 3600;
@@ -107,7 +109,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CityPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
-  const { page } = await searchParams;
+  const { page, sort } = await searchParams;
   const currentPage = Number(page) || 1;
 
   const [province, city] = await Promise.all([
@@ -124,6 +126,11 @@ export default async function CityPage({ params, searchParams }: Props) {
     notFound();
   }
 
+  // Determine sort order
+  const orderBy = sort === 'distance'
+    ? { field: 'distance' as const, direction: 'asc' as const }
+    : { field: 'googleMapsRating' as const, direction: 'desc' as const };
+
   // Obtener mecánicos de la ciudad
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
@@ -133,6 +140,7 @@ export default async function CityPage({ params, searchParams }: Props) {
     filters: {
       cityId: city.id,
     },
+    orderBy,
   });
 
   const provinces: ProvinceEntity[] = await getProvinces();
@@ -193,9 +201,12 @@ export default async function CityPage({ params, searchParams }: Props) {
               <h2 className="text-2xl font-semibold mb-2">
                 Talleres Mecánicos en {city.name}
               </h2>
-              <p className="text-muted-foreground">
-                Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de {pagination.total} resultados
-              </p>
+              <Suspense>
+                <ResultsHeader
+                  businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
+                  currentSort={sort || 'relevance'}
+                />
+              </Suspense>
             </div>
             <div className="space-y-8">
               <PaginatedList
