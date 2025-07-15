@@ -8,7 +8,7 @@ import { buildWhereClause } from './utils';
 
 export async function getBusinesses({
   filters,
-  orderBy = { field: 'distance', direction: 'desc' },
+  orderBy = { field: 'googleMapsRating', direction: 'desc' },
   pagination = { page: 1, limit: 16 },
   userLocation,
   maxDistance = 999999999, // Radio máximo en kilómetros
@@ -20,11 +20,18 @@ export async function getBusinesses({
     // Build where clause based on filters
     const where = buildWhereClause(filters);
 
+    let orderByParsed =
+      orderBy?.field === 'distance'
+        ? userLocation
+          ? orderBy
+          : { field: 'googleMapsRating', direction: orderBy.direction }
+        : orderBy;
+
     // Si tenemos ubicación del usuario y queremos ordenar por distancia
-    if (userLocation && orderBy.field === 'distance') {
+    if (userLocation && orderByParsed.field === 'distance') {
       return await getBusinessesByDistance({
         filters,
-        orderBy,
+        orderBy: orderByParsed,
         pagination,
         userLocation,
         maxDistance,
@@ -52,7 +59,7 @@ export async function getBusinesses({
         },
       },
       orderBy: {
-        [orderBy.field]: orderBy.direction,
+        [orderByParsed.field]: orderByParsed.direction,
       },
       skip: offset,
       take: pagination.limit,
