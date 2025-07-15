@@ -15,154 +15,115 @@ async function main() {
   // First cleanup the database
   await cleanup();
 
-  const provinces = await Promise.all([
-    prisma.province.create({
-      data: {
-        name: 'La Rioja',
-        slug: 'la-rioja',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'San Juan',
-        slug: 'san-juan',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Catamarca',
-        slug: 'catamarca',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Santiago del Estero',
-        slug: 'santiago-del-estero',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Tucumán',
-        slug: 'tucuman',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'San Luis',
-        slug: 'san-luis',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Chaco',
-        slug: 'chaco',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Córdoba',
-        slug: 'cordoba',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Buenos Aires',
-        slug: 'buenos-aires',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Santa Fe',
-        slug: 'santa-fe',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Capital Federal',
-        slug: 'capital-federal',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Santa Cruz',
-        slug: 'santa-cruz',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'La Pampa',
-        slug: 'la-pampa',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Entre Rios',
-        slug: 'entre-rios',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Chubut',
-        slug: 'chubut',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Neuquén',
-        slug: 'neuquen',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Río Negro',
-        slug: 'rio-negro',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Tierra del Fuego',
-        slug: 'tierra-del-fuego',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Formosa',
-        slug: 'formosa',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Jujuy',
-        slug: 'jujuy',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Salta',
-        slug: 'salta',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Mendoza',
-        slug: 'mendoza',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Misiones',
-        slug: 'misiones',
-      },
-    }),
-    prisma.province.create({
-      data: {
-        name: 'Corrientes',
-        slug: 'corrientes',
-      },
-    }),
-  ]);
+  const provincesArray = [
+    {
+      name: 'La Rioja',
+      slug: 'la-rioja',
+    },
+    {
+      name: 'San Juan',
+      slug: 'san-juan',
+    },
+    {
+      name: 'Catamarca',
+      slug: 'catamarca',
+    },
+    {
+      name: 'Santiago del Estero',
+      slug: 'santiago-del-estero',
+    },
+    {
+      name: 'Tucumán',
+      slug: 'tucuman',
+    },
+    {
+      name: 'San Luis',
+      slug: 'san-luis',
+    },
+    {
+      name: 'Chaco',
+      slug: 'chaco',
+    },
+    {
+      name: 'Córdoba',
+      slug: 'cordoba',
+    },
+    {
+      name: 'Buenos Aires',
+      slug: 'buenos-aires',
+    },
+    {
+      name: 'Santa Fe',
+      slug: 'santa-fe',
+    },
+    {
+      name: 'Capital Federal',
+      slug: 'capital-federal',
+    },
+    {
+      name: 'Santa Cruz',
+      slug: 'santa-cruz',
+    },
+    {
+      name: 'La Pampa',
+      slug: 'la-pampa',
+    },
+    {
+      name: 'Entre Rios',
+      slug: 'entre-rios',
+    },
+    {
+      name: 'Chubut',
+      slug: 'chubut',
+    },
+    {
+      name: 'Neuquén',
+      slug: 'neuquen',
+    },
+    {
+      name: 'Río Negro',
+      slug: 'rio-negro',
+    },
+    {
+      name: 'Tierra del Fuego',
+      slug: 'tierra-del-fuego',
+    },
+    {
+      name: 'Formosa',
+      slug: 'formosa',
+    },
+    {
+      name: 'Jujuy',
+      slug: 'jujuy',
+    },
+    {
+      name: 'Salta',
+      slug: 'salta',
+    },
+    {
+      name: 'Mendoza',
+      slug: 'mendoza',
+    },
+    {
+      name: 'Misiones',
+      slug: 'misiones',
+    },
+    {
+      name: 'Corrientes',
+      slug: 'corrientes',
+    },
+  ];
 
-  console.log(`Created ${provinces.length} provinces`);
+  for (const province of provincesArray) {
+    await prisma.province.create({
+      data: {
+        name: province.name,
+        slug: province.slug,
+      },
+    });
+  }
+
+  console.log(`Created ${provincesArray.length} provinces`);
 }
 
 main()
