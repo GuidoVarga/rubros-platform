@@ -14,15 +14,12 @@ export const Distance = (props: DistanceProps) => {
 
   const { coordinates: userLocation } = useGeolocation();
 
-  console.log('userLocation ', userLocation);
-
   const parsedDistance = distance || (userLocation && latitude && longitude
     ? formatDistance(calculateDistance(userLocation, { latitude, longitude }))
     : null)
 
   return (
     <div>
-      <span>User location {userLocation?.latitude} {userLocation?.longitude}</span>
       {distance ? (
         <div className="flex items-center gap-2" >
           <div>

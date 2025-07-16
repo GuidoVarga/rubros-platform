@@ -71,9 +71,16 @@ export function getCurrentPosition(): Promise<Coordinates> {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const parsedLatitude =
+          position.coords.latitude &&
+          parseFloat(position.coords.latitude.toFixed(4));
+        const parsedLongitude =
+          position.coords.longitude &&
+          parseFloat(position.coords.longitude.toFixed(4));
+
         resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: parsedLatitude,
+          longitude: parsedLongitude,
         });
       },
       (error) => {

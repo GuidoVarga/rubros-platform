@@ -10,6 +10,8 @@ type SortSelectorProps = {
   onSortChange: (sortBy: SortOption) => void;
   className?: string;
   initialValue?: SortOption;
+  paramLatitude?: number;
+  paramLongitude?: number;
 };
 
 const sortOptions = [
@@ -25,7 +27,7 @@ const sortOptions = [
   }
 ];
 
-export function SortSelector({ onSortChange, className, initialValue = 'relevance' }: SortSelectorProps) {
+export function SortSelector({ onSortChange, className, paramLatitude, paramLongitude, initialValue = 'relevance' }: SortSelectorProps) {
   const [selectedSort, setSelectedSort] = useState<SortOption>(initialValue);
   const [isOpen, setIsOpen] = useState(false);
   const { coordinates: userLocation, error: locationError } = useGeolocation();
@@ -34,7 +36,7 @@ export function SortSelector({ onSortChange, className, initialValue = 'relevanc
   // Filter available options based on geolocation availability
   const availableOptions = sortOptions.filter(option => {
     if (option.value === 'distance') {
-      return userLocation !== null && !locationError;
+      return (userLocation !== null && !locationError) || (paramLatitude && paramLongitude);
     }
     return true;
   });
@@ -46,7 +48,7 @@ export function SortSelector({ onSortChange, className, initialValue = 'relevanc
 
   // Reset to relevance if distance is selected but location is lost
   useEffect(() => {
-    if (selectedSort === 'distance' && (!userLocation || locationError)) {
+    if (selectedSort === 'distance' && (!userLocation && (!paramLatitude || !paramLongitude))) {
       setSelectedSort('relevance');
       onSortChange('relevance');
     }

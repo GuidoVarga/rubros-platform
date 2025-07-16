@@ -18,7 +18,7 @@ import { Suspense } from "react";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
-  searchParams: Promise<{ page?: string; sort?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string, lat?: string, lng?: string }>;
 };
 
 export const revalidate = 3600;
@@ -109,7 +109,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CityPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
-  const { page, sort } = await searchParams;
+  const { page, sort, lat, lng } = await searchParams;
   const currentPage = Number(page) || 1;
 
   const [province, city] = await Promise.all([
@@ -141,6 +141,10 @@ export default async function CityPage({ params, searchParams }: Props) {
       cityId: city.id,
     },
     orderBy,
+    userLocation: {
+      latitude: Number(lat),
+      longitude: Number(lng),
+    },
   });
 
   const provinces: ProvinceEntity[] = await getProvinces();

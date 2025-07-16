@@ -1,5 +1,6 @@
 'use client';
 
+import { useGeolocation } from '@rubros/ui/utils';
 import { SortSelector, type SortOption } from '../SortSelector';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -15,11 +16,17 @@ export function ResultsHeader({
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const { coordinates: userLocation } = useGeolocation();
+
+  console.log('currentSort ', currentSort);
+
   const handleSortChange = (sortBy: SortOption) => {
     const params = new URLSearchParams(searchParams);
 
     if (sortBy === 'distance') {
       params.set('sort', 'distance');
+      params.set('lat', userLocation?.latitude.toString() || '');
+      params.set('lng', userLocation?.longitude.toString() || '');
     } else {
       params.delete('sort');
     }
@@ -39,6 +46,8 @@ export function ResultsHeader({
       <SortSelector
         onSortChange={handleSortChange}
         initialValue={currentSort as SortOption}
+        paramLatitude={Number(searchParams.get('lat')) || undefined}
+        paramLongitude={Number(searchParams.get('lng')) || undefined}
       />
     </div>
   );

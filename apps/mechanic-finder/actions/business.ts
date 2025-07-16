@@ -38,6 +38,8 @@ export async function getBusinesses({
       });
     }
 
+    console.log('orderByParsed ', orderByParsed);
+
     // Lógica original para otros tipos de ordenamiento
     // Get total count for pagination
     const total = await prisma.business.count({ where });
@@ -111,6 +113,8 @@ async function getBusinessesByDistance({
   maxDistance: number;
 }) {
   const offset = (pagination.page - 1) * pagination.limit;
+  console.log('getBusinessesByDistance userLocation ', userLocation);
+  console.log('orderBy ', orderBy);
 
   // Construir condiciones WHERE dinámicamente
   const whereConditions = ['b.status = true'];
@@ -143,7 +147,6 @@ async function getBusinessesByDistance({
   }
 
   // Filtro por categoría MECHANICS
-  whereConditions.push(`c.slug = $${paramIndex}`);
   params.push(Categories.MECHANICS);
   paramIndex++;
 
@@ -176,6 +179,7 @@ async function getBusinessesByDistance({
       b."openingHours",
       b.latitude,
       b.longitude,
+      ST_AsText(b.location) as location,
       b.hours,
       b."googleMapsLink",
       b."closedOn",
@@ -210,7 +214,7 @@ async function getBusinessesByDistance({
       p."updatedAt" as province_updated_at,
       ST_Distance(
         b.location,
-        ST_SetSRID(ST_MakePoint(${params.findIndex((p) => p === userLocation.longitude) + 1}, ${params.findIndex((p) => p === userLocation.latitude) + 1}), 4326)::geography
+        ST_SetSRID(ST_MakePoint($${params.findIndex((p) => p === userLocation.longitude) + 1}, $${params.findIndex((p) => p === userLocation.latitude) + 1}), 4326)::geography
       ) / 1000 as distance
     FROM "Business" b
     JOIN "Category" c ON b."categoryId" = c.id
@@ -218,7 +222,7 @@ async function getBusinessesByDistance({
     JOIN "Province" p ON city."provinceId" = p.id
     WHERE ${whereClause}
     ORDER BY distance ${orderBy.direction?.toUpperCase() || 'ASC'}
-    LIMIT ${paramIndex} OFFSET ${paramIndex + 1}
+    LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
   `;
 
   // Query para contar total

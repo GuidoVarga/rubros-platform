@@ -604,6 +604,28 @@ async function processStreamingData(
   console.log(`   • Registros omitidos: ${skippedCount.toLocaleString()}`);
 }
 
+async function updateMissingLocations() {
+  try {
+    const [{ count }] = await prisma.$queryRawUnsafe<{ count: bigint }[]>(`
+      WITH updated AS (
+        UPDATE "Business"
+        SET location = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
+        WHERE latitude IS NOT NULL
+          AND longitude IS NOT NULL
+          AND location IS NULL
+        RETURNING 1
+      )
+      SELECT COUNT(*)::bigint AS count FROM updated;
+    `);
+
+    console.log(`✅ Location actualizado para ${count.toString()} negocios.`);
+    return Number(count);
+  } catch (error) {
+    console.error('❌ Error actualizando location:', error);
+    throw error;
+  }
+}
+
 async function main() {
   const startTime = Date.now();
 
@@ -634,13 +656,17 @@ async function main() {
     console.log('🚀 Iniciando procesamiento masivo...');
     await processStreamingData(filePath, categoryId);
 
+    // 🔥 Agregar la actualización de location después del procesamiento
+    console.log('📍 Actualizando columna location...');
+    const updated = await updateMissingLocations();
+    console.log(`✅ Location actualizado para ${updated} negocios.`);
+
     const endTime = Date.now();
     const duration = (endTime - startTime) / 1000;
 
     console.log(`🎉 Seed completado en ${duration.toFixed(2)} segundos`);
   } catch (error) {
     console.error('❌ Error crítico:', error);
-    throw error;
   }
 }
 
