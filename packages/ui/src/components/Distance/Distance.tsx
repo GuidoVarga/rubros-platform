@@ -14,13 +14,13 @@ export const Distance = (props: DistanceProps) => {
 
   const { coordinates: userLocation } = useGeolocation();
 
-  const parsedDistance = distance || (userLocation && latitude && longitude
+  const parsedDistance = distance ? formatDistance(distance) : (userLocation && latitude && longitude
     ? formatDistance(calculateDistance(userLocation, { latitude, longitude }))
     : null)
 
   return (
     <div>
-      {distance ? (
+      {parsedDistance ? (
         <div className="flex items-center gap-2" >
           <div>
             <Navigation className="h-4 w-4 text-blue-600" />

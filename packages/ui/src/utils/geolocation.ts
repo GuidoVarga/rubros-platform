@@ -51,10 +51,8 @@ function toRadians(degrees: number): number {
 export function formatDistance(distance: number): string {
   if (distance < 1) {
     return `${Math.round(distance * 1000)}m`;
-  } else if (distance < 10) {
-    return `${distance.toFixed(1)}km`;
   } else {
-    return `${Math.round(distance)}km`;
+    return `${distance.toFixed(1)}km`;
   }
 }
 
