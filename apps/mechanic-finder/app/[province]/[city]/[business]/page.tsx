@@ -131,7 +131,7 @@ export default async function BusinessPage({ params }: Props) {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <CardTitle className="text-2xl">{business.name}</CardTitle>
+                    <h1 className="text-2xl font-semibold">{business.name}</h1>
                     <p className="text-muted-foreground mt-2">
                       {business.city?.name}, {business.city?.province?.name}
                     </p>
