@@ -45,12 +45,12 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Servicios principales</h4>
+            <h4 className="font-semibold mb-4">Provincias Destacadas</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/servicios/mecanica-general" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Mecánica General</Link></li>
-              <li><Link href="/servicios/cambio-aceite" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Cambio de Aceite</Link></li>
-              <li><Link href="/servicios/reparacion-frenos" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Reparación de Frenos</Link></li>
-              <li><Link href="/servicios/diagnostico-computarizado" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Diagnóstico Computarizado</Link></li>
+              <li><Link href="/buenos-aires" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Buenos Aires</Link></li>
+              <li><Link href="/cordoba" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Córdoba</Link></li>
+              <li><Link href="/santa-fe" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Santa Fe</Link></li>
+              <li><Link href="/mendoza" className="text-muted-foreground hover:text-primary inline-block py-1 min-h-[24px]">Mendoza</Link></li>
             </ul>
           </div>
 
