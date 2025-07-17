@@ -26,5 +26,9 @@ export function buildWhereClause(filters?: BusinessFilters) {
     ];
   }
 
+  // Note: isOpen filter is applied in post-processing
+  // since it requires calculating current time against business hours
+  // The actual filtering happens after the database query
+
   return where;
 }

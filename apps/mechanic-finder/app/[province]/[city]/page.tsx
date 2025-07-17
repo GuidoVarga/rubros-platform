@@ -18,7 +18,7 @@ import { Suspense } from "react";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
-  searchParams: Promise<{ page?: string; sort?: string, lat?: string, lng?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string; filters?: string, lat?: string, lng?: string }>;
 };
 
 export const revalidate = 3600;
@@ -109,7 +109,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CityPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
-  const { page, sort, lat, lng } = await searchParams;
+  const { page, sort, filters, lat, lng } = await searchParams;
   const currentPage = Number(page) || 1;
 
   const [province, city] = await Promise.all([
@@ -131,6 +131,12 @@ export default async function CityPage({ params, searchParams }: Props) {
     ? { field: 'distance' as const, direction: 'asc' as const }
     : { field: 'googleMapsRating' as const, direction: 'desc' as const };
 
+  // Build userLocation if lat/lng are provided
+  const userLocation = lat && lng ? {
+    latitude: Number(lat),
+    longitude: Number(lng),
+  } : undefined;
+
   // Obtener mecánicos de la ciudad
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
@@ -139,12 +145,10 @@ export default async function CityPage({ params, searchParams }: Props) {
     },
     filters: {
       cityId: city.id,
+      isOpen: filters === 'isOpen' ? true : undefined,
     },
     orderBy,
-    userLocation: {
-      latitude: Number(lat),
-      longitude: Number(lng),
-    },
+    userLocation,
   });
 
   const provinces: ProvinceEntity[] = await getProvinces();
@@ -209,6 +213,7 @@ export default async function CityPage({ params, searchParams }: Props) {
                 <ResultsHeader
                   businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
                   currentSort={sort || 'relevance'}
+                  currentFilters={filters || null}
                 />
               </Suspense>
             </div>

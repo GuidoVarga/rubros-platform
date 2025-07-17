@@ -1,10 +1,15 @@
 'use server';
 
-import { prisma } from '@/lib/db';
-import type { GetBusinessesParams } from '@/types/business';
+import { prisma } from '@rubros/db';
+import type { BusinessEntity } from '@rubros/db/entities';
+import type { GetBusinessesParams, BusinessFilters } from '@/types/business';
+import { buildWhereClause } from '@/actions/utils';
 import { Categories } from '@rubros/db';
-import { BusinessEntity } from '@rubros/db/entities';
-import { buildWhereClause } from './utils';
+import {
+  isOpenNow,
+  type HourEntry,
+  calculateDistance as calculateDistanceUtil,
+} from '@rubros/ui/utils';
 
 export async function getBusinesses({
   filters,
@@ -17,7 +22,7 @@ export async function getBusinesses({
     // Calculate offset
     const offset = (pagination.page - 1) * pagination.limit;
 
-    // Build where clause based on filters
+    // Build where clause based on filters (excluding isOpen which is post-processed)
     const where = buildWhereClause(filters);
 
     let orderByParsed =
@@ -27,30 +32,40 @@ export async function getBusinesses({
           : { field: 'googleMapsRating', direction: orderBy.direction }
         : orderBy;
 
-    // Si tenemos ubicación del usuario y queremos ordenar por distancia
-    if (userLocation && orderByParsed.field === 'distance') {
+    // Use SQL-based function when we need distance sorting OR isOpen filter
+    if (
+      (userLocation && orderByParsed.field === 'distance') ||
+      filters?.isOpen
+    ) {
       return await getBusinessesByDistance({
         filters,
         orderBy: orderByParsed,
         pagination,
-        userLocation,
+        userLocation: userLocation || { latitude: 0, longitude: 0 }, // Fallback for isOpen-only cases
         maxDistance,
       });
     }
 
-    console.log('orderByParsed ', orderByParsed);
-
-    // Lógica original para otros tipos de ordenamiento
+    // Lógica original para casos simples
     // Get total count for pagination
-    const total = await prisma.business.count({ where });
+    const total = await prisma.business.count({
+      where: {
+        ...where,
+        category: {
+          slug: Categories.MECHANICS,
+        },
+        status: true,
+      },
+    });
 
-    // Get businesses
+    // Get businesses with pagination
     const businesses = (await prisma.business.findMany({
       where: {
         ...where,
         category: {
           slug: Categories.MECHANICS,
         },
+        status: true,
       },
       include: {
         category: true,
@@ -74,11 +89,12 @@ export async function getBusinesses({
         ...business,
         distance:
           business.latitude && business.longitude
-            ? calculateDistance(
-                userLocation.latitude,
-                userLocation.longitude,
-                business.latitude,
-                business.longitude
+            ? calculateDistanceUtil(
+                {
+                  latitude: userLocation.latitude,
+                  longitude: userLocation.longitude,
+                },
+                { latitude: business.latitude, longitude: business.longitude }
               )
             : undefined,
       }));
@@ -143,27 +159,94 @@ async function getBusinessesByDistance({
       paramIndex++;
     }
 
-    // Añadir otros filtros según tu función buildWhereClause
+    // Filtro isOpen si está activo
+    if (filters.isOpen) {
+      const isOpenCondition = `
+        EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(b.hours::jsonb) AS hour_entry
+          WHERE
+            -- Convertir el día a español y comparar con el día actual
+            CASE
+              WHEN hour_entry->>'day' = 'lunes' THEN 1
+              WHEN hour_entry->>'day' = 'martes' THEN 2
+              WHEN hour_entry->>'day' = 'miércoles' OR hour_entry->>'day' = 'miercoles' THEN 3
+              WHEN hour_entry->>'day' = 'jueves' THEN 4
+              WHEN hour_entry->>'day' = 'viernes' THEN 5
+              WHEN hour_entry->>'day' = 'sábado' OR hour_entry->>'day' = 'sabado' THEN 6
+              WHEN hour_entry->>'day' = 'domingo' THEN 0
+              ELSE -1
+            END = EXTRACT(DOW FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires')
+            AND EXISTS (
+              SELECT 1
+              FROM jsonb_array_elements_text(hour_entry->'times') AS time_range
+              WHERE
+                time_range NOT ILIKE '%cerrado%'
+                AND time_range NOT ILIKE '%closed%'
+                AND (
+                  -- Formato "8 a. m.-5 p. m."
+                  CASE
+                    WHEN time_range ~ '^[0-9]+ a\\. m\\.-[0-9]+ p\\. m\\.$' THEN
+                      (
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                        CAST(regexp_replace(time_range, '^([0-9]+) a\\. m\\.-.*', '\\1') AS INTEGER)
+                        AND
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <
+                        (CAST(regexp_replace(time_range, '.*-([0-9]+) p\\. m\\.$', '\\1') AS INTEGER) + 12)
+                      )
+                    -- Formato básico para casos simples, asumimos abierto si no hay formato claro
+                    ELSE true
+                  END
+                )
+            )
+        )
+      `;
+      whereConditions.push(isOpenCondition);
+    }
   }
 
   // Filtro por categoría MECHANICS
+  whereConditions.push(`c.slug = $${paramIndex}`);
   params.push(Categories.MECHANICS);
   paramIndex++;
 
-  // Filtro de distancia
-  whereConditions.push(`
-    ST_DWithin(
-      b.location,
-      ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
-      $${paramIndex + 2} * 1000
-    )
-  `);
-  params.push(userLocation.longitude, userLocation.latitude, maxDistance);
-  paramIndex += 3;
+  // Determinar si necesitamos filtro y ordenamiento por distancia
+  const needsDistanceFilter =
+    userLocation.latitude !== 0 && userLocation.longitude !== 0;
+  const orderByDistance = orderBy.field === 'distance' && needsDistanceFilter;
+
+  if (needsDistanceFilter) {
+    // Filtro de distancia solo si tenemos coordenadas reales
+    whereConditions.push(`
+      ST_DWithin(
+        b.location,
+        ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
+        $${paramIndex + 2} * 1000
+      )
+    `);
+    params.push(userLocation.longitude, userLocation.latitude, maxDistance);
+    paramIndex += 3;
+  }
 
   const whereClause = whereConditions.join(' AND ');
 
-  // Query principal con distancia calculada
+  // Construir ORDER BY dinámicamente
+  let orderByClause;
+  if (orderByDistance) {
+    orderByClause = `distance ${orderBy.direction?.toUpperCase() || 'ASC'}`;
+  } else {
+    orderByClause = `b."${orderBy.field}" ${orderBy.direction?.toUpperCase() || 'DESC'}`;
+  }
+
+  // Query principal con distancia calculada (solo si necesitamos distancia)
+  const distanceSelect = needsDistanceFilter
+    ? `
+    ST_Distance(
+      b.location,
+      ST_SetSRID(ST_MakePoint($${params.findIndex((p) => p === userLocation.longitude) + 1}, $${params.findIndex((p) => p === userLocation.latitude) + 1}), 4326)::geography
+    ) / 1000 as distance,`
+    : '';
+
   const businessesQuery = `
     SELECT
       b.id,
@@ -189,7 +272,7 @@ async function getBusinessesByDistance({
       b."createdAt",
       b."updatedAt",
       b."categoryId",
-      b."cityId",
+      b."cityId",${distanceSelect}
       c.name as category_name,
       c.slug as category_slug,
       c.icon as category_icon,
@@ -211,17 +294,13 @@ async function getBusinessesByDistance({
       p.id as province_id,
       p.status as province_status,
       p."createdAt" as province_created_at,
-      p."updatedAt" as province_updated_at,
-      ST_Distance(
-        b.location,
-        ST_SetSRID(ST_MakePoint($${params.findIndex((p) => p === userLocation.longitude) + 1}, $${params.findIndex((p) => p === userLocation.latitude) + 1}), 4326)::geography
-      ) / 1000 as distance
+      p."updatedAt" as province_updated_at
     FROM "Business" b
     JOIN "Category" c ON b."categoryId" = c.id
     JOIN "City" city ON b."cityId" = city.id
     JOIN "Province" p ON city."provinceId" = p.id
     WHERE ${whereClause}
-    ORDER BY distance ${orderBy.direction?.toUpperCase() || 'ASC'}
+    ORDER BY ${orderByClause}
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
   `;
 
@@ -269,7 +348,8 @@ async function getBusinessesByDistance({
     updatedAt: row.updatedAt,
     categoryId: row.categoryId,
     cityId: row.cityId,
-    distance: Number(row.distance),
+    // Add distance from SQL result if available, otherwise calculate it
+    distance: row.distance ? Number(row.distance) : undefined,
     category: {
       id: row.category_id,
       name: row.category_name,

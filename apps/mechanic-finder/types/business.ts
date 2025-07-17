@@ -8,6 +8,7 @@ export type BusinessFilters = {
   cityId?: string;
   provinceId?: string;
   search?: string;
+  isOpen?: boolean;
 };
 
 export type PaginationParams = {
