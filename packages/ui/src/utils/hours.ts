@@ -203,21 +203,48 @@ export const isOpenNow = (
   }
 
   // Parsear horarios para verificar si está abierto
-  // Esta es una implementación básica - se puede mejorar para casos más complejos
   return todayHours.times.some((timeRange) => {
+    // Regex pattern que maneja horas con minutos opcionales y diferentes combinaciones AM/PM
+    // Formatos soportados:
+    // - "8 a. m.-5 p. m."
+    // - "8:30 a. m.-7 p. m."
+    // - "9:00 a. m. - 5:00 p. m."
+    // - "8:30 a. m. a 7 p. m."
+    // - "2:00 p. m. - 6:30 p. m."
+    // - "8:00 a. m. - 11:00 a. m."
     const timePattern =
-      /(\d+)\s*(?:a\.\s*m\.|am)\s*(?:-|a)\s*(\d+)\s*(?:p\.\s*m\.|pm)/i;
+      /(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|am|p\.\s*m\.|pm)\s*(?:-|a)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|am|p\.\s*m\.|pm)/i;
     const match = timeRange.match(timePattern);
 
     if (!match) return false;
 
-    const openTime = parseInt(match[1]!) * 100;
-    let closeTime = parseInt(match[2]!) * 100;
+    // Extraer horas, minutos y períodos
+    const openHour = parseInt(match[1]!);
+    const openMinute = parseInt(match[2] || '0');
+    const openPeriod = match[3]!.toLowerCase();
+    const closeHour = parseInt(match[4]!);
+    const closeMinute = parseInt(match[5] || '0');
+    const closePeriod = match[6]!.toLowerCase();
 
-    // Convertir PM a formato 24h
-    if (closeTime < 1200) closeTime += 1200;
+    // Convertir a formato 24h
+    let openTime24 = openHour * 100 + openMinute;
+    let closeTime24 = closeHour * 100 + closeMinute;
 
-    return currentTime >= openTime && currentTime <= closeTime;
+    // Convertir AM/PM a formato 24h
+    if (openPeriod.includes('p') && openHour !== 12) {
+      openTime24 += 1200;
+    } else if (openPeriod.includes('a') && openHour === 12) {
+      openTime24 -= 1200;
+    }
+
+    if (closePeriod.includes('p') && closeHour !== 12) {
+      closeTime24 += 1200;
+    } else if (closePeriod.includes('a') && closeHour === 12) {
+      closeTime24 -= 1200;
+    }
+
+    // Verificar si la hora actual está dentro del rango
+    return currentTime >= openTime24 && currentTime <= closeTime24;
   });
 };
 

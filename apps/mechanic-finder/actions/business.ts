@@ -129,9 +129,6 @@ async function getBusinessesByDistance({
   maxDistance: number;
 }) {
   const offset = (pagination.page - 1) * pagination.limit;
-  console.log('getBusinessesByDistance userLocation ', userLocation);
-  console.log('orderBy ', orderBy);
-
   // Construir condiciones WHERE dinámicamente
   const whereConditions = ['b.status = true'];
   const params: any[] = [];
@@ -184,18 +181,50 @@ async function getBusinessesByDistance({
                 time_range NOT ILIKE '%cerrado%'
                 AND time_range NOT ILIKE '%closed%'
                 AND (
-                  -- Formato "8 a. m.-5 p. m."
+                                    -- Regex mejorado que maneja múltiples formatos de horarios con minutos
+                  -- Soporta: "8 a. m.-5 p. m.", "8:30 a. m. a 7 p. m.", "9:00 a. m. - 5:00 p. m.", "2:00 p. m. - 6:30 p. m."
                   CASE
-                    WHEN time_range ~ '^[0-9]+ a\\. m\\.-[0-9]+ p\\. m\\.$' THEN
+                    -- Formato AM a PM sin minutos: "8 a. m.-5 p. m."
+                    WHEN time_range ~ '^[0-9]{1,2} a\\. m\\.-[0-9]{1,2} p\\. m\\.$' THEN
                       (
-                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
-                        CAST(regexp_replace(time_range, '^([0-9]+) a\\. m\\.-.*', '\\1') AS INTEGER)
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                        CAST(regexp_replace(time_range, '^([0-9]{1,2}) a\\. m\\.-.*', '\\1') AS INTEGER) * 100
                         AND
-                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <
-                        (CAST(regexp_replace(time_range, '.*-([0-9]+) p\\. m\\.$', '\\1') AS INTEGER) + 12)
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                        (CAST(regexp_replace(time_range, '.*-([0-9]{1,2}) p\\. m\\.$', '\\1') AS INTEGER) + 12) * 100
                       )
-                    -- Formato básico para casos simples, asumimos abierto si no hay formato claro
-                    ELSE true
+                    -- Formato AM a PM con minutos: "8:30 a. m.-7:15 p. m." o "8:30 a. m. a 7:15 p. m."
+                    WHEN time_range ~ '^[0-9]{1,2}:[0-9]{2} a\\. m\\.[\\s\\-a]*[0-9]{1,2}:[0-9]{2} p\\. m\\.$' THEN
+                      (
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                        CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) a\\. m\\..*', '\\1') AS INTEGER) * 100 +
+                        CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) a\\. m\\..*', '\\2') AS INTEGER)
+                        AND
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                        (CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) + 12) * 100 +
+                        CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\2') AS INTEGER)
+                      )
+                    -- Formato PM a PM con minutos: "2:00 p. m. - 6:30 p. m."
+                    WHEN time_range ~ '^[0-9]{1,2}:[0-9]{2} p\\. m\\.[\\s\\-a]*[0-9]{1,2}:[0-9]{2} p\\. m\\.$' THEN
+                      (
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                        (CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\1') AS INTEGER) +
+                         CASE WHEN CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\1') AS INTEGER) = 12 THEN 0 ELSE 12 END) * 100 +
+                        CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\2') AS INTEGER)
+                        AND
+                        EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                        EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                        (CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) +
+                         CASE WHEN CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) = 12 THEN 0 ELSE 12 END) * 100 +
+                        CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\2') AS INTEGER)
+                      )
+                    -- Si no coincide con formatos conocidos, conservadoramente asumir cerrado
+                    ELSE false
                   END
                 )
             )

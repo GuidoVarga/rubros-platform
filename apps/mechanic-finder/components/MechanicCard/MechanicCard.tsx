@@ -1,7 +1,7 @@
 import { BussinessCard, Button } from "@rubros/ui";
 import { BusinessEntity } from "@rubros/db/entities";
 import Link from "next/link";
-import { getOpenDays, HourEntry, isOpenNow, useGeolocation, calculateDistance, formatDistance } from "@rubros/ui/utils";
+import { getOpenDays, HourEntry, isOpenNow } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
   business: BusinessEntity & { distance?: number | null };

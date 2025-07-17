@@ -197,13 +197,13 @@ describe('hours utility functions', () => {
       jest.useRealTimers();
     });
 
-    it('should return false for null/undefined input', () => {
-      expect(isOpenNow(null)).toBe(false);
-      expect(isOpenNow(undefined)).toBe(false);
+    it('should return undefined for null/undefined input', () => {
+      expect(isOpenNow(null)).toBe(undefined);
+      expect(isOpenNow(undefined)).toBe(undefined);
     });
 
-    it('should return false for empty array', () => {
-      expect(isOpenNow([])).toBe(false);
+    it('should return undefined for empty array', () => {
+      expect(isOpenNow([])).toBe(undefined);
     });
 
     it('should return false if no hours for current day', () => {
@@ -236,7 +236,12 @@ describe('hours utility functions', () => {
       const hours: HourEntry[] = [
         { day: 'lunes', times: ['9 a. m. - 12 p. m.', '1 p. m. - 5 p. m.'] },
       ];
-      expect(isOpenNow(hours)).toBe(false);
+      const hours2: HourEntry[] = [
+        { day: 'lunes', times: ['9 a. m.-6:30 p. m.'] },
+      ];
+      // At 2:30 PM, should be open (in second range: 1 PM - 5 PM)
+      expect(isOpenNow(hours)).toBe(true);
+      expect(isOpenNow(hours2)).toBe(true);
     });
 
     it('should handle invalid time format', () => {
@@ -249,6 +254,125 @@ describe('hours utility functions', () => {
     it('should handle empty times array', () => {
       const hours: HourEntry[] = [{ day: 'lunes', times: [] }];
       expect(isOpenNow(hours)).toBe(false);
+    });
+
+    // Tests for time formats with minutes
+    describe('time formats with minutes', () => {
+      it('should handle time with minutes - currently open', () => {
+        // Mock Monday 10:00 AM (should be open for 8:30 AM - 7 PM)
+        const mockDate = new Date('2024-01-15T10:00:00'); // Monday 10:00 AM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8:30 a. m. a 7 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle time with minutes - currently closed (before opening)', () => {
+        // Mock Monday 8:00 AM (should be closed for 8:30 AM - 7 PM)
+        const mockDate = new Date('2024-01-15T08:00:00'); // Monday 8:00 AM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8:30 a. m. a 7 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(false);
+      });
+
+      it('should handle time with minutes - currently closed (after closing)', () => {
+        // Mock Monday 7:30 PM (should be closed for 8:30 AM - 7 PM)
+        const mockDate = new Date('2024-01-15T19:30:00'); // Monday 7:30 PM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8:30 a. m. a 7 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(false);
+      });
+
+      it('should handle time with minutes in different format', () => {
+        // Mock Monday 10:30 AM (should be open for 9:15 AM - 6:45 PM)
+        const mockDate = new Date('2024-01-15T10:30:00'); // Monday 10:30 AM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['9:15 a. m.-6:45 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle mixed format - hours without minutes vs hours with minutes', () => {
+        // Mock Monday 8:45 AM (should be open for 8 AM - 12:30 PM)
+        const mockDate = new Date('2024-01-15T08:45:00'); // Monday 8:45 AM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8 a. m.-12:30 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle format with spaces - "9:00 a. m. - 5:00 p. m."', () => {
+        // Mock Monday 2:30 PM (should be open for 9:00 AM - 5:00 PM)
+        const mockDate = new Date('2024-01-15T14:30:00'); // Monday 2:30 PM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['9:00 a. m. - 5:00 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle edge case - exactly at opening time with minutes', () => {
+        // Mock Monday 8:30 AM (should be open for 8:30 AM - 7 PM)
+        const mockDate = new Date('2024-01-15T08:30:00'); // Monday 8:30 AM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8:30 a. m. a 7 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle edge case - exactly at closing time with minutes', () => {
+        // Mock Monday 7:00 PM (should be closed for 8:30 AM - 7 PM)
+        const mockDate = new Date('2024-01-15T19:00:00'); // Monday 7:00 PM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          { day: 'lunes', times: ['8:30 a. m. a 7 p. m.'] },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle multiple time ranges with minutes', () => {
+        // Mock Monday 2:30 PM (should be open for second range 2:00 PM - 6:30 PM)
+        const mockDate = new Date('2024-01-15T14:30:00'); // Monday 2:30 PM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          {
+            day: 'lunes',
+            times: ['8:30 a. m. - 12:00 p. m.', '2:00 p. m. - 6:30 p. m.'],
+          },
+        ];
+        expect(isOpenNow(hours)).toBe(true);
+      });
+
+      it('should handle time gap between ranges with minutes', () => {
+        // Mock Monday 1:30 PM (should be closed between ranges)
+        const mockDate = new Date('2024-01-15T13:30:00'); // Monday 1:30 PM
+        jest.setSystemTime(mockDate);
+
+        const hours: HourEntry[] = [
+          {
+            day: 'lunes',
+            times: ['8:30 a. m. - 12:00 p. m.', '2:00 p. m. - 6:30 p. m.'],
+          },
+        ];
+        expect(isOpenNow(hours)).toBe(false);
+      });
     });
   });
 
