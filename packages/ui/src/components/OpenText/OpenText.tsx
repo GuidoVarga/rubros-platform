@@ -1,8 +1,15 @@
-export const OpenText = (props: { isOpen: boolean | undefined }) => {
-  const { isOpen } = props;
+import { cn } from "@/lib/utils";
+
+type OpenTextProps = {
+  isOpen: boolean | undefined;
+  className?: string;
+}
+
+export const OpenText = (props: OpenTextProps) => {
+  const { isOpen, className } = props;
   return (
     isOpen !== undefined ? (
-      <div className="flex items-center gap-2">
+      <div className={cn('flex items-center gap-2', className)}>
         <div>
           <div className={`h-3 w-3 ml-0.5 rounded-full ${isOpen ? 'bg-green-500' : 'bg-red-500'}`} />
         </div>

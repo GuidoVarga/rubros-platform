@@ -124,70 +124,45 @@ export default async function BusinessPage({ params }: Props) {
       <div className="container py-8">
         <Breadcrumb elements={breadcrumbElements} />
 
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section className="space-y-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className='h-full'>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <Card className='h-full'>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-semibold">{business.name}</h1>
+                  <p className="text-muted-foreground mt-2">
+                    {business.city?.name}, {business.city?.province?.name}
+                  </p>
+                </div>
+                <SocialShare
+                  url={currentUrl}
+                  title={`${business.name} - Mecánico en ${business.city?.name}`}
+                  description={business.description || `Contacta con ${business.name} para servicios de mecánica en ${business.city?.name}`}
+                  className="flex-shrink-0"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 h-full">
+              {business.description && (
+                <p className="text-muted-foreground leading-relaxed">{business.description}</p>
+              )}
+              {/* Información de contacto */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                {business.address && (
                   <div>
-                    <h1 className="text-2xl font-semibold">{business.name}</h1>
-                    <p className="text-muted-foreground mt-2">
-                      {business.city?.name}, {business.city?.province?.name}
-                    </p>
+                    <span className="text-sm font-medium text-muted-foreground">Dirección</span>
+                    <p className="font-medium">{business.address}</p>
+                    <Distance className="mt-2" latitude={business.latitude} longitude={business.longitude} />
                   </div>
-                  <SocialShare
-                    url={currentUrl}
-                    title={`${business.name} - Mecánico en ${business.city?.name}`}
-                    description={business.description || `Contacta con ${business.name} para servicios de mecánica en ${business.city?.name}`}
-                    className="flex-shrink-0"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 h-full">
-                {business.description && (
-                  <p className="text-muted-foreground leading-relaxed">{business.description}</p>
                 )}
-
-                <OpenText isOpen={isOpen} />
-                <Distance latitude={business.latitude} longitude={business.longitude} />
-                <div className="flex gap-2 pt-4 flex-wrap">
-                  {business.phone && (
-                    <Button asChild>
-                      <a href={`tel:${business.phone}`}>
-                        <Phone className="h-4 w-4 mr-2" />
-                        Llamar
-                      </a>
-                    </Button>
-                  )}
-                  {business.website && (
-                    <Button variant="outline" asChild>
-                      <a href={business.website} target="_blank" rel="noopener noreferrer">
-                        <Globe className="h-4 w-4 mr-2" />
-                        Sitio web
-                      </a>
-                    </Button>
-                  )}
-                  {
-                    business.googleMapsLink && (
-                      <Button variant="secondary" asChild>
-                        <a href={business.googleMapsLink} target="_blank" rel="noopener noreferrer">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          Ver en Google Maps
-                        </a>
-                      </Button>
-                    )
-                  }
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="space-y-6">
-            <Card className='h-full'>
-              <CardHeader>
-                <CardTitle>Información de contacto</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+                {openDays && (
+                  <div>
+                    <span className="text-sm font-medium text-muted-foreground">Días de atención</span>
+                    <p className="font-medium">{openDays}</p>
+                    <OpenText className="mt-2" isOpen={isOpen} />
+                  </div>
+                )}
                 {business.phone && (
                   <div>
                     <span className="text-sm font-medium text-muted-foreground">Teléfono</span>
@@ -200,21 +175,38 @@ export default async function BusinessPage({ params }: Props) {
                     <p className="font-medium">{business.email}</p>
                   </div>
                 )}
-                {business.address && (
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Dirección</span>
-                    <p className="font-medium">{business.address}</p>
-                  </div>
+              </div>
+
+              <div className="flex gap-2 pt-4 flex-wrap">
+                {business.phone && (
+                  <Button asChild>
+                    <a href={`tel:${business.phone}`}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Llamar
+                    </a>
+                  </Button>
                 )}
-                {openDays && (
-                  <div>
-                    <span className="text-sm font-medium text-muted-foreground">Días de atención</span>
-                    <p className="font-medium">{openDays}</p>
-                  </div>
+                {business.website && (
+                  <Button variant="outline" asChild>
+                    <a href={business.website} target="_blank" rel="noopener noreferrer">
+                      <Globe className="h-4 w-4 mr-2" />
+                      Sitio web
+                    </a>
+                  </Button>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+                {
+                  business.googleMapsLink && (
+                    <Button variant="secondary" asChild>
+                      <a href={business.googleMapsLink} target="_blank" rel="noopener noreferrer">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Ver en Google Maps
+                      </a>
+                    </Button>
+                  )
+                }
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Map Card */}

@@ -7,10 +7,11 @@ type DistanceProps = {
   distance?: number | null;
   latitude: number | null | undefined;
   longitude: number | null | undefined;
+  className?: string;
 }
 
 export const Distance = (props: DistanceProps) => {
-  const { distance, latitude, longitude } = props;
+  const { distance, latitude, longitude, className } = props;
 
   const { coordinates: userLocation } = useGeolocation();
 
@@ -19,7 +20,7 @@ export const Distance = (props: DistanceProps) => {
     : null)
 
   return (
-    <div>
+    <div className={className}>
       {parsedDistance ? (
         <div className="flex items-center gap-2" >
           <div>
