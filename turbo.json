@@ -6,7 +6,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["NEXT_PUBLIC_BASE_URL", "ADSENSE_KEY"]
+      "env": ["NEXT_PUBLIC_BASE_URL", "ADSENSE_KEY", "NEXT_PUBLIC_GA_ID"]
     },
     "build": {
       "dependsOn": ["^build"],
@@ -23,5 +23,10 @@
       "persistent": true
     }
   },
-  "globalEnv": ["DATABASE_URL", "PRISMA_CLIENT_ENGINE_TYPE", "PRISMA_CLI_BINARY_TARGETS"]
+  "globalEnv": [
+    "DATABASE_URL",
+    "PRISMA_CLIENT_ENGINE_TYPE",
+    "PRISMA_CLI_BINARY_TARGETS",
+    "NEXT_PUBLIC_GA_ID"
+  ]
 }

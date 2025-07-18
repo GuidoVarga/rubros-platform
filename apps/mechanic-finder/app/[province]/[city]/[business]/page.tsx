@@ -10,6 +10,8 @@ import { LatLngExpression } from '@rubros/ui/map'
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { AdComponent } from '@/components/ads/ads'
+import BusinessActions from '@/components/BusinessActions/BusinessActions'
+import BusinessViewTracker from '@/components/BusinessViewTracker/BusinessViewTracker'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
@@ -176,35 +178,14 @@ export default async function BusinessPage({ params }: Props) {
                   </div>
                 )}
               </div>
-
-              <div className="flex gap-2 pt-4 flex-wrap">
-                {business.phone && (
-                  <Button asChild>
-                    <a href={`tel:${business.phone}`}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Llamar
-                    </a>
-                  </Button>
-                )}
-                {business.website && (
-                  <Button variant="outline" asChild>
-                    <a href={business.website} target="_blank" rel="noopener noreferrer">
-                      <Globe className="h-4 w-4 mr-2" />
-                      Sitio web
-                    </a>
-                  </Button>
-                )}
-                {
-                  business.googleMapsLink && (
-                    <Button variant="secondary" asChild>
-                      <a href={business.googleMapsLink} target="_blank" rel="noopener noreferrer">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        Ver en Google Maps
-                      </a>
-                    </Button>
-                  )
-                }
-              </div>
+              <Suspense>
+                <BusinessActions
+                  businessName={business.name}
+                  phone={business.phone}
+                  website={business.website}
+                  googleMapsLink={business.googleMapsLink}
+                />
+              </Suspense>
             </CardContent>
           </Card>
         </section>
@@ -362,6 +343,13 @@ export default async function BusinessPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Analytics tracking */}
+      <BusinessViewTracker
+        businessName={business.name}
+        city={business.city?.name || ''}
+        province={business.city?.province?.name || ''}
+      />
     </>
   )
 }

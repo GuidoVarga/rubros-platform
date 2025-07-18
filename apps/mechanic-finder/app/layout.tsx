@@ -10,6 +10,7 @@ import { SkeletonPage } from "@rubros/ui";
 import { ORGANIZATION } from "@/constants/org";
 import Link from "next/link";
 import { APP_NAME } from "@/constants/app";
+import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -148,6 +149,7 @@ export default function RootLayout({
             <CookieBanner />
           </Suspense>
         </div>
+        <GoogleAnalytics />
       </body>
     </html>
   );

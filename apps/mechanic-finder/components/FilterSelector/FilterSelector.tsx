@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Clock } from 'lucide-react';
+import { trackFilterUse } from '@/lib/analytics';
 
 type FilterSelectorProps = {
   onFilterChange?: (filters: string | null) => void;
@@ -22,6 +23,9 @@ export function FilterSelector({ onFilterChange, className, initialValue = null 
 
   const handleFilterChange = (checked: boolean) => {
     setIsOpenFilter(checked);
+
+    // Track filter usage
+    trackFilterUse('isOpen', checked ? 'enabled' : 'disabled');
 
     const params = new URLSearchParams(searchParams);
 
