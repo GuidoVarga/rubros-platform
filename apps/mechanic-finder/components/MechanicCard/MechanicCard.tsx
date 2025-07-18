@@ -4,14 +4,14 @@ import Link from "next/link";
 import { getOpenDays, HourEntry, isOpenNow } from "@rubros/ui/utils";
 
 type MechanicCardProps = {
-  business: BusinessEntity & { distance?: number | null };
+  business: BusinessEntity & { distance?: number | null, isOpen?: boolean | null };
   href: string;
 }
 
 export const MechanicCard = ({ business, href }: MechanicCardProps) => {
-  const { name, description, phone, email, openingHours, closedOn, website, hours, address, latitude, longitude, distance } = business;
+  const { name, description, phone, email, openingHours, closedOn, website, hours, address, latitude, longitude, distance, isOpen } = business;
   const openingDays = getOpenDays(closedOn, openingHours, hours as HourEntry[]);
-  const isOpen = isOpenNow(hours as HourEntry[]);
+  const parsedIsOpen = isOpen !== undefined && isOpen !== null ? isOpen : isOpenNow(hours as HourEntry[]);
 
   return (
     <BussinessCard
@@ -22,7 +22,7 @@ export const MechanicCard = ({ business, href }: MechanicCardProps) => {
       email={email}
       website={website}
       openDays={openingDays}
-      isOpen={isOpen}
+      isOpen={parsedIsOpen}
       latitude={latitude}
       longitude={longitude}
       distance={distance ? +distance.toFixed(1) : null}
