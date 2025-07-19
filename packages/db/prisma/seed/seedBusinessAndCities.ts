@@ -1,13 +1,18 @@
 import { prisma } from '../../client';
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { createReadStream } from 'fs';
 import { Business } from '../../generated/prisma';
 import streamArray from 'stream-json/streamers/StreamArray.js';
 import streamValues from 'stream-json/streamers/StreamValues.js';
-import streamObject from 'stream-json/streamers/StreamObject.js';
 import parser from 'stream-json';
+
+// Obtener __dirname en módulos ES6
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function slugify(input: string): string {
   return input
@@ -21,50 +26,73 @@ function slugify(input: string): string {
 }
 
 // Función para parsear argumentos de línea de comandos
-function parseArguments(): { filePath: string; categorySlug: string } {
+function parseArguments(): {
+  filePath: string;
+  categorySlug: string;
+  countryCode: string;
+} {
   const args = process.argv.slice(2);
 
   if (args.length < 2) {
-    console.error('❌ Uso: node script.js <archivo.json> <categoria-slug>');
-    console.error('📝 Ejemplo: node script.js data.json mecanicos');
+    console.error(
+      '❌ Uso: node script.js <archivo.json> <categoria-slug> [codigo-pais]'
+    );
+    console.error('📝 Ejemplo: node script.js data.json mecanicos AR');
+    console.error(
+      '📝 Ejemplo: node script.js data.json mecanicos (usa AR por defecto)'
+    );
     process.exit(1);
   }
 
-  const [filePath, categorySlug] = args;
+  const [filePath, categorySlug, countryCode = 'AR'] = args;
 
-  return { filePath, categorySlug };
+  return { filePath, categorySlug, countryCode };
 }
 
-// Tabla de equivalencias para provincias
-const provinceLookup: Record<string, { name: string; slug: string }> = {
-  'buenos aires': { name: 'Buenos Aires', slug: 'buenos-aires' },
-  'santa fe': { name: 'Santa Fe', slug: 'santa-fe' },
-  'capital federal': { name: 'Capital Federal', slug: 'capital-federal' },
-  caba: { name: 'Capital Federal', slug: 'capital-federal' },
-  cordoba: { name: 'Córdoba', slug: 'cordoba' },
-  'santa cruz': { name: 'Santa Cruz', slug: 'santa-cruz' },
-  'la pampa': { name: 'La Pampa', slug: 'la-pampa' },
-  'entre rios': { name: 'Entre Ríos', slug: 'entre-rios' },
-  chubut: { name: 'Chubut', slug: 'chubut' },
-  neuquen: { name: 'Neuquén', slug: 'neuquen' },
-  'rio negro': { name: 'Río Negro', slug: 'rio-negro' },
-  'tierra del fuego': { name: 'Tierra del Fuego', slug: 'tierra-del-fuego' },
-  formosa: { name: 'Formosa', slug: 'formosa' },
-  jujuy: { name: 'Jujuy', slug: 'jujuy' },
-  salta: { name: 'Salta', slug: 'salta' },
-  mendoza: { name: 'Mendoza', slug: 'mendoza' },
-  misiones: { name: 'Misiones', slug: 'misiones' },
-  corrientes: { name: 'Corrientes', slug: 'corrientes' },
-  'la rioja': { name: 'La Rioja', slug: 'la-rioja' },
-  'san juan': { name: 'San Juan', slug: 'san-juan' },
-  catamarca: { name: 'Catamarca', slug: 'catamarca' },
-  'santiago del estero': {
-    name: 'Santiago del Estero',
-    slug: 'santiago-del-estero',
+// Tabla de equivalencias para provincias por país
+const provinceLookup: Record<
+  string,
+  Record<string, { name: string; slug: string }>
+> = {
+  AR: {
+    'buenos aires': { name: 'Buenos Aires', slug: 'buenos-aires' },
+    'provincia de buenos aires': { name: 'Buenos Aires', slug: 'buenos-aires' },
+    'santa fe': { name: 'Santa Fe', slug: 'santa-fe' },
+    'capital federal': { name: 'Capital Federal', slug: 'capital-federal' },
+    'cdad. autonoma de buenos aires': {
+      name: 'Capital Federal',
+      slug: 'capital-federal',
+    },
+    'ciudad autonoma de buenos aires': {
+      name: 'Capital Federal',
+      slug: 'capital-federal',
+    },
+    caba: { name: 'Capital Federal', slug: 'capital-federal' },
+    cordoba: { name: 'Córdoba', slug: 'cordoba' },
+    'santa cruz': { name: 'Santa Cruz', slug: 'santa-cruz' },
+    'la pampa': { name: 'La Pampa', slug: 'la-pampa' },
+    'entre rios': { name: 'Entre Ríos', slug: 'entre-rios' },
+    chubut: { name: 'Chubut', slug: 'chubut' },
+    neuquen: { name: 'Neuquén', slug: 'neuquen' },
+    'rio negro': { name: 'Río Negro', slug: 'rio-negro' },
+    'tierra del fuego': { name: 'Tierra del Fuego', slug: 'tierra-del-fuego' },
+    formosa: { name: 'Formosa', slug: 'formosa' },
+    jujuy: { name: 'Jujuy', slug: 'jujuy' },
+    salta: { name: 'Salta', slug: 'salta' },
+    mendoza: { name: 'Mendoza', slug: 'mendoza' },
+    misiones: { name: 'Misiones', slug: 'misiones' },
+    corrientes: { name: 'Corrientes', slug: 'corrientes' },
+    'la rioja': { name: 'La Rioja', slug: 'la-rioja' },
+    'san juan': { name: 'San Juan', slug: 'san-juan' },
+    catamarca: { name: 'Catamarca', slug: 'catamarca' },
+    'santiago del estero': {
+      name: 'Santiago del Estero',
+      slug: 'santiago-del-estero',
+    },
+    tucuman: { name: 'Tucumán', slug: 'tucuman' },
+    'san luis': { name: 'San Luis', slug: 'san-luis' },
+    chaco: { name: 'Chaco', slug: 'chaco' },
   },
-  tucuman: { name: 'Tucumán', slug: 'tucuman' },
-  'san luis': { name: 'San Luis', slug: 'san-luis' },
-  chaco: { name: 'Chaco', slug: 'chaco' },
 };
 
 interface BusinessData {
@@ -76,6 +104,7 @@ interface BusinessData {
   detailed_address?: {
     city?: string;
     state?: string;
+    country_code?: string;
   };
   postal_code?: string;
   opening_hours?: string;
@@ -105,6 +134,27 @@ function validateBusiness(business: any): business is BusinessData {
     typeof business.name === 'string' &&
     business.name.trim().length > 0
   );
+}
+
+// Validación de calidad de datos para ciudades
+function validateCityName(cityName: string): boolean {
+  if (!cityName || typeof cityName !== 'string') {
+    return false;
+  }
+
+  const trimmedName = cityName.trim();
+
+  // Debe tener más de 3 letras
+  if (trimmedName.length <= 3) {
+    return false;
+  }
+
+  // No debe contener números
+  if (/\d/.test(trimmedName)) {
+    return false;
+  }
+
+  return true;
 }
 
 type ProcessedBusiness = Omit<
@@ -352,7 +402,9 @@ async function validateCategory(categorySlug: string): Promise<string> {
 
 async function processStreamingData(
   filePath: string,
-  categoryId: string
+  categoryId: string,
+  categorySlug: string,
+  countryCode: string
 ): Promise<void> {
   const memoryManager = new MemoryManager();
   const fileStats = await fs.stat(filePath);
@@ -392,6 +444,29 @@ async function processStreamingData(
   let skippedCount = 0;
   let progressTracker: ProgressTracker;
 
+  // Contadores detallados globales
+  const skipReasons = {
+    invalidStructure: 0,
+    missingLocation: 0,
+    invalidCityLength: 0,
+    invalidCityNumbers: 0,
+    unknownProvince: 0,
+    provinceNotInDB: 0,
+    wrongCountry: 0,
+    unknownProvinces: new Set<string>(),
+    wrongCountries: new Set<string>(),
+    invalidCities: new Set<string>(),
+    examples: {
+      invalidStructure: [] as any[],
+      missingLocation: [] as any[],
+      invalidCityLength: [] as any[],
+      invalidCityNumbers: [] as any[],
+      unknownProvince: [] as any[],
+      provinceNotInDB: [] as any[],
+      wrongCountry: [] as any[],
+    },
+  };
+
   // Contador para debugging
   const jsonCounter = new JSONCounter();
 
@@ -404,6 +479,14 @@ async function processStreamingData(
 
         // Validar estructura del objeto
         if (!validateBusiness(business)) {
+          skipReasons.invalidStructure++;
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.invalidStructure.length < 10) {
+            skipReasons.examples.invalidStructure.push({
+              record: business,
+              reason: 'Estructura inválida o nombre vacío',
+            });
+          }
           skippedCount++;
           callback();
           return;
@@ -413,23 +496,147 @@ async function processStreamingData(
         const provinceRaw = business.detailed_address?.state
           ?.trim()
           .toLowerCase();
+        const businessCountryCode =
+          business.detailed_address?.country_code?.trim();
 
-        if (!cityRaw || !provinceRaw) {
+        // Validar país
+        if (businessCountryCode !== countryCode) {
+          skipReasons.wrongCountry++;
+          skipReasons.wrongCountries.add(businessCountryCode || 'undefined');
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.wrongCountry.length < 10) {
+            skipReasons.examples.wrongCountry.push({
+              record: {
+                name: business.name,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `País incorrecto: esperado '${countryCode}', encontrado '${businessCountryCode}'`,
+            });
+          }
           skippedCount++;
           callback();
           return;
         }
 
-        const normalizedProvince = provinceLookup[provinceRaw];
-        if (!normalizedProvince) {
+        if (!cityRaw || !provinceRaw) {
+          skipReasons.missingLocation++;
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.missingLocation.length < 10) {
+            skipReasons.examples.missingLocation.push({
+              record: {
+                name: business.name,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `Falta ubicación: ciudad='${cityRaw}', provincia='${provinceRaw}'`,
+            });
+          }
           skippedCount++;
+          // Log específico para datos faltantes
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Falta ubicación: ciudad='${cityRaw}', provincia='${provinceRaw}' (registro #${totalProcessed})`
+            );
+          }
+          callback();
+          return;
+        }
+
+        // Validar calidad de datos de la ciudad
+        if (!validateCityName(cityRaw)) {
+          const cityLength = cityRaw?.length || 0;
+          const hasNumbers = /\d/.test(cityRaw || '');
+
+          if (cityLength <= 3) {
+            skipReasons.invalidCityLength++;
+            skipReasons.invalidCities.add(cityRaw || 'undefined');
+            // Guardar ejemplo (máximo 10)
+            if (skipReasons.examples.invalidCityLength.length < 10) {
+              skipReasons.examples.invalidCityLength.push({
+                record: {
+                  name: business.name,
+                  detailed_address: business.detailed_address,
+                  address: business.address,
+                },
+                reason: `Ciudad con longitud inválida (${cityLength} caracteres): '${cityRaw}'`,
+              });
+            }
+          } else if (hasNumbers) {
+            skipReasons.invalidCityNumbers++;
+            skipReasons.invalidCities.add(cityRaw || 'undefined');
+            // Guardar ejemplo (máximo 10)
+            if (skipReasons.examples.invalidCityNumbers.length < 10) {
+              skipReasons.examples.invalidCityNumbers.push({
+                record: {
+                  name: business.name,
+                  detailed_address: business.detailed_address,
+                  address: business.address,
+                },
+                reason: `Ciudad contiene números: '${cityRaw}'`,
+              });
+            }
+          }
+
+          skippedCount++;
+          // Log específico para ciudades inválidas
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Ciudad inválida: '${cityRaw}' (registro #${totalProcessed})`
+            );
+          }
+          callback();
+          return;
+        }
+
+        const normalizedProvince = provinceLookup[countryCode]?.[provinceRaw];
+        if (!normalizedProvince) {
+          skipReasons.unknownProvince++;
+          skipReasons.unknownProvinces.add(provinceRaw);
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.unknownProvince.length < 10) {
+            skipReasons.examples.unknownProvince.push({
+              record: {
+                name: business.name,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `Provincia no reconocida: '${provinceRaw}'`,
+            });
+          }
+          skippedCount++;
+          // Log específico para provincias no reconocidas
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Provincia no reconocida: '${provinceRaw}' (registro #${totalProcessed})`
+            );
+          }
           callback();
           return;
         }
 
         const provinceId = provinceMap.get(normalizedProvince.slug);
         if (!provinceId) {
+          skipReasons.provinceNotInDB++;
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.provinceNotInDB.length < 10) {
+            skipReasons.examples.provinceNotInDB.push({
+              record: {
+                name: business.name,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `Provincia no en BD: '${normalizedProvince.slug}'`,
+              normalizedProvince: normalizedProvince,
+            });
+          }
           skippedCount++;
+          // Log específico para provincias no en BD
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Provincia no en BD: '${normalizedProvince.slug}' (registro #${totalProcessed})`
+            );
+          }
           callback();
           return;
         }
@@ -602,6 +809,75 @@ async function processStreamingData(
     `   • Ciudades creadas: ${citiesToCreate.length.toLocaleString()}`
   );
   console.log(`   • Registros omitidos: ${skippedCount.toLocaleString()}`);
+
+  // Mostrar desglose detallado de omisiones
+  console.log(`\n📊 Desglose de registros omitidos:`);
+  console.log(
+    `   • Estructura inválida: ${skipReasons.invalidStructure.toLocaleString()}`
+  );
+  console.log(
+    `   • Falta ubicación: ${skipReasons.missingLocation.toLocaleString()}`
+  );
+  console.log(
+    `   • Ciudad muy corta (≤3 chars): ${skipReasons.invalidCityLength.toLocaleString()}`
+  );
+  console.log(
+    `   • Ciudad con números: ${skipReasons.invalidCityNumbers.toLocaleString()}`
+  );
+  console.log(
+    `   • Provincia no reconocida: ${skipReasons.unknownProvince.toLocaleString()}`
+  );
+  console.log(
+    `   • Provincia no en BD: ${skipReasons.provinceNotInDB.toLocaleString()}`
+  );
+  console.log(
+    `   • País incorrecto: ${skipReasons.wrongCountry.toLocaleString()}`
+  );
+
+  // Exportar detalles a JSON
+  await exportSkipReasons(skipReasons, categorySlug, validBusinesses.length);
+
+  if (skipReasons.unknownProvinces.size > 0) {
+    console.log(`\n❗ Provincias no reconocidas (primeras 10):`);
+    Array.from(skipReasons.unknownProvinces)
+      .slice(0, 10)
+      .forEach((prov, i) => {
+        console.log(`   ${i + 1}. "${prov}"`);
+      });
+    if (skipReasons.unknownProvinces.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.unknownProvinces.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
+
+  if (skipReasons.wrongCountries.size > 0) {
+    console.log(`\n❗ Países encontrados (diferentes a ${countryCode}):`);
+    Array.from(skipReasons.wrongCountries)
+      .slice(0, 10)
+      .forEach((country, i) => {
+        console.log(`   ${i + 1}. "${country}"`);
+      });
+    if (skipReasons.wrongCountries.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.wrongCountries.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
+
+  if (skipReasons.invalidCities.size > 0) {
+    console.log(`\n❗ Ciudades inválidas encontradas (primeras 10):`);
+    Array.from(skipReasons.invalidCities)
+      .slice(0, 10)
+      .forEach((city, i) => {
+        console.log(`   ${i + 1}. "${city}"`);
+      });
+    if (skipReasons.invalidCities.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.invalidCities.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
 }
 
 async function updateMissingLocations() {
@@ -626,6 +902,150 @@ async function updateMissingLocations() {
   }
 }
 
+async function exportSkipReasons(
+  skipReasons: any,
+  categorySlug: string,
+  totalSuccess: number
+): Promise<void> {
+  try {
+    console.log('🔄 Iniciando exportación de detalles...');
+
+    // Usar path relativo al archivo actual del script
+    const logsDir = path.join(__dirname, 'logs');
+
+    console.log(`📂 Creando directorio: ${logsDir}`);
+    await fs.mkdir(logsDir, { recursive: true });
+
+    console.log('✅ Directorio creado');
+
+    // Preparar datos para export
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      category: categorySlug,
+      summary: {
+        totalSuccess: totalSuccess,
+        invalidStructure: skipReasons.invalidStructure,
+        missingLocation: skipReasons.missingLocation,
+        invalidCityLength: skipReasons.invalidCityLength,
+        invalidCityNumbers: skipReasons.invalidCityNumbers,
+        unknownProvince: skipReasons.unknownProvince,
+        provinceNotInDB: skipReasons.provinceNotInDB,
+        wrongCountry: skipReasons.wrongCountry,
+        totalSkipped:
+          skipReasons.invalidStructure +
+          skipReasons.missingLocation +
+          skipReasons.invalidCityLength +
+          skipReasons.invalidCityNumbers +
+          skipReasons.unknownProvince +
+          skipReasons.provinceNotInDB +
+          skipReasons.wrongCountry,
+        totalProcessed:
+          totalSuccess +
+          skipReasons.invalidStructure +
+          skipReasons.missingLocation +
+          skipReasons.invalidCityLength +
+          skipReasons.invalidCityNumbers +
+          skipReasons.unknownProvince +
+          skipReasons.provinceNotInDB +
+          skipReasons.wrongCountry,
+      },
+      unknownProvinces: {
+        count: skipReasons.unknownProvinces.size,
+        list: Array.from(skipReasons.unknownProvinces).sort(),
+      },
+      wrongCountries: {
+        count: skipReasons.wrongCountries.size,
+        list: Array.from(skipReasons.wrongCountries).sort(),
+      },
+      invalidCities: {
+        count: skipReasons.invalidCities.size,
+        list: Array.from(skipReasons.invalidCities).sort(),
+      },
+      examples: skipReasons.examples,
+    };
+
+    // Nombre del archivo con timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `skip-reasons-${categorySlug}-${timestamp}.json`;
+    const filepath = path.join(logsDir, filename);
+
+    console.log(`📝 Escribiendo archivo: ${filepath}`);
+
+    // Escribir archivo
+    await fs.writeFile(filepath, JSON.stringify(exportData, null, 2), 'utf8');
+
+    console.log(`✅ Archivo creado exitosamente`);
+    console.log(`📁 Detalles de omisiones exportados a: ${filepath}`);
+    console.log(
+      `📊 Total de provincias no reconocidas: ${skipReasons.unknownProvinces.size}`
+    );
+  } catch (error) {
+    console.error('❌ Error exportando detalles:', error);
+    console.error('Stack trace:', error);
+
+    // Intentar crear en directorio actual como fallback
+    try {
+      console.log('🔄 Intentando crear en directorio actual...');
+      const fallbackFilename = `skip-reasons-${categorySlug}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      const fallbackPath = path.join(process.cwd(), fallbackFilename);
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        category: categorySlug,
+        summary: {
+          totalSuccess: totalSuccess,
+          invalidStructure: skipReasons.invalidStructure,
+          missingLocation: skipReasons.missingLocation,
+          invalidCityLength: skipReasons.invalidCityLength,
+          invalidCityNumbers: skipReasons.invalidCityNumbers,
+          unknownProvince: skipReasons.unknownProvince,
+          provinceNotInDB: skipReasons.provinceNotInDB,
+          wrongCountry: skipReasons.wrongCountry,
+          totalSkipped:
+            skipReasons.invalidStructure +
+            skipReasons.missingLocation +
+            skipReasons.invalidCityLength +
+            skipReasons.invalidCityNumbers +
+            skipReasons.unknownProvince +
+            skipReasons.provinceNotInDB +
+            skipReasons.wrongCountry,
+          totalProcessed:
+            totalSuccess +
+            skipReasons.invalidStructure +
+            skipReasons.missingLocation +
+            skipReasons.invalidCityLength +
+            skipReasons.invalidCityNumbers +
+            skipReasons.unknownProvince +
+            skipReasons.provinceNotInDB +
+            skipReasons.wrongCountry,
+        },
+        unknownProvinces: {
+          count: skipReasons.unknownProvinces.size,
+          list: Array.from(skipReasons.unknownProvinces).sort(),
+        },
+        wrongCountries: {
+          count: skipReasons.wrongCountries.size,
+          list: Array.from(skipReasons.wrongCountries).sort(),
+        },
+        invalidCities: {
+          count: skipReasons.invalidCities.size,
+          list: Array.from(skipReasons.invalidCities).sort(),
+        },
+        examples: skipReasons.examples,
+      };
+
+      await fs.writeFile(
+        fallbackPath,
+        JSON.stringify(exportData, null, 2),
+        'utf8'
+      );
+      console.log(`✅ Archivo fallback creado en: ${fallbackPath}`);
+    } catch (fallbackError) {
+      console.error('❌ Error también en fallback:', fallbackError);
+    }
+  }
+}
+
 async function main() {
   const startTime = Date.now();
 
@@ -638,10 +1058,21 @@ async function main() {
 
   try {
     // Parsear argumentos
-    const { filePath, categorySlug } = parseArguments();
+    const { filePath, categorySlug, countryCode } = parseArguments();
 
     console.log(`📂 Archivo: ${filePath}`);
     console.log(`🏷️  Categoría: ${categorySlug}`);
+    console.log(`🌍 País: ${countryCode}`);
+
+    // Validar que el código de país esté soportado
+    if (!provinceLookup[countryCode]) {
+      const supportedCountries = Object.keys(provinceLookup).join(', ');
+      throw new Error(
+        `❌ Código de país no soportado: '${countryCode}'. ` +
+          `Países disponibles: ${supportedCountries}`
+      );
+    }
+    console.log(`✅ País soportado: ${countryCode}`);
 
     // Verificar que el archivo exista
     try {
@@ -654,7 +1085,7 @@ async function main() {
     const categoryId = await validateCategory(categorySlug);
 
     console.log('🚀 Iniciando procesamiento masivo...');
-    await processStreamingData(filePath, categoryId);
+    await processStreamingData(filePath, categoryId, categorySlug, countryCode);
 
     // 🔥 Agregar la actualización de location después del procesamiento
     console.log('📍 Actualizando columna location...');
