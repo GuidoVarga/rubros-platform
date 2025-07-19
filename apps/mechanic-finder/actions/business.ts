@@ -3,6 +3,12 @@
 import { prisma } from '@rubros/db';
 import type { BusinessEntity } from '@rubros/db/entities';
 import type { GetBusinessesParams, BusinessFilters } from '@/types/business';
+
+// Tipo extendido para incluir campos calculados
+export type BusinessWithCalculatedFields = BusinessEntity & {
+  distance?: number;
+  isOpen?: boolean;
+};
 import { buildWhereClause } from '@/actions/utils';
 import { Categories } from '@rubros/db';
 import {
@@ -83,6 +89,7 @@ export async function getBusinesses({
     })) as BusinessEntity[];
 
     // Si tenemos ubicación del usuario, agregar distancia a cada negocio
+    // También agregar el campo isOpen a todos los negocios
     let businessesWithDistance = businesses;
     if (userLocation) {
       businessesWithDistance = businesses.map((business) => ({
@@ -97,11 +104,22 @@ export async function getBusinesses({
                 { latitude: business.latitude, longitude: business.longitude }
               )
             : undefined,
+        isOpen: business.hours
+          ? isOpenNow(business.hours as HourEntry[])
+          : false,
+      }));
+    } else {
+      // Agregar isOpen sin distancia
+      businessesWithDistance = businesses.map((business) => ({
+        ...business,
+        isOpen: business.hours
+          ? isOpenNow(business.hours as HourEntry[])
+          : false,
       }));
     }
 
     return {
-      businesses: businessesWithDistance,
+      businesses: businessesWithDistance as BusinessWithCalculatedFields[],
       pagination: {
         total,
         pages: Math.ceil(total / pagination.limit),
@@ -276,6 +294,79 @@ async function getBusinessesByDistance({
     ) / 1000 as distance,`
     : '';
 
+  // Campo calculado para determinar si está abierto
+  const isOpenSelect = `
+    CASE WHEN EXISTS (
+      SELECT 1
+      FROM jsonb_array_elements(b.hours::jsonb) AS hour_entry
+      WHERE
+        -- Convertir el día a español y comparar con el día actual
+        CASE
+          WHEN hour_entry->>'day' = 'lunes' THEN 1
+          WHEN hour_entry->>'day' = 'martes' THEN 2
+          WHEN hour_entry->>'day' = 'miércoles' OR hour_entry->>'day' = 'miercoles' THEN 3
+          WHEN hour_entry->>'day' = 'jueves' THEN 4
+          WHEN hour_entry->>'day' = 'viernes' THEN 5
+          WHEN hour_entry->>'day' = 'sábado' OR hour_entry->>'day' = 'sabado' THEN 6
+          WHEN hour_entry->>'day' = 'domingo' THEN 0
+          ELSE -1
+        END = EXTRACT(DOW FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires')
+        AND EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements_text(hour_entry->'times') AS time_range
+          WHERE
+            time_range NOT ILIKE '%cerrado%'
+            AND time_range NOT ILIKE '%closed%'
+            AND (
+              -- Regex mejorado que maneja múltiples formatos de horarios con minutos
+              -- Soporta: "8 a. m.-5 p. m.", "8:30 a. m. a 7 p. m.", "9:00 a. m. - 5:00 p. m.", "2:00 p. m. - 6:30 p. m."
+              CASE
+                -- Formato AM a PM sin minutos: "8 a. m.-5 p. m."
+                WHEN time_range ~ '^[0-9]{1,2} a\\. m\\.-[0-9]{1,2} p\\. m\\.$' THEN
+                  (
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                    CAST(regexp_replace(time_range, '^([0-9]{1,2}) a\\. m\\.-.*', '\\1') AS INTEGER) * 100
+                    AND
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                    (CAST(regexp_replace(time_range, '.*-([0-9]{1,2}) p\\. m\\.$', '\\1') AS INTEGER) + 12) * 100
+                  )
+                -- Formato AM a PM con minutos: "8:30 a. m.-7:15 p. m." o "8:30 a. m. a 7:15 p. m."
+                WHEN time_range ~ '^[0-9]{1,2}:[0-9]{2} a\\. m\\.[\\s\\-a]*[0-9]{1,2}:[0-9]{2} p\\. m\\.$' THEN
+                  (
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                    CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) a\\. m\\..*', '\\1') AS INTEGER) * 100 +
+                    CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) a\\. m\\..*', '\\2') AS INTEGER)
+                    AND
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                    (CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) + 12) * 100 +
+                    CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\2') AS INTEGER)
+                  )
+                -- Formato PM a PM con minutos: "2:00 p. m. - 6:30 p. m."
+                WHEN time_range ~ '^[0-9]{1,2}:[0-9]{2} p\\. m\\.[\\s\\-a]*[0-9]{1,2}:[0-9]{2} p\\. m\\.$' THEN
+                  (
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') >=
+                    (CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\1') AS INTEGER) +
+                     CASE WHEN CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\1') AS INTEGER) = 12 THEN 0 ELSE 12 END) * 100 +
+                    CAST(regexp_replace(time_range, '^([0-9]{1,2}):([0-9]{2}) p\\. m\\..*', '\\2') AS INTEGER)
+                    AND
+                    EXTRACT(HOUR FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') * 100 +
+                    EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') <=
+                    (CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) +
+                     CASE WHEN CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\1') AS INTEGER) = 12 THEN 0 ELSE 12 END) * 100 +
+                    CAST(regexp_replace(time_range, '.*[\\s\\-a]*([0-9]{1,2}):([0-9]{2}) p\\. m\\.$', '\\2') AS INTEGER)
+                  )
+                -- Si no coincide con formatos conocidos, conservadoramente asumir cerrado
+                ELSE false
+              END
+            )
+        )
+    ) THEN true ELSE false END as is_open,`;
+
   const businessesQuery = `
     SELECT
       b.id,
@@ -302,6 +393,7 @@ async function getBusinessesByDistance({
       b."updatedAt",
       b."categoryId",
       b."cityId",${distanceSelect}
+      ${isOpenSelect}
       c.name as category_name,
       c.slug as category_slug,
       c.icon as category_icon,
@@ -379,6 +471,8 @@ async function getBusinessesByDistance({
     cityId: row.cityId,
     // Add distance from SQL result if available, otherwise calculate it
     distance: row.distance ? Number(row.distance) : undefined,
+    // Add isOpen field from SQL result
+    isOpen: Boolean(row.is_open),
     category: {
       id: row.category_id,
       name: row.category_name,
@@ -410,7 +504,7 @@ async function getBusinessesByDistance({
   }));
 
   return {
-    businesses,
+    businesses: businesses as BusinessWithCalculatedFields[],
     pagination: {
       total,
       pages: Math.ceil(total / pagination.limit),

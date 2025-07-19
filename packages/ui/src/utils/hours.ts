@@ -179,72 +179,138 @@ export const getBusinessHoursString = (
   return parsed.join('. ');
 };
 
-// Función para verificar si está abierto ahora (opcional)
+// Función para verificar si está abierto ahora (mejorada para consistencia con SQL)
 export const isOpenNow = (
   hours: HourEntry[] | null | undefined
 ): boolean | undefined => {
   if (!hours?.length || !Array.isArray(hours)) return undefined;
 
   const now = new Date();
-  const currentDay = now
-    .toLocaleDateString('es-ES', { weekday: 'long' })
-    .toLowerCase();
+
+  // Mapeo manual de días para evitar problemas de acentos
+  const dayMap: Record<number, string> = {
+    0: 'domingo',
+    1: 'lunes',
+    2: 'martes',
+    3: 'miércoles', // Probar ambas versiones
+    4: 'jueves',
+    5: 'viernes',
+    6: 'sábado', // Probar ambas versiones
+  };
+
+  const currentDayNumber = now.getDay();
   const currentTime = now.getHours() * 100 + now.getMinutes(); // HHMM format
 
-  const todayHours = hours.find((h) => h.day.toLowerCase() === currentDay);
+  // Buscar horarios para hoy probando múltiples variantes del día
+  const possibleDayNames = [
+    dayMap[currentDayNumber]!,
+    dayMap[currentDayNumber]!.normalize('NFD').replace(/[\u0300-\u036f]/g, ''), // Sin acentos
+  ];
+
+  const todayHours = hours.find((h) =>
+    possibleDayNames.some(
+      (dayName) => h.day.toLowerCase() === dayName.toLowerCase()
+    )
+  );
 
   if (!todayHours || !todayHours.times || todayHours.times.length === 0) {
     return false;
   }
 
   // Verificar si dice "Cerrado"
-  if (todayHours.times.some((time) => time.toLowerCase().includes('cerrado'))) {
+  if (
+    todayHours.times.some(
+      (time) =>
+        time.toLowerCase().includes('cerrado') ||
+        time.toLowerCase().includes('closed')
+    )
+  ) {
     return false;
   }
 
   // Parsear horarios para verificar si está abierto
   return todayHours.times.some((timeRange) => {
-    // Regex pattern que maneja horas con minutos opcionales y diferentes combinaciones AM/PM
-    // Formatos soportados:
-    // - "8 a. m.-5 p. m."
-    // - "8:30 a. m.-7 p. m."
-    // - "9:00 a. m. - 5:00 p. m."
-    // - "8:30 a. m. a 7 p. m."
-    // - "2:00 p. m. - 6:30 p. m."
-    // - "8:00 a. m. - 11:00 a. m."
-    const timePattern =
-      /(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|am|p\.\s*m\.|pm)\s*(?:-|a)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|am|p\.\s*m\.|pm)/i;
-    const match = timeRange.match(timePattern);
+    // Limpiar espacios extra
+    const cleanTimeRange = timeRange.trim();
 
-    if (!match) return false;
+    // Patrones mejorados que manejan los formatos reales:
+    // "2-7 p. m.", "2-7:30 p. m.", "10 a. m.-8 p. m.", "8:30 a. m.-7:15 p. m."
 
-    // Extraer horas, minutos y períodos
-    const openHour = parseInt(match[1]!);
-    const openMinute = parseInt(match[2] || '0');
-    const openPeriod = match[3]!.toLowerCase();
-    const closeHour = parseInt(match[4]!);
-    const closeMinute = parseInt(match[5] || '0');
-    const closePeriod = match[6]!.toLowerCase();
+    // Patrón 1: Formato "X a. m.-Y p. m." (con AM explícito en inicio)
+    let match = cleanTimeRange.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*a\.\s*m\.\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*p\.\s*m\.$/i
+    );
+    if (match) {
+      const openHour = parseInt(match[1]!);
+      const openMinute = parseInt(match[2] || '0');
+      const closeHour = parseInt(match[3]!);
+      const closeMinute = parseInt(match[4] || '0');
 
-    // Convertir a formato 24h
-    let openTime24 = openHour * 100 + openMinute;
-    let closeTime24 = closeHour * 100 + closeMinute;
+      let openTime24 = openHour * 100 + openMinute;
+      let closeTime24 = closeHour * 100 + closeMinute;
 
-    // Convertir AM/PM a formato 24h
-    if (openPeriod.includes('p') && openHour !== 12) {
-      openTime24 += 1200;
-    } else if (openPeriod.includes('a') && openHour === 12) {
-      openTime24 -= 1200;
+      // Manejar 12 a.m. = 00:xx
+      if (openHour === 12) {
+        openTime24 = openMinute;
+      }
+
+      // Manejar PM para hora de cierre - 12 p.m. = 1200 (mediodía)
+      if (closeHour !== 12) {
+        closeTime24 += 1200; // Solo agregar 12 horas si no es 12 p.m.
+      }
+
+      return currentTime >= openTime24 && currentTime <= closeTime24;
     }
 
-    if (closePeriod.includes('p') && closeHour !== 12) {
-      closeTime24 += 1200;
-    } else if (closePeriod.includes('a') && closeHour === 12) {
-      closeTime24 -= 1200;
+    // Patrón 2: Formato "X-Y p. m." (solo PM al final)
+    match = cleanTimeRange.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*p\.\s*m\.$/i
+    );
+    if (match) {
+      const openHour = parseInt(match[1]!) + 12; // Asumir PM también para la apertura
+      const openMinute = parseInt(match[2] || '0');
+      const closeHour = parseInt(match[3]!) + 12; // PM
+      const closeMinute = parseInt(match[4] || '0');
+
+      const openTime24 = openHour * 100 + openMinute;
+      const closeTime24 = closeHour * 100 + closeMinute;
+
+      return currentTime >= openTime24 && currentTime <= closeTime24;
     }
 
-    // Verificar si la hora actual está dentro del rango
-    return currentTime >= openTime24 && currentTime <= closeTime24;
+    // Patrón 3: Formato completo "X:XX a. m. a Y:XX p. m." o "X:XX p. m. - Y:XX p. m."
+    match = cleanTimeRange.match(
+      /^(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|p\.\s*m\.)\s*(?:[-–]|a)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.\s*m\.|p\.\s*m\.)$/i
+    );
+    if (match) {
+      const openHour = parseInt(match[1]!);
+      const openMinute = parseInt(match[2] || '0');
+      const openPeriod = match[3]!.toLowerCase();
+      const closeHour = parseInt(match[4]!);
+      const closeMinute = parseInt(match[5] || '0');
+      const closePeriod = match[6]!.toLowerCase();
+
+      let openTime24 = openHour * 100 + openMinute;
+      let closeTime24 = closeHour * 100 + closeMinute;
+
+      // Convertir AM/PM a formato 24h
+      if (openPeriod.includes('p') && openHour !== 12) {
+        openTime24 += 1200;
+      } else if (openPeriod.includes('a') && openHour === 12) {
+        openTime24 = openMinute; // 12 a.m. es 00:xx
+      }
+
+      if (closePeriod.includes('p') && closeHour !== 12) {
+        closeTime24 += 1200;
+      } else if (closePeriod.includes('a') && closeHour === 12) {
+        closeTime24 = closeMinute; // 12 a.m. es 00:xx
+      }
+
+      return currentTime >= openTime24 && currentTime <= closeTime24;
+    }
+
+    // Si no coincide con ningún patrón conocido, conservadoramente asumir cerrado
+    return false;
   });
 };
 
