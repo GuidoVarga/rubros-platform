@@ -2,21 +2,43 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { pageview, GA_TRACKING_ID } from '@/lib/analytics';
+import { canUseAnalytics, getCurrentConsent } from '@/lib/cookies';
 
 export default function GoogleAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [hasAnalyticsConsent, setHasAnalyticsConsent] = useState(false);
 
+  // Check consent on mount and listen for changes
   useEffect(() => {
-    if (pathname) {
+    const checkConsent = () => {
+      setHasAnalyticsConsent(canUseAnalytics());
+    };
+
+    // Check initial consent
+    checkConsent();
+
+    // Listen for consent changes
+    const handleConsentChange = () => {
+      checkConsent();
+    };
+
+    window.addEventListener('cookieConsentChanged', handleConsentChange);
+    return () => window.removeEventListener('cookieConsentChanged', handleConsentChange);
+  }, []);
+
+  // Track pageviews only if consent is given
+  useEffect(() => {
+    if (pathname && hasAnalyticsConsent) {
       const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
       pageview(url);
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, hasAnalyticsConsent]);
 
-  if (!GA_TRACKING_ID || process.env.NODE_ENV !== 'production') {
+  // Don't render GA if no consent, no tracking ID, or not production
+  if (!hasAnalyticsConsent || !GA_TRACKING_ID || process.env.NODE_ENV !== 'production') {
     return null;
   }
 
@@ -37,7 +59,10 @@ export default function GoogleAnalytics() {
             gtag('config', '${GA_TRACKING_ID}', {
               page_location: window.location.href,
               page_title: document.title,
-              send_page_view: false
+              send_page_view: false,
+              anonymize_ip: true,
+              allow_google_signals: false,
+              allow_ad_personalization_signals: false
             });
           `,
         }}

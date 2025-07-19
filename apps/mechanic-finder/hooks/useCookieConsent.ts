@@ -10,38 +10,35 @@ import {
 
 export function useCookieConsent() {
   const [consent, setConsent] = useState<CookieConsent | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasAnalyticsConsent, setHasAnalyticsConsent] = useState(false);
+  const [hasAdvertisingConsent, setHasAdvertisingConsent] = useState(false);
 
   useEffect(() => {
-    // Cargar consentimiento inicial
-    setConsent(getCurrentConsent());
-    setIsLoaded(true);
-
-    // Escuchar cambios en el consentimiento
-    const handleConsentChange = (event: CustomEvent) => {
-      setConsent(event.detail as CookieConsent);
+    const updateConsent = () => {
+      const currentConsent = getCurrentConsent();
+      setConsent(currentConsent);
+      setHasAnalyticsConsent(canUseAnalytics());
+      setHasAdvertisingConsent(canUseAdvertising());
     };
 
-    window.addEventListener(
-      'cookieConsentChanged',
-      handleConsentChange as EventListener
-    );
+    // Initial check
+    updateConsent();
 
-    return () => {
-      window.removeEventListener(
-        'cookieConsentChanged',
-        handleConsentChange as EventListener
-      );
+    // Listen for changes
+    const handleConsentChange = () => {
+      updateConsent();
     };
+
+    window.addEventListener('cookieConsentChanged', handleConsentChange);
+    return () =>
+      window.removeEventListener('cookieConsentChanged', handleConsentChange);
   }, []);
 
   return {
     consent,
-    isLoaded,
-    canUseAnalytics: isLoaded ? canUseAnalytics() : false,
-    canUseAdvertising: isLoaded ? canUseAdvertising() : false,
-    hasNecessary: consent?.necessary ?? true,
-    hasAnalytics: consent?.analytics ?? false,
-    hasAdvertising: consent?.advertising ?? false,
+    hasAnalyticsConsent,
+    hasAdvertisingConsent,
+    canUseAnalytics: hasAnalyticsConsent,
+    canUseAdvertising: hasAdvertisingConsent,
   };
 }
