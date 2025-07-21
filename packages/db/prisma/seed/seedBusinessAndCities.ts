@@ -164,6 +164,75 @@ const cabaProvinces = [
 ];
 
 // Whitelist de ciudades que tienen números válidos en su nombre
+const CpaCodeLookup = {
+  B1611BWT: 'Don Torcuato',
+  P3600HWA: 'Formosa',
+  P3600HWB: 'Formosa',
+  P3600HWC: 'Formosa',
+  P3600HWD: 'Formosa',
+  P3600HWE: 'Formosa',
+  P3600HWF: 'Formosa',
+  P3600HWG: 'Formosa',
+  P3600HWH: 'Formosa',
+  P3600HWI: 'Formosa',
+  P3600HWJ: 'Formosa',
+  P3600HWK: 'Formosa',
+  P3600HWL: 'Formosa',
+  P3600HWM: 'Formosa',
+  P3600HWN: 'Formosa',
+  P3600HWO: 'Formosa',
+  P3600HWP: 'Formosa',
+  P3600HWQ: 'Formosa',
+  P3600HWR: 'Formosa',
+  P3600HWS: 'Formosa',
+  P3600HWT: 'Formosa',
+  P3600HWU: 'Formosa',
+  P3600HWV: 'Formosa',
+  P3600HWW: 'Formosa',
+  P3600HWX: 'Formosa',
+  P3600HWY: 'Formosa',
+  P3600HWZ: 'Formosa',
+  P3600HXA: 'Formosa',
+  P3600HXB: 'Formosa',
+  P3600HXC: 'Formosa',
+  P3600HXD: 'Formosa',
+  P3600HXF: 'Formosa',
+  P3600HXG: 'Formosa',
+  P3600HXH: 'Formosa',
+  P3600HXI: 'Formosa',
+  P3600HXJ: 'Formosa',
+  P3600HXK: 'Formosa',
+  P3600HXL: 'Formosa',
+  P3600HXM: 'Formosa',
+  P3600HXN: 'Formosa',
+  P3600HXO: 'Formosa',
+  P3600HXP: 'Formosa',
+  P3600HXQ: 'Formosa',
+  P3600HXR: 'Formosa',
+  P3600HXS: 'Formosa',
+  P3600HXT: 'Formosa',
+  P3600HXU: 'Formosa',
+  P3600HXV: 'Formosa',
+  Q8300APZ: 'Neuquén',
+  Q8300BQL: 'Neuquén',
+  Q8300IZS: 'Neuquén',
+  Q8302GYC: 'Neuquén',
+  S3002BZS: 'San Luis',
+  S3002CEP: 'San Luis',
+  S3002DYJ: 'San Luis',
+  S3004ACN: 'San Luis',
+  S3004GPB: 'San Luis',
+  S3004KMG: 'San Luis',
+  S3006EXZ: 'San Luis',
+  S3006FPP: 'San Luis',
+  V9410ISE: 'Río Grande',
+  V9410JIK: 'Río Grande',
+  W3400ADN: 'Resistencia',
+  W3410BAX: 'Resistencia',
+  X5004AER: 'Santa Fe de La Vera Cruz',
+};
+
+// Whitelist de ciudades que tienen números válidos en su nombre
 const cityNumberWhitelist = [
   '25 de mayo',
   // Agregar más ciudades aquí según sea necesario
@@ -240,6 +309,15 @@ function findCABABarrio(
   return normalizedBarrio || null;
 }
 
+// Función helper para buscar códigos CPA
+function findCPACode(cityName: string): string | null {
+  if (!cityName) return null;
+
+  // Buscar coincidencia exacta en CpaCodeLookup
+  const foundCity = CpaCodeLookup[cityName as keyof typeof CpaCodeLookup];
+  return foundCity || null;
+}
+
 // Validación de calidad de datos para ciudades
 function validateCityName(cityName: string, isCABA: boolean = false): boolean {
   if (!cityName || typeof cityName !== 'string') {
@@ -253,18 +331,28 @@ function validateCityName(cityName: string, isCABA: boolean = false): boolean {
     return false;
   }
 
-  // Si contiene números, verificar si es un barrio válido de CABA o está en whitelist
+  // Si contiene números, verificar múltiples opciones
   if (/\d/.test(trimmedName)) {
-    if (isCABA) {
-      // Si es CABA, verificar si es un barrio válido
-      return findCABABarrio(trimmedName) !== null;
-    } else {
-      // Si no es CABA, verificar si está en la whitelist
+    // 1. Verificar si es un código CPA válido
+    if (findCPACode(trimmedName)) {
+      return true;
+    }
+
+    // 2. Si es CABA, verificar si es un barrio válido
+    if (isCABA && findCABABarrio(trimmedName)) {
+      return true;
+    }
+
+    // 3. Si no es CABA, verificar si está en la whitelist
+    if (!isCABA) {
       const lowerCityName = trimmedName.toLowerCase();
       return cityNumberWhitelist.some(
         (city) => city.toLowerCase() === lowerCityName
       );
     }
+
+    // Si no coincide con ninguna opción, rechazar
+    return false;
   }
 
   return true;
@@ -583,12 +671,14 @@ async function processStreamingData(
     duplicatedBusiness: 0, // ✅ Nuevo contador para duplicados
     skippedByDatabase: 0, // ✅ Será actualizado al final con totalSkippedByDB
     acceptedByWhitelist: 0, // ✅ Nuevo contador para ciudades aceptadas por whitelist
+    acceptedByCPA: 0, // ✅ Nuevo contador para ciudades resueltas via CPA codes
     unknownProvinces: new Set<string>(),
     wrongCountries: new Set<string>(),
     invalidCities: new Set<string>(),
     unknownBarriosCABA: new Set<string>(),
     duplicatedSlugs: new Set<string>(), // ✅ Track slugs duplicados
     whitelistCities: new Set<string>(), // ✅ Track ciudades aceptadas por whitelist
+    cpaCities: new Set<string>(), // ✅ Track ciudades resueltas via CPA codes
     examples: {
       invalidStructure: [] as any[],
       missingLocation: [] as any[],
@@ -715,7 +805,7 @@ async function processStreamingData(
                   detailed_address: business.detailed_address,
                   address: business.address,
                 },
-                reason: `Ciudad contiene números, no es barrio de CABA válido, y no está en whitelist: '${cityRaw}'`,
+                reason: `Ciudad contiene números, no es código CPA válido, no es barrio de CABA válido, y no está en whitelist: '${cityRaw}'`,
               });
             }
           }
@@ -731,18 +821,27 @@ async function processStreamingData(
           return;
         }
 
-        // Log para ciudades aceptadas por whitelist
-        if (!isCABA && /\d/.test(cityRaw || '')) {
-          const lowerCityName = cityRaw.toLowerCase();
-          const isInWhitelist = cityNumberWhitelist.some(
-            (city) => city.toLowerCase() === lowerCityName
-          );
-          if (isInWhitelist) {
-            skipReasons.acceptedByWhitelist++;
-            skipReasons.whitelistCities.add(cityRaw);
-            console.log(
-              `✅ Ciudad con números aceptada por whitelist: '${cityRaw}'`
+        // Log para ciudades aceptadas por whitelist o CPA
+        if (/\d/.test(cityRaw || '')) {
+          // Verificar CPA code primero
+          const cpaCity = findCPACode(cityRaw);
+          if (cpaCity) {
+            skipReasons.acceptedByCPA++;
+            skipReasons.cpaCities.add(cityRaw);
+            console.log(`✅ Código CPA resuelto: '${cityRaw}' → '${cpaCity}'`);
+          } else if (!isCABA) {
+            // Solo verificar whitelist si no es CPA y no es CABA
+            const lowerCityName = cityRaw.toLowerCase();
+            const isInWhitelist = cityNumberWhitelist.some(
+              (city) => city.toLowerCase() === lowerCityName
             );
+            if (isInWhitelist) {
+              skipReasons.acceptedByWhitelist++;
+              skipReasons.whitelistCities.add(cityRaw);
+              console.log(
+                `✅ Ciudad con números aceptada por whitelist: '${cityRaw}'`
+              );
+            }
           }
         }
 
@@ -798,11 +897,19 @@ async function processStreamingData(
           return;
         }
 
-        // Para CABA, normalizar usando el lookup de barrios
+        // Normalizar nombre de ciudad
         let finalCityName = cityRaw;
         let citySlug = slugify(cityRaw);
 
-        if (isCABA && cityRaw) {
+        // Verificar si es un código CPA válido primero
+        const cpaCity = findCPACode(cityRaw);
+        if (cpaCity) {
+          finalCityName = cpaCity;
+          citySlug = slugify(cpaCity);
+        }
+
+        // Para CABA, normalizar usando el lookup de barrios (solo si no fue resuelto por CPA)
+        if (isCABA && cityRaw && !cpaCity) {
           const normalizedBarrio = findCABABarrio(cityRaw);
 
           if (normalizedBarrio) {
@@ -1060,6 +1167,9 @@ async function processStreamingData(
   console.log(
     `   • Ciudades aceptadas por whitelist: ${skipReasons.acceptedByWhitelist.toLocaleString()}`
   );
+  console.log(
+    `   • Ciudades resueltas por CPA codes: ${skipReasons.acceptedByCPA.toLocaleString()}`
+  );
 
   // Mostrar desglose detallado de omisiones
   console.log(`\n📊 Desglose de registros omitidos:`);
@@ -1186,6 +1296,21 @@ async function processStreamingData(
       );
     }
   }
+
+  if (skipReasons.cpaCities.size > 0) {
+    console.log(`\n🏷️  Códigos CPA resueltos (primeros 10):`);
+    Array.from(skipReasons.cpaCities)
+      .slice(0, 10)
+      .forEach((code, i) => {
+        const resolvedCity = findCPACode(code);
+        console.log(`   ${i + 1}. "${code}" → "${resolvedCity}"`);
+      });
+    if (skipReasons.cpaCities.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.cpaCities.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
 }
 
 async function updateMissingLocations() {
@@ -1246,6 +1371,7 @@ async function exportSkipReasons(
         duplicatedBusiness: skipReasons.duplicatedBusiness,
         skippedByDatabase: skipReasons.skippedByDatabase,
         acceptedByWhitelist: skipReasons.acceptedByWhitelist,
+        acceptedByCPA: skipReasons.acceptedByCPA,
         totalSkippedByValidation:
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
@@ -1271,19 +1397,39 @@ async function exportSkipReasons(
       },
       unknownProvinces: {
         count: skipReasons.unknownProvinces.size,
+        businessesSkipped: skipReasons.unknownProvince,
         list: Array.from(skipReasons.unknownProvinces).sort(),
       },
       wrongCountries: {
         count: skipReasons.wrongCountries.size,
+        businessesSkipped: skipReasons.wrongCountry,
         list: Array.from(skipReasons.wrongCountries).sort(),
       },
       invalidCities: {
         count: skipReasons.invalidCities.size,
+        businessesSkipped:
+          skipReasons.invalidCityLength + skipReasons.invalidCityNumbers,
         list: Array.from(skipReasons.invalidCities).sort(),
       },
       unknownBarriosCABA: {
         count: skipReasons.unknownBarriosCABA.size,
+        businessesSkipped: skipReasons.unknownBarrioCABA,
         list: Array.from(skipReasons.unknownBarriosCABA).sort(),
+      },
+      duplicatedSlugs: {
+        count: skipReasons.duplicatedSlugs.size,
+        businessesSkipped: skipReasons.duplicatedBusiness,
+        list: Array.from(skipReasons.duplicatedSlugs).sort(),
+      },
+      whitelistCities: {
+        count: skipReasons.whitelistCities.size,
+        businessesSkipped: skipReasons.acceptedByWhitelist,
+        list: Array.from(skipReasons.whitelistCities).sort(),
+      },
+      cpaCities: {
+        count: skipReasons.cpaCities.size,
+        businessesSkipped: skipReasons.acceptedByCPA,
+        list: Array.from(skipReasons.cpaCities).sort(),
       },
       examples: skipReasons.examples,
     };
@@ -1330,6 +1476,7 @@ async function exportSkipReasons(
           duplicatedBusiness: skipReasons.duplicatedBusiness,
           skippedByDatabase: skipReasons.skippedByDatabase,
           acceptedByWhitelist: skipReasons.acceptedByWhitelist,
+          acceptedByCPA: skipReasons.acceptedByCPA,
           totalSkippedByValidation:
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
@@ -1355,27 +1502,39 @@ async function exportSkipReasons(
         },
         unknownProvinces: {
           count: skipReasons.unknownProvinces.size,
+          businessesSkipped: skipReasons.unknownProvince,
           list: Array.from(skipReasons.unknownProvinces).sort(),
         },
         wrongCountries: {
           count: skipReasons.wrongCountries.size,
+          businessesSkipped: skipReasons.wrongCountry,
           list: Array.from(skipReasons.wrongCountries).sort(),
         },
         invalidCities: {
           count: skipReasons.invalidCities.size,
+          businessesSkipped:
+            skipReasons.invalidCityLength + skipReasons.invalidCityNumbers,
           list: Array.from(skipReasons.invalidCities).sort(),
         },
         unknownBarriosCABA: {
           count: skipReasons.unknownBarriosCABA.size,
+          businessesSkipped: skipReasons.unknownBarrioCABA,
           list: Array.from(skipReasons.unknownBarriosCABA).sort(),
         },
         duplicatedSlugs: {
           count: skipReasons.duplicatedSlugs.size,
+          businessesSkipped: skipReasons.duplicatedBusiness,
           list: Array.from(skipReasons.duplicatedSlugs).sort(),
         },
         whitelistCities: {
           count: skipReasons.whitelistCities.size,
+          businessesSkipped: skipReasons.acceptedByWhitelist,
           list: Array.from(skipReasons.whitelistCities).sort(),
+        },
+        cpaCities: {
+          count: skipReasons.cpaCities.size,
+          businessesSkipped: skipReasons.acceptedByCPA,
+          list: Array.from(skipReasons.cpaCities).sort(),
         },
         examples: skipReasons.examples,
       };
