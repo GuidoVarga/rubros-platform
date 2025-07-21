@@ -95,6 +95,67 @@ const provinceLookup: Record<
   },
 };
 
+// Tabla de equivalencias para barrios de CABA
+const barriosCABALookup: Record<string, { name: string; slug: string }> = {
+  agronomia: { name: 'Agronomía', slug: 'agronomia' },
+  almagro: { name: 'Almagro', slug: 'almagro' },
+  balvanera: { name: 'Balvanera', slug: 'balvanera' },
+  barracas: { name: 'Barracas', slug: 'barracas' },
+  belgrano: { name: 'Belgrano', slug: 'belgrano' },
+  boedo: { name: 'Boedo', slug: 'boedo' },
+  caballito: { name: 'Caballito', slug: 'caballito' },
+  chacarita: { name: 'Chacarita', slug: 'chacarita' },
+  coghlan: { name: 'Coghlan', slug: 'coghlan' },
+  colegiales: { name: 'Colegiales', slug: 'colegiales' },
+  constitucion: { name: 'Constitución', slug: 'constitucion' },
+  'constitución': { name: 'Constitución', slug: 'constitucion' },
+  flores: { name: 'Flores', slug: 'flores' },
+  floresta: { name: 'Floresta', slug: 'floresta' },
+  'la boca': { name: 'La Boca', slug: 'la-boca' },
+  'la paternal': { name: 'La Paternal', slug: 'la-paternal' },
+  liniers: { name: 'Liniers', slug: 'liniers' },
+  mataderos: { name: 'Mataderos', slug: 'mataderos' },
+  'monte castro': { name: 'Monte Castro', slug: 'monte-castro' },
+  monserrat: { name: 'Monserrat', slug: 'monserrat' },
+  'nueva pompeya': { name: 'Nueva Pompeya', slug: 'nueva-pompeya' },
+  nunez: { name: 'Núñez', slug: 'nunez' },
+  'núñez': { name: 'Núñez', slug: 'nunez' },
+  palermo: { name: 'Palermo', slug: 'palermo' },
+  'parque avellaneda': { name: 'Parque Avellaneda', slug: 'parque-avellaneda' },
+  'parque chacabuco': { name: 'Parque Chacabuco', slug: 'parque-chacabuco' },
+  'parque patricios': { name: 'Parque Patricios', slug: 'parque-patricios' },
+  'puerto madero': { name: 'Puerto Madero', slug: 'puerto-madero' },
+  recoleta: { name: 'Recoleta', slug: 'recoleta' },
+  retiro: { name: 'Retiro', slug: 'retiro' },
+  saavedra: { name: 'Saavedra', slug: 'saavedra' },
+  'san cristobal': { name: 'San Cristóbal', slug: 'san-cristobal' },
+  'san cristóbal': { name: 'San Cristóbal', slug: 'san-cristobal' },
+  'san nicolas': { name: 'San Nicolás', slug: 'san-nicolas' },
+  'san nicolás': { name: 'San Nicolás', slug: 'san-nicolas' },
+  'san telmo': { name: 'San Telmo', slug: 'san-telmo' },
+  'velez sarsfield': { name: 'Vélez Sarsfield', slug: 'velez-sarsfield' },
+  'vélez sarsfield': { name: 'Vélez Sarsfield', slug: 'velez-sarsfield' },
+  versalles: { name: 'Versalles', slug: 'versalles' },
+  'villa crespo': { name: 'Villa Crespo', slug: 'villa-crespo' },
+  'villa del parque': { name: 'Villa del Parque', slug: 'villa-del-parque' },
+  'villa devoto': { name: 'Villa Devoto', slug: 'villa-devoto' },
+  'villa general mitre': { name: 'Villa General Mitre', slug: 'villa-general-mitre' },
+  'villa lugano': { name: 'Villa Lugano', slug: 'villa-lugano' },
+  'villa luro': { name: 'Villa Luro', slug: 'villa-luro' },
+  'villa ortuzar': { name: 'Villa Ortúzar', slug: 'villa-ortuzar' },
+  'villa ortúzar': { name: 'Villa Ortúzar', slug: 'villa-ortuzar' },
+  'villa pueyrredon': { name: 'Villa Pueyrredón', slug: 'villa-pueyrredon' },
+  'villa pueyrredón': { name: 'Villa Pueyrredón', slug: 'villa-pueyrredon' },
+  'villa real': { name: 'Villa Real', slug: 'villa-real' },
+  'villa riachuelo': { name: 'Villa Riachuelo', slug: 'villa-riachuelo' },
+  'villa santa rita': { name: 'Villa Santa Rita', slug: 'villa-santa-rita' },
+  'villa soldati': { name: 'Villa Soldati', slug: 'villa-soldati' },
+  'villa urquiza': { name: 'Villa Urquiza', slug: 'villa-urquiza' },
+};
+
+// Identificar provincias que requieren procesamiento de barrios (CABA)
+const cabaProvinces = ['capital federal', 'cdad. autonoma de buenos aires', 'ciudad autonoma de buenos aires'];
+
 interface BusinessData {
   name: string;
   description: string;
@@ -105,6 +166,7 @@ interface BusinessData {
     city?: string;
     state?: string;
     country_code?: string;
+    ward?: string;
   };
   postal_code?: string;
   opening_hours?: string;
@@ -453,9 +515,11 @@ async function processStreamingData(
     unknownProvince: 0,
     provinceNotInDB: 0,
     wrongCountry: 0,
+    unknownBarrioCABA: 0,
     unknownProvinces: new Set<string>(),
     wrongCountries: new Set<string>(),
     invalidCities: new Set<string>(),
+    unknownBarriosCABA: new Set<string>(),
     examples: {
       invalidStructure: [] as any[],
       missingLocation: [] as any[],
@@ -464,6 +528,7 @@ async function processStreamingData(
       unknownProvince: [] as any[],
       provinceNotInDB: [] as any[],
       wrongCountry: [] as any[],
+      unknownBarrioCABA: [] as any[],
     },
   };
 
@@ -492,12 +557,17 @@ async function processStreamingData(
           return;
         }
 
-        const cityRaw = business.detailed_address?.city?.trim();
         const provinceRaw = business.detailed_address?.state
           ?.trim()
           .toLowerCase();
         const businessCountryCode =
           business.detailed_address?.country_code?.trim();
+
+        // Determinar si estamos procesando CABA para usar ward en lugar de city
+        const isCABA = cabaProvinces.includes(provinceRaw || '');
+        const cityRaw = isCABA 
+          ? business.detailed_address?.ward?.trim()
+          : business.detailed_address?.city?.trim();
 
         // Validar país
         if (businessCountryCode !== countryCode) {
@@ -523,20 +593,22 @@ async function processStreamingData(
           skipReasons.missingLocation++;
           // Guardar ejemplo (máximo 10)
           if (skipReasons.examples.missingLocation.length < 10) {
+            const locationField = isCABA ? 'ward' : 'city';
             skipReasons.examples.missingLocation.push({
               record: {
                 name: business.name,
                 detailed_address: business.detailed_address,
                 address: business.address,
               },
-              reason: `Falta ubicación: ciudad='${cityRaw}', provincia='${provinceRaw}'`,
+              reason: `Falta ubicación: ${locationField}='${cityRaw}', provincia='${provinceRaw}'`,
             });
           }
           skippedCount++;
           // Log específico para datos faltantes
           if (totalProcessed % 1000 === 0) {
+            const locationField = isCABA ? 'ward' : 'city';
             console.log(
-              `❗ Registro omitido - Falta ubicación: ciudad='${cityRaw}', provincia='${provinceRaw}' (registro #${totalProcessed})`
+              `❗ Registro omitido - Falta ubicación: ${locationField}='${cityRaw}', provincia='${provinceRaw}' (registro #${totalProcessed})`
             );
           }
           callback();
@@ -641,14 +713,49 @@ async function processStreamingData(
           return;
         }
 
-        const citySlug = slugify(cityRaw);
+        // Para CABA, normalizar usando el lookup de barrios
+        let finalCityName = cityRaw;
+        let citySlug = slugify(cityRaw);
+
+        if (isCABA && cityRaw) {
+          const normalizedBarrio = barriosCABALookup[cityRaw.toLowerCase()];
+          if (normalizedBarrio) {
+            finalCityName = normalizedBarrio.name;
+            citySlug = normalizedBarrio.slug;
+          } else {
+            // Barrio de CABA no reconocido
+            skipReasons.unknownBarrioCABA++;
+            skipReasons.unknownBarriosCABA.add(cityRaw);
+            // Guardar ejemplo (máximo 10)
+            if (skipReasons.examples.unknownBarrioCABA.length < 10) {
+              skipReasons.examples.unknownBarrioCABA.push({
+                record: {
+                  name: business.name,
+                  detailed_address: business.detailed_address,
+                  address: business.address,
+                },
+                reason: `Barrio de CABA no reconocido: '${cityRaw}'`,
+              });
+            }
+            skippedCount++;
+            // Log específico para barrios no reconocidos
+            if (totalProcessed % 1000 === 0) {
+              console.log(
+                `❗ Registro omitido - Barrio CABA no reconocido: '${cityRaw}' (registro #${totalProcessed})`
+              );
+            }
+            callback();
+            return;
+          }
+        }
+
         const cityKey = `${citySlug}|${provinceId}`;
 
         // Verificar si necesitamos crear la ciudad
         if (!cityMap.has(cityKey) && !uniqueCities.has(cityKey)) {
           uniqueCities.add(cityKey);
           citiesToCreate.push({
-            name: cityRaw,
+            name: finalCityName,
             slug: citySlug,
             provinceId,
           });
@@ -833,6 +940,9 @@ async function processStreamingData(
   console.log(
     `   • País incorrecto: ${skipReasons.wrongCountry.toLocaleString()}`
   );
+  console.log(
+    `   • Barrio CABA no reconocido: ${skipReasons.unknownBarrioCABA.toLocaleString()}`
+  );
 
   // Exportar detalles a JSON
   await exportSkipReasons(skipReasons, categorySlug, validBusinesses.length);
@@ -875,6 +985,20 @@ async function processStreamingData(
     if (skipReasons.invalidCities.size > 10) {
       console.log(
         `   ... y ${skipReasons.invalidCities.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
+
+  if (skipReasons.unknownBarriosCABA.size > 0) {
+    console.log(`\n❗ Barrios de CABA no reconocidos (primeros 10):`);
+    Array.from(skipReasons.unknownBarriosCABA)
+      .slice(0, 10)
+      .forEach((barrio, i) => {
+        console.log(`   ${i + 1}. "${barrio}"`);
+      });
+    if (skipReasons.unknownBarriosCABA.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.unknownBarriosCABA.size - 10} más (ver archivo logs/)`
       );
     }
   }
@@ -938,7 +1062,8 @@ async function exportSkipReasons(
           skipReasons.invalidCityNumbers +
           skipReasons.unknownProvince +
           skipReasons.provinceNotInDB +
-          skipReasons.wrongCountry,
+          skipReasons.wrongCountry +
+          skipReasons.unknownBarrioCABA,
         totalProcessed:
           totalSuccess +
           skipReasons.invalidStructure +
@@ -947,7 +1072,8 @@ async function exportSkipReasons(
           skipReasons.invalidCityNumbers +
           skipReasons.unknownProvince +
           skipReasons.provinceNotInDB +
-          skipReasons.wrongCountry,
+          skipReasons.wrongCountry +
+          skipReasons.unknownBarrioCABA,
       },
       unknownProvinces: {
         count: skipReasons.unknownProvinces.size,
@@ -957,11 +1083,15 @@ async function exportSkipReasons(
         count: skipReasons.wrongCountries.size,
         list: Array.from(skipReasons.wrongCountries).sort(),
       },
-      invalidCities: {
-        count: skipReasons.invalidCities.size,
-        list: Array.from(skipReasons.invalidCities).sort(),
-      },
-      examples: skipReasons.examples,
+              invalidCities: {
+          count: skipReasons.invalidCities.size,
+          list: Array.from(skipReasons.invalidCities).sort(),
+        },
+        unknownBarriosCABA: {
+          count: skipReasons.unknownBarriosCABA.size,
+          list: Array.from(skipReasons.unknownBarriosCABA).sort(),
+        },
+        examples: skipReasons.examples,
     };
 
     // Nombre del archivo con timestamp
@@ -1008,7 +1138,8 @@ async function exportSkipReasons(
             skipReasons.invalidCityNumbers +
             skipReasons.unknownProvince +
             skipReasons.provinceNotInDB +
-            skipReasons.wrongCountry,
+            skipReasons.wrongCountry +
+            skipReasons.unknownBarrioCABA,
           totalProcessed:
             totalSuccess +
             skipReasons.invalidStructure +
@@ -1017,7 +1148,8 @@ async function exportSkipReasons(
             skipReasons.invalidCityNumbers +
             skipReasons.unknownProvince +
             skipReasons.provinceNotInDB +
-            skipReasons.wrongCountry,
+            skipReasons.wrongCountry +
+            skipReasons.unknownBarrioCABA,
         },
         unknownProvinces: {
           count: skipReasons.unknownProvinces.size,
@@ -1030,6 +1162,10 @@ async function exportSkipReasons(
         invalidCities: {
           count: skipReasons.invalidCities.size,
           list: Array.from(skipReasons.invalidCities).sort(),
+        },
+        unknownBarriosCABA: {
+          count: skipReasons.unknownBarriosCABA.size,
+          list: Array.from(skipReasons.unknownBarriosCABA).sort(),
         },
         examples: skipReasons.examples,
       };

@@ -50,7 +50,7 @@ export function CookieBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/95 backdrop-blur-sm border-t shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 shadow-lg bg-transparent">
       <div className="container max-w-6xl mx-auto">
         <Card className="border-primary/20 bg-card/95">
           <CardContent className="p-6">
