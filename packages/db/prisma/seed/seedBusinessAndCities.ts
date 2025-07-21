@@ -108,7 +108,7 @@ const barriosCABALookup: Record<string, { name: string; slug: string }> = {
   coghlan: { name: 'Coghlan', slug: 'coghlan' },
   colegiales: { name: 'Colegiales', slug: 'colegiales' },
   constitucion: { name: 'Constitución', slug: 'constitucion' },
-  'constitución': { name: 'Constitución', slug: 'constitucion' },
+  constitución: { name: 'Constitución', slug: 'constitucion' },
   flores: { name: 'Flores', slug: 'flores' },
   floresta: { name: 'Floresta', slug: 'floresta' },
   'la boca': { name: 'La Boca', slug: 'la-boca' },
@@ -119,7 +119,7 @@ const barriosCABALookup: Record<string, { name: string; slug: string }> = {
   monserrat: { name: 'Monserrat', slug: 'monserrat' },
   'nueva pompeya': { name: 'Nueva Pompeya', slug: 'nueva-pompeya' },
   nunez: { name: 'Núñez', slug: 'nunez' },
-  'núñez': { name: 'Núñez', slug: 'nunez' },
+  núñez: { name: 'Núñez', slug: 'nunez' },
   palermo: { name: 'Palermo', slug: 'palermo' },
   'parque avellaneda': { name: 'Parque Avellaneda', slug: 'parque-avellaneda' },
   'parque chacabuco': { name: 'Parque Chacabuco', slug: 'parque-chacabuco' },
@@ -139,7 +139,10 @@ const barriosCABALookup: Record<string, { name: string; slug: string }> = {
   'villa crespo': { name: 'Villa Crespo', slug: 'villa-crespo' },
   'villa del parque': { name: 'Villa del Parque', slug: 'villa-del-parque' },
   'villa devoto': { name: 'Villa Devoto', slug: 'villa-devoto' },
-  'villa general mitre': { name: 'Villa General Mitre', slug: 'villa-general-mitre' },
+  'villa general mitre': {
+    name: 'Villa General Mitre',
+    slug: 'villa-general-mitre',
+  },
   'villa lugano': { name: 'Villa Lugano', slug: 'villa-lugano' },
   'villa luro': { name: 'Villa Luro', slug: 'villa-luro' },
   'villa ortuzar': { name: 'Villa Ortúzar', slug: 'villa-ortuzar' },
@@ -154,7 +157,11 @@ const barriosCABALookup: Record<string, { name: string; slug: string }> = {
 };
 
 // Identificar provincias que requieren procesamiento de barrios (CABA)
-const cabaProvinces = ['capital federal', 'cdad. autonoma de buenos aires', 'ciudad autonoma de buenos aires'];
+const cabaProvinces = [
+  'capital federal',
+  'cdad. autonoma de buenos aires',
+  'ciudad autonoma de buenos aires',
+];
 
 interface BusinessData {
   name: string;
@@ -198,8 +205,37 @@ function validateBusiness(business: any): business is BusinessData {
   );
 }
 
+// Función helper para buscar barrios de CABA
+function findCABABarrio(
+  cityName: string
+): { name: string; slug: string } | null {
+  if (!cityName) return null;
+
+  const lowerCityName = cityName.toLowerCase();
+
+  // Intentar coincidencia exacta primero
+  let normalizedBarrio = barriosCABALookup[lowerCityName];
+
+  // Si no hay coincidencia exacta, intentar búsqueda por substring
+  if (!normalizedBarrio) {
+    // Ordenar por longitud descendente para coincidir con nombres más largos primero
+    const sortedBarrios = Object.keys(barriosCABALookup).sort(
+      (a, b) => b.length - a.length
+    );
+
+    for (const barrioKey of sortedBarrios) {
+      if (lowerCityName.includes(barrioKey)) {
+        normalizedBarrio = barriosCABALookup[barrioKey];
+        break;
+      }
+    }
+  }
+
+  return normalizedBarrio || null;
+}
+
 // Validación de calidad de datos para ciudades
-function validateCityName(cityName: string): boolean {
+function validateCityName(cityName: string, isCABA: boolean = false): boolean {
   if (!cityName || typeof cityName !== 'string') {
     return false;
   }
@@ -211,9 +247,15 @@ function validateCityName(cityName: string): boolean {
     return false;
   }
 
-  // No debe contener números
+  // Si contiene números, verificar si es un barrio válido de CABA
   if (/\d/.test(trimmedName)) {
-    return false;
+    if (isCABA) {
+      // Si es CABA, verificar si es un barrio válido
+      return findCABABarrio(trimmedName) !== null;
+    } else {
+      // Si no es CABA, rechazar por números
+      return false;
+    }
   }
 
   return true;
@@ -429,17 +471,29 @@ async function bulkCreateCities(
 async function bulkCreateBusinesses(
   businesses: ProcessedBusiness[],
   batchNumber: number
-): Promise<void> {
-  if (businesses.length === 0) return;
+): Promise<{ sent: number; created: number; skipped: number }> {
+  if (businesses.length === 0) return { sent: 0, created: 0, skipped: 0 };
 
   try {
-    await executeWithTransaction(async () => {
-      await prisma.business.createMany({
+    const result = await executeWithTransaction(async () => {
+      return await prisma.business.createManyAndReturn({
         //@ts-expect-error TODO: fix this
         data: businesses,
         skipDuplicates: true,
       });
     });
+
+    const sent = businesses.length;
+    const created = result.length;
+    const skipped = sent - created;
+
+    if (skipped > 0) {
+      console.log(
+        `📦 Batch ${batchNumber}: ${created} creados, ${skipped} omitidos (ya existían)`
+      );
+    }
+
+    return { sent, created, skipped };
   } catch (error) {
     console.error(`❌ Error en batch ${batchNumber}:`, error);
     throw error;
@@ -500,6 +554,7 @@ async function processStreamingData(
     slug: string;
     provinceId: string;
   }> = [];
+  const processedBusinessSlugs = new Set<string>(); // ✅ Track slugs en este batch
 
   let totalProcessed = 0;
   let batchNumber = 0;
@@ -516,10 +571,13 @@ async function processStreamingData(
     provinceNotInDB: 0,
     wrongCountry: 0,
     unknownBarrioCABA: 0,
+    duplicatedBusiness: 0, // ✅ Nuevo contador para duplicados
+    skippedByDatabase: 0, // ✅ Será actualizado al final con totalSkippedByDB
     unknownProvinces: new Set<string>(),
     wrongCountries: new Set<string>(),
     invalidCities: new Set<string>(),
     unknownBarriosCABA: new Set<string>(),
+    duplicatedSlugs: new Set<string>(), // ✅ Track slugs duplicados
     examples: {
       invalidStructure: [] as any[],
       missingLocation: [] as any[],
@@ -529,6 +587,7 @@ async function processStreamingData(
       provinceNotInDB: [] as any[],
       wrongCountry: [] as any[],
       unknownBarrioCABA: [] as any[],
+      duplicatedBusiness: [] as any[], // ✅ Ejemplos de duplicados
     },
   };
 
@@ -565,7 +624,7 @@ async function processStreamingData(
 
         // Determinar si estamos procesando CABA para usar ward en lugar de city
         const isCABA = cabaProvinces.includes(provinceRaw || '');
-        const cityRaw = isCABA 
+        const cityRaw = isCABA
           ? business.detailed_address?.ward?.trim()
           : business.detailed_address?.city?.trim();
 
@@ -616,7 +675,7 @@ async function processStreamingData(
         }
 
         // Validar calidad de datos de la ciudad
-        if (!validateCityName(cityRaw)) {
+        if (!validateCityName(cityRaw, isCABA)) {
           const cityLength = cityRaw?.length || 0;
           const hasNumbers = /\d/.test(cityRaw || '');
 
@@ -645,7 +704,7 @@ async function processStreamingData(
                   detailed_address: business.detailed_address,
                   address: business.address,
                 },
-                reason: `Ciudad contiene números: '${cityRaw}'`,
+                reason: `Ciudad contiene números y no es barrio de CABA válido: '${cityRaw}'`,
               });
             }
           }
@@ -718,10 +777,14 @@ async function processStreamingData(
         let citySlug = slugify(cityRaw);
 
         if (isCABA && cityRaw) {
-          const normalizedBarrio = barriosCABALookup[cityRaw.toLowerCase()];
+          const normalizedBarrio = findCABABarrio(cityRaw);
+
           if (normalizedBarrio) {
             finalCityName = normalizedBarrio.name;
             citySlug = normalizedBarrio.slug;
+            console.log(
+              `✅ Barrio CABA reconocido: '${cityRaw}' → ${normalizedBarrio.name}`
+            );
           } else {
             // Barrio de CABA no reconocido
             skipReasons.unknownBarrioCABA++;
@@ -761,6 +824,39 @@ async function processStreamingData(
           });
         }
 
+        // Generar slug para el negocio y verificar duplicados
+        const businessSlug = slugify(`${business.name}-${finalCityName}`);
+
+        // Verificar si ya procesamos este slug en este batch
+        if (processedBusinessSlugs.has(businessSlug)) {
+          skipReasons.duplicatedBusiness++;
+          skipReasons.duplicatedSlugs.add(businessSlug);
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.duplicatedBusiness.length < 10) {
+            skipReasons.examples.duplicatedBusiness.push({
+              record: {
+                name: business.name,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `Negocio duplicado (slug): '${businessSlug}'`,
+              slug: businessSlug,
+            });
+          }
+          skippedCount++;
+          // Log específico para duplicados
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Negocio duplicado: '${business.name}' en '${finalCityName}' (registro #${totalProcessed})`
+            );
+          }
+          callback();
+          return;
+        }
+
+        // Marcar este slug como procesado
+        processedBusinessSlugs.add(businessSlug);
+
         // Agregar al batch con cityKey temporal y categoryId
         businessBatch.push({
           name: business.name,
@@ -771,7 +867,7 @@ async function processStreamingData(
           categoryId, // Agregar categoryId desde parámetro
           latitude: business.coordinates?.latitude ?? null,
           longitude: business.coordinates?.longitude ?? null,
-          slug: slugify(`${business.name}-${business.detailed_address?.city}`),
+          slug: businessSlug, // ✅ Usar slug ya calculado
           description: business?.description ?? null,
           email: business?.email ?? null,
           image: business?.image ?? null,
@@ -900,22 +996,41 @@ async function processStreamingData(
     businessChunks.push(validBusinesses.slice(i, i + CONFIG.BATCH_SIZE));
   }
 
+  // Contadores para batch results
+  let totalSent = 0;
+  let totalCreated = 0;
+  let totalSkippedByDB = 0;
+
   for (const [index, chunk] of businessChunks.entries()) {
     batchNumber++;
-    await bulkCreateBusinesses(chunk, batchNumber);
+    const result = await bulkCreateBusinesses(chunk, batchNumber);
+
+    totalSent += result.sent;
+    totalCreated += result.created;
+    totalSkippedByDB += result.skipped;
+
     progressTracker.update((index + 1) * CONFIG.BATCH_SIZE);
   }
 
   progressTracker.finish();
 
+  // Actualizar skipReasons con la información de la BD
+  skipReasons.skippedByDatabase = totalSkippedByDB;
+
   console.log(`✅ Procesamiento completado:`);
+  console.log(`   • Negocios enviados a BD: ${totalSent.toLocaleString()}`);
   console.log(
-    `   • Negocios creados: ${validBusinesses.length.toLocaleString()}`
+    `   • Negocios realmente creados: ${totalCreated.toLocaleString()}`
+  );
+  console.log(
+    `   • Negocios omitidos por BD (ya existían): ${totalSkippedByDB.toLocaleString()}`
   );
   console.log(
     `   • Ciudades creadas: ${citiesToCreate.length.toLocaleString()}`
   );
-  console.log(`   • Registros omitidos: ${skippedCount.toLocaleString()}`);
+  console.log(
+    `   • Registros omitidos por validación: ${skippedCount.toLocaleString()}`
+  );
 
   // Mostrar desglose detallado de omisiones
   console.log(`\n📊 Desglose de registros omitidos:`);
@@ -943,9 +1058,21 @@ async function processStreamingData(
   console.log(
     `   • Barrio CABA no reconocido: ${skipReasons.unknownBarrioCABA.toLocaleString()}`
   );
+  console.log(
+    `   • Negocios duplicados (mismo slug): ${skipReasons.duplicatedBusiness.toLocaleString()}`
+  );
+  console.log(
+    `   • Negocios omitidos por BD (ya existían): ${skipReasons.skippedByDatabase.toLocaleString()}`
+  );
 
   // Exportar detalles a JSON
-  await exportSkipReasons(skipReasons, categorySlug, validBusinesses.length);
+  await exportSkipReasons(
+    skipReasons,
+    categorySlug,
+    totalCreated,
+    totalSkippedByDB,
+    totalSent
+  );
 
   if (skipReasons.unknownProvinces.size > 0) {
     console.log(`\n❗ Provincias no reconocidas (primeras 10):`);
@@ -1002,6 +1129,20 @@ async function processStreamingData(
       );
     }
   }
+
+  if (skipReasons.duplicatedSlugs.size > 0) {
+    console.log(`\n🔄 Negocios duplicados encontrados (primeros 10 slugs):`);
+    Array.from(skipReasons.duplicatedSlugs)
+      .slice(0, 10)
+      .forEach((slug, i) => {
+        console.log(`   ${i + 1}. "${slug}"`);
+      });
+    if (skipReasons.duplicatedSlugs.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.duplicatedSlugs.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
 }
 
 async function updateMissingLocations() {
@@ -1029,7 +1170,9 @@ async function updateMissingLocations() {
 async function exportSkipReasons(
   skipReasons: any,
   categorySlug: string,
-  totalSuccess: number
+  totalCreated: number,
+  totalSkippedByDB: number,
+  totalSent: number
 ): Promise<void> {
   try {
     console.log('🔄 Iniciando exportación de detalles...');
@@ -1047,7 +1190,9 @@ async function exportSkipReasons(
       timestamp: new Date().toISOString(),
       category: categorySlug,
       summary: {
-        totalSuccess: totalSuccess,
+        totalSent: totalSent,
+        totalCreated: totalCreated,
+        totalSkippedByDB: totalSkippedByDB,
         invalidStructure: skipReasons.invalidStructure,
         missingLocation: skipReasons.missingLocation,
         invalidCityLength: skipReasons.invalidCityLength,
@@ -1055,7 +1200,9 @@ async function exportSkipReasons(
         unknownProvince: skipReasons.unknownProvince,
         provinceNotInDB: skipReasons.provinceNotInDB,
         wrongCountry: skipReasons.wrongCountry,
-        totalSkipped:
+        duplicatedBusiness: skipReasons.duplicatedBusiness,
+        skippedByDatabase: skipReasons.skippedByDatabase,
+        totalSkippedByValidation:
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
           skipReasons.invalidCityLength +
@@ -1063,9 +1210,11 @@ async function exportSkipReasons(
           skipReasons.unknownProvince +
           skipReasons.provinceNotInDB +
           skipReasons.wrongCountry +
-          skipReasons.unknownBarrioCABA,
+          skipReasons.unknownBarrioCABA +
+          skipReasons.duplicatedBusiness,
         totalProcessed:
-          totalSuccess +
+          totalCreated +
+          totalSkippedByDB +
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
           skipReasons.invalidCityLength +
@@ -1073,7 +1222,8 @@ async function exportSkipReasons(
           skipReasons.unknownProvince +
           skipReasons.provinceNotInDB +
           skipReasons.wrongCountry +
-          skipReasons.unknownBarrioCABA,
+          skipReasons.unknownBarrioCABA +
+          skipReasons.duplicatedBusiness,
       },
       unknownProvinces: {
         count: skipReasons.unknownProvinces.size,
@@ -1083,15 +1233,15 @@ async function exportSkipReasons(
         count: skipReasons.wrongCountries.size,
         list: Array.from(skipReasons.wrongCountries).sort(),
       },
-              invalidCities: {
-          count: skipReasons.invalidCities.size,
-          list: Array.from(skipReasons.invalidCities).sort(),
-        },
-        unknownBarriosCABA: {
-          count: skipReasons.unknownBarriosCABA.size,
-          list: Array.from(skipReasons.unknownBarriosCABA).sort(),
-        },
-        examples: skipReasons.examples,
+      invalidCities: {
+        count: skipReasons.invalidCities.size,
+        list: Array.from(skipReasons.invalidCities).sort(),
+      },
+      unknownBarriosCABA: {
+        count: skipReasons.unknownBarriosCABA.size,
+        list: Array.from(skipReasons.unknownBarriosCABA).sort(),
+      },
+      examples: skipReasons.examples,
     };
 
     // Nombre del archivo con timestamp
@@ -1123,7 +1273,9 @@ async function exportSkipReasons(
         timestamp: new Date().toISOString(),
         category: categorySlug,
         summary: {
-          totalSuccess: totalSuccess,
+          totalSent: totalSent,
+          totalCreated: totalCreated,
+          totalSkippedByDB: totalSkippedByDB,
           invalidStructure: skipReasons.invalidStructure,
           missingLocation: skipReasons.missingLocation,
           invalidCityLength: skipReasons.invalidCityLength,
@@ -1131,7 +1283,9 @@ async function exportSkipReasons(
           unknownProvince: skipReasons.unknownProvince,
           provinceNotInDB: skipReasons.provinceNotInDB,
           wrongCountry: skipReasons.wrongCountry,
-          totalSkipped:
+          duplicatedBusiness: skipReasons.duplicatedBusiness,
+          skippedByDatabase: skipReasons.skippedByDatabase,
+          totalSkippedByValidation:
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
             skipReasons.invalidCityLength +
@@ -1139,9 +1293,11 @@ async function exportSkipReasons(
             skipReasons.unknownProvince +
             skipReasons.provinceNotInDB +
             skipReasons.wrongCountry +
-            skipReasons.unknownBarrioCABA,
+            skipReasons.unknownBarrioCABA +
+            skipReasons.duplicatedBusiness,
           totalProcessed:
-            totalSuccess +
+            totalCreated +
+            totalSkippedByDB +
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
             skipReasons.invalidCityLength +
@@ -1149,7 +1305,8 @@ async function exportSkipReasons(
             skipReasons.unknownProvince +
             skipReasons.provinceNotInDB +
             skipReasons.wrongCountry +
-            skipReasons.unknownBarrioCABA,
+            skipReasons.unknownBarrioCABA +
+            skipReasons.duplicatedBusiness,
         },
         unknownProvinces: {
           count: skipReasons.unknownProvinces.size,
@@ -1166,6 +1323,10 @@ async function exportSkipReasons(
         unknownBarriosCABA: {
           count: skipReasons.unknownBarriosCABA.size,
           list: Array.from(skipReasons.unknownBarriosCABA).sort(),
+        },
+        duplicatedSlugs: {
+          count: skipReasons.duplicatedSlugs.size,
+          list: Array.from(skipReasons.duplicatedSlugs).sort(),
         },
         examples: skipReasons.examples,
       };
