@@ -163,6 +163,12 @@ const cabaProvinces = [
   'ciudad autonoma de buenos aires',
 ];
 
+// Whitelist de ciudades que tienen números válidos en su nombre
+const cityNumberWhitelist = [
+  '25 de mayo',
+  // Agregar más ciudades aquí según sea necesario
+];
+
 interface BusinessData {
   name: string;
   description: string;
@@ -247,14 +253,17 @@ function validateCityName(cityName: string, isCABA: boolean = false): boolean {
     return false;
   }
 
-  // Si contiene números, verificar si es un barrio válido de CABA
+  // Si contiene números, verificar si es un barrio válido de CABA o está en whitelist
   if (/\d/.test(trimmedName)) {
     if (isCABA) {
       // Si es CABA, verificar si es un barrio válido
       return findCABABarrio(trimmedName) !== null;
     } else {
-      // Si no es CABA, rechazar por números
-      return false;
+      // Si no es CABA, verificar si está en la whitelist
+      const lowerCityName = trimmedName.toLowerCase();
+      return cityNumberWhitelist.some(
+        (city) => city.toLowerCase() === lowerCityName
+      );
     }
   }
 
@@ -573,11 +582,13 @@ async function processStreamingData(
     unknownBarrioCABA: 0,
     duplicatedBusiness: 0, // ✅ Nuevo contador para duplicados
     skippedByDatabase: 0, // ✅ Será actualizado al final con totalSkippedByDB
+    acceptedByWhitelist: 0, // ✅ Nuevo contador para ciudades aceptadas por whitelist
     unknownProvinces: new Set<string>(),
     wrongCountries: new Set<string>(),
     invalidCities: new Set<string>(),
     unknownBarriosCABA: new Set<string>(),
     duplicatedSlugs: new Set<string>(), // ✅ Track slugs duplicados
+    whitelistCities: new Set<string>(), // ✅ Track ciudades aceptadas por whitelist
     examples: {
       invalidStructure: [] as any[],
       missingLocation: [] as any[],
@@ -704,7 +715,7 @@ async function processStreamingData(
                   detailed_address: business.detailed_address,
                   address: business.address,
                 },
-                reason: `Ciudad contiene números y no es barrio de CABA válido: '${cityRaw}'`,
+                reason: `Ciudad contiene números, no es barrio de CABA válido, y no está en whitelist: '${cityRaw}'`,
               });
             }
           }
@@ -718,6 +729,21 @@ async function processStreamingData(
           }
           callback();
           return;
+        }
+
+        // Log para ciudades aceptadas por whitelist
+        if (!isCABA && /\d/.test(cityRaw || '')) {
+          const lowerCityName = cityRaw.toLowerCase();
+          const isInWhitelist = cityNumberWhitelist.some(
+            (city) => city.toLowerCase() === lowerCityName
+          );
+          if (isInWhitelist) {
+            skipReasons.acceptedByWhitelist++;
+            skipReasons.whitelistCities.add(cityRaw);
+            console.log(
+              `✅ Ciudad con números aceptada por whitelist: '${cityRaw}'`
+            );
+          }
         }
 
         const normalizedProvince = provinceLookup[countryCode]?.[provinceRaw];
@@ -1031,6 +1057,9 @@ async function processStreamingData(
   console.log(
     `   • Registros omitidos por validación: ${skippedCount.toLocaleString()}`
   );
+  console.log(
+    `   • Ciudades aceptadas por whitelist: ${skipReasons.acceptedByWhitelist.toLocaleString()}`
+  );
 
   // Mostrar desglose detallado de omisiones
   console.log(`\n📊 Desglose de registros omitidos:`);
@@ -1143,6 +1172,20 @@ async function processStreamingData(
       );
     }
   }
+
+  if (skipReasons.whitelistCities.size > 0) {
+    console.log(`\n✅ Ciudades aceptadas por whitelist (primeras 10):`);
+    Array.from(skipReasons.whitelistCities)
+      .slice(0, 10)
+      .forEach((city, i) => {
+        console.log(`   ${i + 1}. "${city}"`);
+      });
+    if (skipReasons.whitelistCities.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.whitelistCities.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
 }
 
 async function updateMissingLocations() {
@@ -1202,6 +1245,7 @@ async function exportSkipReasons(
         wrongCountry: skipReasons.wrongCountry,
         duplicatedBusiness: skipReasons.duplicatedBusiness,
         skippedByDatabase: skipReasons.skippedByDatabase,
+        acceptedByWhitelist: skipReasons.acceptedByWhitelist,
         totalSkippedByValidation:
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
@@ -1285,6 +1329,7 @@ async function exportSkipReasons(
           wrongCountry: skipReasons.wrongCountry,
           duplicatedBusiness: skipReasons.duplicatedBusiness,
           skippedByDatabase: skipReasons.skippedByDatabase,
+          acceptedByWhitelist: skipReasons.acceptedByWhitelist,
           totalSkippedByValidation:
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
@@ -1327,6 +1372,10 @@ async function exportSkipReasons(
         duplicatedSlugs: {
           count: skipReasons.duplicatedSlugs.size,
           list: Array.from(skipReasons.duplicatedSlugs).sort(),
+        },
+        whitelistCities: {
+          count: skipReasons.whitelistCities.size,
+          list: Array.from(skipReasons.whitelistCities).sort(),
         },
         examples: skipReasons.examples,
       };
