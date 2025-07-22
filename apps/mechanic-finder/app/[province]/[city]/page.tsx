@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getBusinesses, getMechanicsCount } from "@/actions/business";
 import { getProvinceBySlug, getProvinces } from "@/actions/province";
-import { getCityBySlug } from "@/actions/cities";
+import { getCityBySlug, getRelatedCitiesByMechanicsCount } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
 import { BusinessEntity, ProvinceEntity } from "@rubros/db/entities";
 import { ITEMS_PER_PAGE } from "@/constants/pagination";
@@ -151,7 +151,10 @@ export default async function CityPage({ params, searchParams }: Props) {
     userLocation,
   });
 
-  const provinces: ProvinceEntity[] = await getProvinces();
+  const [provinces, relatedCities] = await Promise.all([
+    getProvinces(),
+    getRelatedCitiesByMechanicsCount(province.id, city.id, 12)
+  ]);
 
   const breadcrumbElements: BreadcrumbProps['elements'] = [
     {
@@ -317,26 +320,32 @@ export default async function CityPage({ params, searchParams }: Props) {
       </section>
 
       {/* Related Cities Section */}
-      {province.cities.length > 1 && (
+      {relatedCities.length > 0 && (
         <section className="container">
           <div className="bg-card border rounded-lg p-6">
             <h3 className="text-xl font-semibold mb-4">
-              Otras ciudades en {province.name}
+              Otras Ciudades Destacadas en {province.name}
             </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Explorá talleres mecánicos en las principales ciudades de {province.name} ordenadas por cantidad de servicios.
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {province.cities
-                .filter((relatedCity) => relatedCity.slug !== city.slug)
-                .map((relatedCity) => (
-                  <a
-                    key={relatedCity.id}
-                    href={`/${province.slug}/${relatedCity.slug}`}
-                    className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <span className="text-sm font-medium">
+              {relatedCities.map((relatedCity, index) => (
+                <a
+                  key={relatedCity.id}
+                  href={`/${province.slug}/${relatedCity.slug}`}
+                  className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors relative group"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium group-hover:text-primary transition-colors">
                       {relatedCity.name}
                     </span>
-                  </a>
-                ))}
+                    <span className="text-xs text-muted-foreground mt-1">
+                      {relatedCity.mechanicsCount} talleres
+                    </span>
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         </section>

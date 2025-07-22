@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { ViewTracker } from '@rubros/ui';
 import { trackBusinessView } from '@/lib/analytics';
 
 type BusinessViewTrackerProps = {
@@ -14,10 +14,10 @@ export default function BusinessViewTracker({
   city,
   province
 }: BusinessViewTrackerProps) {
-  useEffect(() => {
-    // Track business view on component mount
-    trackBusinessView(businessName, city, province);
-  }, [businessName, city, province]);
-
-  return null; // This component doesn't render anything
+  return (
+    <ViewTracker
+      onView={() => trackBusinessView(businessName, city, province)}
+      dependencies={[businessName, city, province]}
+    />
+  );
 }
