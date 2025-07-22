@@ -42,7 +42,7 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
       <ins
         className={`adsbygoogle ${className} max-w-[1100px]`}
         style={parsedStyle}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
         data-ad-slot={slot}
         data-ad-format="auto"
         data-full-width-responsive="true"
