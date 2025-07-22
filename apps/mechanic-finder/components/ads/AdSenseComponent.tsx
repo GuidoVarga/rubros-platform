@@ -19,7 +19,6 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
   const adRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
@@ -37,7 +36,7 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   }, []);
 
   useEffect(() => {
-    if (!hasConsent || !isLoaded || !scriptLoaded || adPushed) return;
+    if (!hasConsent || !isLoaded || adPushed) return;
 
     // Esperar a que el elemento tenga dimensiones y el script esté cargado
     const checkAndPushAd = () => {
@@ -49,18 +48,23 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
             setAdPushed(true);
           } catch (error) {
             console.error('Error pushing ad:', error);
+            // Retry after error
+            setTimeout(checkAndPushAd, 1000);
           }
         } else {
           // Retry after a short delay if element has no width
-          setTimeout(checkAndPushAd, 100);
+          setTimeout(checkAndPushAd, 200);
         }
+      } else if (!window.adsbygoogle) {
+        // Script not loaded yet, retry
+        setTimeout(checkAndPushAd, 500);
       }
     };
 
     // Small delay to ensure DOM is ready
-    const timer = setTimeout(checkAndPushAd, 200);
+    const timer = setTimeout(checkAndPushAd, 300);
     return () => clearTimeout(timer);
-  }, [hasConsent, isLoaded, scriptLoaded, adPushed]);
+  }, [hasConsent, isLoaded, adPushed]);
 
   const parsedStyle = {
     display: 'block',
@@ -76,24 +80,14 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   }
 
   return (
-    <>
-      <Script
-        async
-        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-        onLoad={() => setScriptLoaded(true)}
-        onError={(e) => console.error('AdSense script failed to load:', e)}
-      />
-      <ins
-        ref={adRef}
-        className={`adsbygoogle ${className || ''}`}
-        style={parsedStyle}
-        data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-        data-ad-slot={slot}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-    </>
+    <ins
+      ref={adRef}
+      className={`adsbygoogle ${className || ''}`}
+      style={parsedStyle}
+      data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+      data-ad-slot={slot}
+      data-ad-format="auto"
+      data-full-width-responsive="true"
+    />
   );
 }

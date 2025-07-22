@@ -50,7 +50,7 @@ const nextConfig = {
 
               "connect-src 'self' unpkg.com tile.openstreetmap.org pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google",
 
-              "frame-src pagead2.googlesyndication.com googleads.g.doubleclick.net",
+              "frame-src pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google ep2.adtrafficquality.google www.google.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
