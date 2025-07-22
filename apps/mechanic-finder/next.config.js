@@ -40,7 +40,7 @@ const nextConfig = {
             value: [
               "default-src 'self'",
 
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net www.googletagmanager.com",
 
               "style-src 'self' 'unsafe-inline' unpkg.com",
 
@@ -48,9 +48,9 @@ const nextConfig = {
 
               "font-src 'self' fonts.gstatic.com",
 
-              "connect-src 'self' unpkg.com tile.openstreetmap.org pagead2.googlesyndication.com googleads.g.doubleclick.net",
+              "connect-src 'self' unpkg.com tile.openstreetmap.org pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google",
 
-              "frame-src pagead2.googlesyndication.com",
+              "frame-src pagead2.googlesyndication.com googleads.g.doubleclick.net",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

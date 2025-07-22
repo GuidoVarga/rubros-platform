@@ -8,6 +8,27 @@ export type AdComponentProps = {
   type: "top" | "side" | "in-feed" | "square" | "footer";
 } & Omit<AdSenseProps, "slot">;
 
+
+const defaultStyles: Record<AdComponentProps["type"], { width?: string; height?: string }> = {
+  top: {
+    height: "90px",
+  },
+  side: {
+    width: "100%",
+    height: "600px",
+  },
+  "in-feed": {
+    height: "100%",
+  },
+  square: {
+    width: "100%",
+    height: "600px",
+  },
+  footer: {
+    height: "150px",
+  },
+}
+
 const getAdSlot = (type: AdComponentProps["type"]) => {
   switch (type) {
     case "top":
@@ -26,12 +47,17 @@ const getAdSlot = (type: AdComponentProps["type"]) => {
 };
 
 export function AdComponent({ type, ...props }: AdComponentProps) {
-  const RealAdComponent = (adProps: Omit<AdSenseProps, "slot">) => (
-    <AdSenseComponent
-      slot={getAdSlot(type)}
-      {...adProps}
-    />
-  );
+  const RealAdComponent = (adProps: Omit<AdSenseProps, "slot">) => {
+    const slot = getAdSlot(type);
+    const style = defaultStyles[type];
+    return (
+      <AdSenseComponent
+        slot={slot}
+        style={style}
+        {...adProps}
+      />
+    );
+  }
 
   return (
     <UIAdComponent

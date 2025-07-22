@@ -28,6 +28,7 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   }, []);
 
   const parsedStyle = {
+    width: "100%",
     ...style,
     maxWidth: "1100px",
   };
