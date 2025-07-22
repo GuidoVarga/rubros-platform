@@ -9,10 +9,19 @@ type MockAdProps = Omit<AdSenseProps, "slot"> & {
 export function MockAd({ style, label = "Anuncio", className }: MockAdProps) {
   const width = style?.width || "100%";
   const height = style?.height || "100%";
+  const finalStyle = {
+    width,
+    height,
+    minWidth: '300px',
+    minHeight: '100px',
+    ...style,
+    maxWidth: "1100px"
+  };
+
   return (
     <div
       className={`bg-muted/30 border border-dashed border-muted-foreground/25 flex items-center justify-center ${className}`}
-      style={{ width, height, ...style, maxWidth: "1100px" }}
+      style={finalStyle}
     >
       <div className="text-center">
         <p className="text-muted-foreground text-sm">{label}</p>

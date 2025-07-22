@@ -40,7 +40,7 @@ const nextConfig = {
             value: [
               "default-src 'self'",
 
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net www.googletagmanager.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net www.googletagmanager.com ep1.adtrafficquality.google ep2.adtrafficquality.google",
 
               "style-src 'self' 'unsafe-inline' unpkg.com",
 
