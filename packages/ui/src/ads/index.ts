@@ -1,1 +1,2 @@
-export * from "./mock-ads";
+export * from './mock-ads';
+export * from './AdComponent';

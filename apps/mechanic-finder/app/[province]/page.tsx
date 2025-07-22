@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getProvinceBySlug } from "@/actions/province";
 import { getProvinces } from "@/actions/province";
-import { getMechanicsCount, getTotalMechanicsInProvince } from "@/actions/business";
+import { getTotalMechanicsInProvince } from "@/actions/business";
+import { getTopCitiesByMechanicsCount } from "@/actions/cities";
 import { CitySelector } from "@/components/CitySelector/CitySelector";
-import { Breadcrumb, BreadcrumbProps, EmptyState as EmptyStateUI } from "@rubros/ui";
+import { AdComponent, Breadcrumb, BreadcrumbProps, EmptyState as EmptyStateUI } from "@rubros/ui";
 import Link from "next/link";
 import { ORGANIZATION } from "@/constants/org";
+import { Suspense } from "react";
 
 type Props = {
   params: Promise<{ province: string }>;
@@ -94,16 +96,8 @@ export default async function ProvincePage({ params }: Props) {
     notFound();
   }
 
-  // Obtener conteo de mecánicos por ciudad
-  const citiesWithCounts = await Promise.all(
-    province.cities.map(async (city) => {
-      const mechanicsCount = await getMechanicsCount(city.id);
-      return {
-        ...city,
-        mechanicsCount,
-      };
-    })
-  );
+  // Obtener ciudades destacadas ordenadas por cantidad de mecánicos (máximo 12)
+  const citiesWithCounts = await getTopCitiesByMechanicsCount(province.id, 12);
 
   const totalMechanics = citiesWithCounts.reduce(
     (sum, city) => sum + city.mechanicsCount,
@@ -160,29 +154,32 @@ export default async function ProvincePage({ params }: Props) {
           <section className="container">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-semibold mb-6 text-center">
-                Ciudades disponibles en {province.name}
+                Ciudades Destacadas con Más Talleres en {province.name}
               </h2>
+              <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Descubrí las principales ciudades de {province.name} con la mayor concentración de talleres mecánicos especializados.
+              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {citiesWithCounts.map((city) => (
+                {citiesWithCounts.map((city, index) => (
                   <a
                     key={city.id}
                     href={`/${province.slug}/${city.slug}`}
-                    className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group"
+                    className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group relative"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-semibold group-hover:text-primary">
                         {city.name}
                       </h3>
-                      <span className="text-2xl">🏙️</span>
+                      <span className="text-2xl">🔧</span>
                     </div>
 
                     <p className="text-muted-foreground text-sm mb-3">
-                      {city.mechanicsCount} talleres mecánicos disponibles
+                      {city.mechanicsCount} talleres especializados
                     </p>
 
                     <div className="flex items-center text-sm text-primary">
-                      <span>Ver talleres</span>
+                      <span>Explorar talleres</span>
                       <span className="ml-2 transition-transform group-hover:translate-x-1">
                         →
                       </span>
@@ -192,6 +189,12 @@ export default async function ProvincePage({ params }: Props) {
               </div>
             </div>
           </section>
+
+          <Suspense>
+            <div className="mt-16">
+              <AdComponent type="in-feed" />
+            </div>
+          </Suspense>
 
           {/* Información sobre mecánicos en la provincia */}
           <section className="container mt-16">

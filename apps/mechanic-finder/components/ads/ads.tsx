@@ -1,39 +1,43 @@
 "use client";
 
 import { AdSenseProps } from "@rubros/types";
-import { TopAd, SideAd, InFeedAd } from "./adsense";
-import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "@rubros/ui";
-
-const isDevelopment = process.env.NODE_ENV === "development";
+import { AdComponent as UIAdComponent, AdComponentProps as UIAdComponentProps } from "@rubros/ui";
+import { AdSenseComponent } from "./AdSenseComponent";
 
 export type AdComponentProps = {
   type: "top" | "side" | "in-feed" | "square" | "footer";
 } & Omit<AdSenseProps, "slot">;
 
-export function AdComponent({ type, ...props }: AdComponentProps) {
-  if (isDevelopment) {
-    switch (type) {
-      case "top":
-        return <MockTopAd {...props} />;
-      case "side":
-        return <MockSideAd {...props} />;
-      case "in-feed":
-        return <MockInFeedAd {...props} />;
-      case "square":
-        return <MockSquareAd {...props} />;
-      case "footer":
-        return <MockFooterAd {...props} />;
-    }
-  }
-
+const getAdSlot = (type: AdComponentProps["type"]) => {
   switch (type) {
     case "top":
-      return <TopAd {...props} />;
+      return "top-ad";
     case "side":
-      return <SideAd {...props} />;
+      return "side-ad";
     case "in-feed":
+      return "in-feed-ad";
     case "square":
+      return "square-ad";
     case "footer":
-      return <InFeedAd {...props} />;
+      return "footer-ad";
+    default:
+      return "in-feed-ad";
   }
+};
+
+export function AdComponent({ type, ...props }: AdComponentProps) {
+  const RealAdComponent = (adProps: Omit<AdSenseProps, "slot">) => (
+    <AdSenseComponent
+      slot={getAdSlot(type)}
+      {...adProps}
+    />
+  );
+
+  return (
+    <UIAdComponent
+      type={type}
+      realAdComponent={RealAdComponent}
+      {...props}
+    />
+  );
 }
