@@ -5,10 +5,26 @@ export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url: string) => {
-  if (typeof window !== 'undefined' && window.gtag && canUseAnalytics()) {
-    window.gtag('config', GA_TRACKING_ID!, {
-      page_location: url,
+  if (typeof window === 'undefined') return;
+
+  if (!window.gtag) {
+    console.warn('⚠️ Google Analytics not loaded yet');
+    return;
+  }
+
+  if (!canUseAnalytics()) {
+    console.log('🚫 Analytics disabled - no consent');
+    return;
+  }
+
+  try {
+    window.gtag('event', 'page_view', {
+      page_location: window.location.origin + url,
+      page_title: document.title || '',
+      send_to: GA_TRACKING_ID,
     });
+  } catch (error) {
+    console.error('❌ Error sending pageview:', error);
   }
 };
 
@@ -19,12 +35,27 @@ export const event = (
   label?: string,
   value?: number
 ) => {
-  if (typeof window !== 'undefined' && window.gtag && canUseAnalytics()) {
+  if (typeof window === 'undefined') return;
+
+  if (!window.gtag) {
+    console.warn('⚠️ Google Analytics not loaded yet');
+    return;
+  }
+
+  if (!canUseAnalytics()) {
+    console.log('🚫 Analytics disabled - no consent');
+    return;
+  }
+
+  try {
     window.gtag('event', action, {
       event_category: category,
       event_label: label,
       value: value,
+      send_to: GA_TRACKING_ID,
     });
+  } catch (error) {
+    console.error('❌ Error sending event:', error);
   }
 };
 

@@ -10,6 +10,7 @@ function GoogleAnalyticsComponent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [hasAnalyticsConsent, setHasAnalyticsConsent] = useState(false);
+  const [gaReady, setGaReady] = useState(false);
 
   // Check consent on mount and listen for changes
   useEffect(() => {
@@ -29,16 +30,58 @@ function GoogleAnalyticsComponent() {
     return () => window.removeEventListener('cookieConsentChanged', handleConsentChange);
   }, []);
 
-  // Track pageviews only if consent is given
+  // Wait for Google Analytics to be ready
   useEffect(() => {
-    if (pathname && hasAnalyticsConsent) {
+    if (!hasAnalyticsConsent) return;
+
+    const checkGAReady = () => {
+      if (typeof window !== 'undefined' && window.gtag && typeof window.gtag === 'function') {
+        setGaReady(true);
+        return true;
+      }
+      return false;
+    };
+
+    if (!checkGAReady()) {
+      const interval = setInterval(() => {
+        if (checkGAReady()) {
+          clearInterval(interval);
+        }
+      }, 100);
+
+      // Cleanup after 10 seconds to avoid infinite polling
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+      }, 10000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [hasAnalyticsConsent]);
+
+  // Track pageviews only if consent is given and GA is ready
+  useEffect(() => {
+    if (pathname && hasAnalyticsConsent && gaReady) {
       const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+      console.log('🔄 GA Ready - Tracking pageview:', url);
       pageview(url);
     }
-  }, [pathname, searchParams, hasAnalyticsConsent]);
+  }, [pathname, searchParams, hasAnalyticsConsent, gaReady]);
 
-  // Don't render GA if no consent, no tracking ID, or not production
-  if (!hasAnalyticsConsent || !GA_TRACKING_ID || process.env.NODE_ENV !== 'production') {
+  // Debug info in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 GA Debug:', {
+      hasConsent: hasAnalyticsConsent,
+      trackingId: GA_TRACKING_ID,
+      gaReady: gaReady,
+      currentPath: pathname
+    });
+  }
+
+  // Don't render GA if no consent or no tracking ID
+  if (!hasAnalyticsConsent || !GA_TRACKING_ID) {
     return null;
   }
 
@@ -55,10 +98,8 @@ function GoogleAnalyticsComponent() {
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+                        gtag('js', new Date());
             gtag('config', '${GA_TRACKING_ID}', {
-              page_location: window.location.href,
-              page_title: document.title,
               send_page_view: false,
               anonymize_ip: true,
               allow_google_signals: false,
