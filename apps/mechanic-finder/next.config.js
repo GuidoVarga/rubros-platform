@@ -40,17 +40,17 @@ const nextConfig = {
             value: [
               "default-src 'self'",
 
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net www.googletagmanager.com ep1.adtrafficquality.google ep2.adtrafficquality.google",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' pagead2.googlesyndication.com googleads.g.doubleclick.net www.googletagmanager.com www.google-analytics.com *.google-analytics.com ep1.adtrafficquality.google ep2.adtrafficquality.google fundingchoicesmessages.google.com",
 
               "style-src 'self' 'unsafe-inline' unpkg.com",
 
-              "img-src 'self' data: blob: *.tile.openstreetmap.org unpkg.com cdn.jsdelivr.net tpc.googlesyndication.com pagead2.googlesyndication.com",
+              "img-src 'self' data: blob: *.tile.openstreetmap.org unpkg.com cdn.jsdelivr.net tpc.googlesyndication.com pagead2.googlesyndication.com www.google-analytics.com *.google-analytics.com ep1.adtrafficquality.google ep2.adtrafficquality.google googleads.g.doubleclick.net *.google.com *.googleapis.com *.gstatic.com *.doubleclick.net",
 
               "font-src 'self' fonts.gstatic.com",
 
-              "connect-src 'self' unpkg.com tile.openstreetmap.org pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google",
+              "connect-src 'self' unpkg.com tile.openstreetmap.org pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google ep2.adtrafficquality.google www.google.com www.google-analytics.com *.google-analytics.com *.googleapis.com *.gstatic.com tpc.googlesyndication.com fundingchoicesmessages.google.com",
 
-              "frame-src pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google ep2.adtrafficquality.google www.google.com",
+              "frame-src pagead2.googlesyndication.com googleads.g.doubleclick.net ep1.adtrafficquality.google ep2.adtrafficquality.google www.google.com fundingchoicesmessages.google.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
