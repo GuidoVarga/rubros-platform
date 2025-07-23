@@ -245,6 +245,7 @@ interface BusinessData {
   image: string;
   category: string;
   detailed_address?: {
+    street?: string;
     city?: string;
     state?: string;
     country_code?: string;
@@ -407,8 +408,7 @@ class MemoryManager {
 
     if (this.processedCount % this.threshold === 0) {
       if (this.gcAvailable) {
-        //@ts-expect-error gc is defined
-        global.gc();
+        (global as any).gc();
         console.log(
           `🧹 Limpieza de memoria ejecutada (${this.processedCount} registros procesados)`
         );
@@ -651,7 +651,8 @@ async function processStreamingData(
     slug: string;
     provinceId: string;
   }> = [];
-  const processedBusinessSlugs = new Set<string>(); // ✅ Track slugs en este batch
+  // ✅ Track slugs + addresses en este batch: Map<slugBase, Map<address, assignedNumber>>
+  const processedBusinessSlugs = new Map<string, Map<string, number>>();
 
   let totalProcessed = 0;
   let batchNumber = 0;
@@ -668,7 +669,7 @@ async function processStreamingData(
     provinceNotInDB: 0,
     wrongCountry: 0,
     unknownBarrioCABA: 0,
-    duplicatedBusiness: 0, // ✅ Nuevo contador para duplicados
+    duplicatedBusiness: 0, // ✅ Contador para duplicados (mismo slug + misma dirección)
     skippedByDatabase: 0, // ✅ Será actualizado al final con totalSkippedByDB
     acceptedByWhitelist: 0, // ✅ Nuevo contador para ciudades aceptadas por whitelist
     acceptedByCPA: 0, // ✅ Nuevo contador para ciudades resueltas via CPA codes
@@ -676,7 +677,7 @@ async function processStreamingData(
     wrongCountries: new Set<string>(),
     invalidCities: new Set<string>(),
     unknownBarriosCABA: new Set<string>(),
-    duplicatedSlugs: new Set<string>(), // ✅ Track slugs duplicados
+    duplicatedSlugs: new Set<string>(), // ✅ Track slugs base con direcciones duplicadas
     whitelistCities: new Set<string>(), // ✅ Track ciudades aceptadas por whitelist
     cpaCities: new Set<string>(), // ✅ Track ciudades resueltas via CPA codes
     examples: {
@@ -688,7 +689,7 @@ async function processStreamingData(
       provinceNotInDB: [] as any[],
       wrongCountry: [] as any[],
       unknownBarrioCABA: [] as any[],
-      duplicatedBusiness: [] as any[], // ✅ Ejemplos de duplicados
+      duplicatedBusiness: [] as any[], // ✅ Ejemplos de duplicados (mismo slug + misma dirección)
     },
   };
 
@@ -957,38 +958,62 @@ async function processStreamingData(
           });
         }
 
-        // Generar slug para el negocio y verificar duplicados
-        const businessSlug = slugify(`${business.name}-${finalCityName}`);
+        // Generar slug base para el negocio
+        const baseSlug = slugify(`${business.name}-${finalCityName}`);
+        const businessAddress = business.detailed_address?.street?.trim() || '';
 
-        // Verificar si ya procesamos este slug en este batch
-        if (processedBusinessSlugs.has(businessSlug)) {
-          skipReasons.duplicatedBusiness++;
-          skipReasons.duplicatedSlugs.add(businessSlug);
-          // Guardar ejemplo (máximo 10)
-          if (skipReasons.examples.duplicatedBusiness.length < 10) {
-            skipReasons.examples.duplicatedBusiness.push({
-              record: {
-                name: business.name,
-                detailed_address: business.detailed_address,
-                address: business.address,
-              },
-              reason: `Negocio duplicado (slug): '${businessSlug}'`,
-              slug: businessSlug,
-            });
-          }
-          skippedCount++;
-          // Log específico para duplicados
-          if (totalProcessed % 1000 === 0) {
+        // Verificar duplicados por slug base + dirección
+        let finalSlug = baseSlug;
+        let slugNumber = 1;
+
+        if (processedBusinessSlugs.has(baseSlug)) {
+          const addressMap = processedBusinessSlugs.get(baseSlug)!;
+          
+          // Verificar si esta dirección ya fue procesada
+          if (addressMap.has(businessAddress)) {
+            // Mismo slug y misma dirección = duplicado real
+            skipReasons.duplicatedBusiness++;
+            skipReasons.duplicatedSlugs.add(baseSlug);
+            // Guardar ejemplo (máximo 10)
+            if (skipReasons.examples.duplicatedBusiness.length < 10) {
+              skipReasons.examples.duplicatedBusiness.push({
+                record: {
+                  name: business.name,
+                  detailed_address: business.detailed_address,
+                  address: business.address,
+                },
+                reason: `Negocio duplicado (mismo slug y dirección): '${baseSlug}' - '${businessAddress}'`,
+                slug: baseSlug,
+              });
+            }
+            skippedCount++;
+            // Log específico para duplicados
+            if (totalProcessed % 1000 === 0) {
+              console.log(
+                `❗ Registro omitido - Negocio duplicado: '${business.name}' en '${finalCityName}' con dirección '${businessAddress}' (registro #${totalProcessed})`
+              );
+            }
+            callback();
+            return;
+          } else {
+            // Mismo slug pero dirección diferente = agregar número
+            const existingNumbers = Array.from(addressMap.values());
+            slugNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 2;
+            finalSlug = `${baseSlug}-${slugNumber}`;
+            
+            // Registrar esta nueva dirección
+            addressMap.set(businessAddress, slugNumber);
+            
             console.log(
-              `❗ Registro omitido - Negocio duplicado: '${business.name}' en '${finalCityName}' (registro #${totalProcessed})`
+              `✅ Negocio con nombre similar agregado: '${business.name}' en '${finalCityName}' - slug: '${finalSlug}' (dirección diferente)`
             );
           }
-          callback();
-          return;
+        } else {
+          // Primer negocio con este slug base
+          const addressMap = new Map<string, number>();
+          addressMap.set(businessAddress, 1);
+          processedBusinessSlugs.set(baseSlug, addressMap);
         }
-
-        // Marcar este slug como procesado
-        processedBusinessSlugs.add(businessSlug);
 
         // Agregar al batch con cityKey temporal y categoryId
         businessBatch.push({
@@ -1000,7 +1025,7 @@ async function processStreamingData(
           categoryId, // Agregar categoryId desde parámetro
           latitude: business.coordinates?.latitude ?? null,
           longitude: business.coordinates?.longitude ?? null,
-          slug: businessSlug, // ✅ Usar slug ya calculado
+          slug: finalSlug, // ✅ Usar slug ya calculado (con número si es necesario)
           description: business?.description ?? null,
           email: business?.email ?? null,
           image: business?.image ?? null,
@@ -1198,7 +1223,7 @@ async function processStreamingData(
     `   • Barrio CABA no reconocido: ${skipReasons.unknownBarrioCABA.toLocaleString()}`
   );
   console.log(
-    `   • Negocios duplicados (mismo slug): ${skipReasons.duplicatedBusiness.toLocaleString()}`
+    `   • Negocios duplicados (mismo slug + dirección): ${skipReasons.duplicatedBusiness.toLocaleString()}`
   );
   console.log(
     `   • Negocios omitidos por BD (ya existían): ${skipReasons.skippedByDatabase.toLocaleString()}`
@@ -1270,7 +1295,7 @@ async function processStreamingData(
   }
 
   if (skipReasons.duplicatedSlugs.size > 0) {
-    console.log(`\n🔄 Negocios duplicados encontrados (primeros 10 slugs):`);
+    console.log(`\n🔄 Negocios con slugs base duplicados (misma dirección - primeros 10):`);
     Array.from(skipReasons.duplicatedSlugs)
       .slice(0, 10)
       .forEach((slug, i) => {
