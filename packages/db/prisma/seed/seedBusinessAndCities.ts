@@ -238,12 +238,84 @@ const cityNumberWhitelist = [
   // Agregar más ciudades aquí según sea necesario
 ];
 
+const categoryWhitelist = 
+{mecanicos:[
+  "Taller mecanico",
+  "Taller de reparacion de automoviles",
+  "Taller de automoviles",
+  "Taller de chapa y pintura",
+  "Taller de reparacion de motos",
+  "Tienda de repuestos para automovil",
+  "Tienda de neumaticos",
+  "Servicio de cambio de aceite",
+  "Taller de revision de automoviles",
+  "Taller de frenos",
+  "Taller de reparacion de vehiculos todoterreno",
+  "Servicio de reacondicionamiento de motores",
+  "Servicio de alineacion de ruedas",
+  "Servicio de reparacion de sistemas electricos para automoviles",
+  "Taller de reparaciones electricas",
+  "Tienda de repuestos para motos",
+  "Tienda de repuestos de automoviles usados",
+  "Servicio de reparacion de aire acondicionado",
+  "Proveedor de repuestos de carroceria de automoviles",
+  "Planchista",
+  "Taller de reparacion de motores diesel",
+  "Tienda de accesorios para automoviles",
+  "Tienda de repuestos para coches de carreras",
+  "Servicio de grua",
+  "Servicio de chapa y pintura",
+  "Tienda de baterias para automovil",
+  "Taller de amortiguadores",
+  "Servicio de remolque",
+  "Tienda de piezas de automovil",
+  "Taller de reparacion de tractores",
+  "Desguace",
+  "Taller de reparacion de autocaravanas",
+  "Servicio de reparacion de motores de baja potencia",
+  "Servicio de restauracion de automoviles",
+  "Tienda de ruedas",
+  "Tienda de transmisiones",
+  "Taller de cristales para automoviles",
+  "Proveedor de alarmas de coche",
+  "Fabricante de repuestos para automoviles",
+  "Pintura de automoviles",
+  "Taller de reparacion de motores electricos",
+  "Inspeccion tecnica de vehiculos",
+  "Servicio de reparacion de radiadores de automoviles",
+  "Servicio de reparacion de radiadores",
+  "Tienda de radiadores",
+  "Servicio de polarizacion de ventanas",
+  "Tienda de automovilismo",
+  "Servicio de reparacion de sistemas hidraulicos",
+  "Servicio de reparacion de maquinaria agricola",
+  "Automocion",
+  "Servicio de reparacion de parabrisas y pantallas",
+  "Servicio de reparacion de cortadoras de cesped",
+  "Taller de reparacion de escuteres",
+  "Fabricante de remolques",
+  "Servicio de reparacion de compresores de aire",
+  "Tapiceria para automoviles",
+  "Auto air conditioning service",
+  "Chapisteria",
+  "Club automovilistico",
+  "Contratista mecanico",
+  "Taller de reparacion de remolques",
+  "Tienda de neumaticos usados",
+  "Taller de camiones",
+  "Tienda de accesorios para camiones",
+  "Taller de reparacion de herramientas",
+  "Tienda de ejes de transmision",
+  "Tienda de silenciadores"
+]}
+
 interface BusinessData {
   name: string;
   description: string;
   email: string;
   image: string;
   category: string;
+  categories?: string[]; // ✅ Agregar campo categories
   detailed_address?: {
     street?: string;
     city?: string;
@@ -375,6 +447,7 @@ type ProcessedBusiness = Omit<
 
 type ProcessedBusinessWithKey = ProcessedBusiness & {
   cityKey: string; // Key temporal para mapear después
+  categories?: string[]; // ✅ Preservar categorías originales
 };
 
 // Configuración optimizada para volúmenes masivos
@@ -567,7 +640,9 @@ async function bulkCreateCities(
 
 async function bulkCreateBusinesses(
   businesses: ProcessedBusiness[],
-  batchNumber: number
+  batchNumber: number,
+  slugToCategoriesMap: Map<string, string[]>, // ✅ Mapeo de slug → categorías originales
+  categoryTracker: Map<string, number> // ✅ Tracker global de categorías
 ): Promise<{ sent: number; created: number; skipped: number }> {
   if (businesses.length === 0) return { sent: 0, created: 0, skipped: 0 };
 
@@ -579,6 +654,17 @@ async function bulkCreateBusinesses(
         skipDuplicates: true,
       });
     });
+
+    // ✅ Contar categorías de negocios creados exitosamente
+    for (const createdBusiness of result) {
+      const originalCategories = slugToCategoriesMap.get(createdBusiness.slug);
+      if (originalCategories) {
+        for (const category of originalCategories) {
+          const currentCount = categoryTracker.get(category) || 0;
+          categoryTracker.set(category, currentCount + 1);
+        }
+      }
+    }
 
     const sent = businesses.length;
     const created = result.length;
@@ -653,6 +739,10 @@ async function processStreamingData(
   }> = [];
   // ✅ Track slugs + addresses en este batch: Map<slugBase, Map<address, assignedNumber>>
   const processedBusinessSlugs = new Map<string, Map<string, number>>();
+  
+  // ✅ Tracking de categorías
+  const categoryTracker = new Map<string, number>(); // Contador global de categorías
+  const slugToCategoriesMap = new Map<string, string[]>(); // Mapeo slug → categorías originales
 
   let totalProcessed = 0;
   let batchNumber = 0;
@@ -1015,6 +1105,11 @@ async function processStreamingData(
           processedBusinessSlugs.set(baseSlug, addressMap);
         }
 
+        // ✅ Mapear slug a categorías originales para tracking
+        if (business.categories && Array.isArray(business.categories)) {
+          slugToCategoriesMap.set(finalSlug, business.categories);
+        }
+
         // Agregar al batch con cityKey temporal y categoryId
         businessBatch.push({
           name: business.name,
@@ -1041,6 +1136,7 @@ async function processStreamingData(
           googlePlaceId: business?.place_id ?? null,
           googleMapsRating: business?.rating ?? null,
           status: true,
+          categories: business.categories, // ✅ Preservar categorías originales
         });
 
         totalProcessed++;
@@ -1159,9 +1255,9 @@ async function processStreamingData(
   let totalCreated = 0;
   let totalSkippedByDB = 0;
 
-  for (const [index, chunk] of businessChunks.entries()) {
-    batchNumber++;
-    const result = await bulkCreateBusinesses(chunk, batchNumber);
+      for (const [index, chunk] of businessChunks.entries()) {
+      batchNumber++;
+      const result = await bulkCreateBusinesses(chunk, batchNumber, slugToCategoriesMap, categoryTracker);
 
     totalSent += result.sent;
     totalCreated += result.created;
@@ -1236,6 +1332,13 @@ async function processStreamingData(
     totalCreated,
     totalSkippedByDB,
     totalSent
+  );
+
+  // ✅ Exportar estadísticas de categorías
+  await exportCategoryStats(
+    categoryTracker,
+    categorySlug,
+    totalCreated
   );
 
   if (skipReasons.unknownProvinces.size > 0) {
@@ -1562,6 +1665,104 @@ async function exportSkipReasons(
           list: Array.from(skipReasons.cpaCities).sort(),
         },
         examples: skipReasons.examples,
+      };
+
+      await fs.writeFile(
+        fallbackPath,
+        JSON.stringify(exportData, null, 2),
+        'utf8'
+      );
+      console.log(`✅ Archivo fallback creado en: ${fallbackPath}`);
+    } catch (fallbackError) {
+      console.error('❌ Error también en fallback:', fallbackError);
+    }
+  }
+}
+
+async function exportCategoryStats(
+  categoryTracker: Map<string, number>,
+  categorySlug: string,
+  totalCreated: number
+): Promise<void> {
+  try {
+    console.log('🔄 Iniciando exportación de estadísticas de categorías...');
+
+    // Usar path relativo al archivo actual del script
+    const logsDir = path.join(__dirname, 'logs');
+
+    console.log(`📂 Creando directorio: ${logsDir}`);
+    await fs.mkdir(logsDir, { recursive: true });
+
+    console.log('✅ Directorio creado');
+
+    // Preparar datos para export - convertir Map a array ordenado por count descendente
+    const categoryStats = Array.from(categoryTracker.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      category: categorySlug,
+      summary: {
+        totalBusinessesCreated: totalCreated,
+        uniqueCategories: categoryStats.length,
+        totalCategoryOccurrences: Array.from(categoryTracker.values()).reduce((sum, count) => sum + count, 0),
+      },
+      categories: categoryStats,
+    };
+
+    // Nombre del archivo con timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `category-stats-${categorySlug}-${timestamp}.json`;
+    const filepath = path.join(logsDir, filename);
+
+    console.log(`📝 Escribiendo archivo: ${filepath}`);
+
+    // Escribir archivo
+    await fs.writeFile(filepath, JSON.stringify(exportData, null, 2), 'utf8');
+
+    console.log(`✅ Archivo creado exitosamente`);
+    console.log(`📁 Estadísticas de categorías exportadas a: ${filepath}`);
+    console.log(
+      `📊 Total de categorías únicas encontradas: ${categoryStats.length}`
+    );
+    console.log(
+      `📊 Total de ocurrencias de categorías: ${exportData.summary.totalCategoryOccurrences}`
+    );
+
+    // Mostrar top 10 categorías
+    if (categoryStats.length > 0) {
+      console.log(`\n🏆 Top 10 categorías más frecuentes:`);
+      categoryStats.slice(0, 10).forEach((cat, i) => {
+        console.log(`   ${i + 1}. "${cat.name}": ${cat.count} negocios`);
+      });
+      if (categoryStats.length > 10) {
+        console.log(`   ... y ${categoryStats.length - 10} categorías más (ver archivo)`);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error exportando estadísticas de categorías:', error);
+    console.error('Stack trace:', error);
+
+    // Intentar crear en directorio actual como fallback
+    try {
+      console.log('🔄 Intentando crear en directorio actual...');
+      const fallbackFilename = `category-stats-${categorySlug}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      const fallbackPath = path.join(process.cwd(), fallbackFilename);
+
+      const categoryStats = Array.from(categoryTracker.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        category: categorySlug,
+        summary: {
+          totalBusinessesCreated: totalCreated,
+          uniqueCategories: categoryStats.length,
+          totalCategoryOccurrences: Array.from(categoryTracker.values()).reduce((sum, count) => sum + count, 0),
+        },
+        categories: categoryStats,
       };
 
       await fs.writeFile(
