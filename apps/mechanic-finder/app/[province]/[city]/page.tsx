@@ -281,31 +281,31 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             {/* Preguntas frecuentes */}
             <section className="mt-16">
-              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas frecuentes sobre mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas frecuentes</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Cómo verificar la información de un taller?</h3>
+                  <div className="font-semibold mb-2">¿Cómo verificar la información de un taller?</div>
                   <p className="text-sm text-muted-foreground">
                     Recomendamos contactar directamente con cada taller para confirmar servicios,
                     horarios y precios, ya que la información puede cambiar sin previo aviso.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿De dónde proviene esta información?</h3>
+                  <div className="font-semibold mb-2">¿De dónde proviene esta información?</div>
                   <p className="text-sm text-muted-foreground">
                     Los datos mostrados provienen de fuentes públicas como directorios comerciales
                     y plataformas de mapas. Siempre verifica la información directamente.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</h3>
+                  <div className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</div>
                   <p className="text-sm text-muted-foreground">
                     Los servicios varían según cada taller. Algunos se especializan en ciertos tipos
                     de reparación mientras otros ofrecen servicios más generales.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <h3 className="font-semibold mb-2">¿Cómo elegir el mejor taller?</h3>
+                  <div className="font-semibold mb-2">¿Cómo elegir el mejor taller?</div>
                   <p className="text-sm text-muted-foreground">
                     Considera factores como ubicación, horarios, servicios ofrecidos, y siempre
                     solicita presupuestos detallados antes de autorizar cualquier trabajo.
@@ -323,9 +323,9 @@ export default async function CityPage({ params, searchParams }: Props) {
       {relatedCities.length > 0 && (
         <section className="container">
           <div className="bg-card border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">
+            <div className="text-xl font-semibold mb-4">
               Otras Ciudades Destacadas en {province.name}
-            </h3>
+            </div>
             <p className="text-sm text-muted-foreground mb-6">
               Explorá talleres mecánicos en las principales ciudades de {province.name} ordenadas por cantidad de servicios.
             </p>

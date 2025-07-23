@@ -38,9 +38,9 @@ export function CitySelector({ cities, provinceSlug }: CitySelectorProps) {
   return (
     <div className="bg-card border rounded-lg p-6 max-w-md mx-auto">
       <div className="pr-2">
-        <h3 className="text-lg font-semibold mb-4">
+        <div className="text-lg font-semibold mb-4">
           Selecciona tu ciudad
-        </h3>
+        </div>
         <p className="text-sm text-muted-foreground mb-4">
           Elige la ciudad donde necesitas un mecánico
         </p>

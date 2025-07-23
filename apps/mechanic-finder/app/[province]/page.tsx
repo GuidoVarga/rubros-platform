@@ -168,9 +168,9 @@ export default async function ProvincePage({ params }: Props) {
                     className="block p-6 bg-card border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all group relative"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold group-hover:text-primary">
+                      <div className="text-lg font-semibold group-hover:text-primary">
                         {city.name}
-                      </h3>
+                      </div>
                       <span className="text-2xl">🔧</span>
                     </div>
 
@@ -240,7 +240,7 @@ export default async function ProvincePage({ params }: Props) {
 
               <div className="bg-muted/30 p-8 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4 text-center">
-                  Cómo usar nuestro directorio en {province.name}
+                  Cómo usar el directorio
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
