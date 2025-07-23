@@ -8,7 +8,8 @@
     "build": "cd ../../packages/db && pnpm build && cd ../../apps/mechanic-finder && next build",
     "start": "next start -p 3002",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "check-debug-protection": "node scripts/check-debug-protection.js"
   },
   "dependencies": {
     "@rubros/db": "workspace:*",

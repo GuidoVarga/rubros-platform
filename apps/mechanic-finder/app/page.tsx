@@ -192,7 +192,7 @@ export default async function Home() {
       <section className="text-center bg-primary/5 p-8 rounded-lg">
         <h3 className="text-3xl font-bold mb-4">¿Necesitás un mecánico ahora?</h3>
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-          Empezá tu búsqueda seleccionando tu provincia y encontrá el <strong>taller mecánico</strong>
+          Empezá tu búsqueda seleccionando tu provincia y encontrá el <strong>taller mecánico </strong>
           más cercano a tu ubicación. Información actualizada las 24 horas.
         </p>
         <Button size="lg" asChild>
