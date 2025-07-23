@@ -19,7 +19,8 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
-  const adRef = useRef<HTMLModElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const adRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     // Verificar consentimiento inicial
@@ -36,41 +37,93 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   }, []);
 
   useEffect(() => {
-    if (!hasConsent || !isLoaded || adPushed) return;
+    if (!hasConsent || !isLoaded || adPushed || error) return;
 
-    // Esperar a que el elemento tenga dimensiones y el script esté cargado
+    let retryCount = 0;
+    const maxRetries = 10;
+
     const checkAndPushAd = () => {
-      if (adRef.current && window.adsbygoogle) {
-        const rect = adRef.current.getBoundingClientRect();
-        if (rect.width > 0) {
-          try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            setAdPushed(true);
-          } catch (error) {
-            console.error('Error pushing ad:', error);
-            // Retry after error
-            setTimeout(checkAndPushAd, 1000);
-          }
+      const element = adRef.current;
+
+      if (!element) {
+        setError('AdSense element not found in DOM');
+        return;
+      }
+
+      if (!window.adsbygoogle) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAndPushAd, 500);
         } else {
-          // Retry after a short delay if element has no width
-          setTimeout(checkAndPushAd, 200);
+          setError('AdSense script not loaded after retries');
         }
-      } else if (!window.adsbygoogle) {
-        // Script not loaded yet, retry
-        setTimeout(checkAndPushAd, 500);
+        return;
+      }
+
+      // Verificar que el elemento esté en el DOM y sea visible
+      const rect = element.getBoundingClientRect();
+      const isInViewport = element.offsetParent !== null;
+      const hasSize = rect.width > 0 && rect.height > 0;
+
+      if (!isInViewport) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAndPushAd, 200);
+        } else {
+          setError('AdSense element not visible after retries');
+        }
+        return;
+      }
+
+      if (!hasSize) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAndPushAd, 200);
+        } else {
+          setError('AdSense element has no size after retries');
+        }
+        return;
+      }
+
+      // Todo listo, push del ad
+      try {
+        console.log(`🎯 Pushing AdSense ad for slot: ${slot}`, {
+          element: element,
+          rect: rect,
+          isInViewport: isInViewport,
+          hasSize: hasSize
+        });
+
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        setAdPushed(true);
+        setError(null);
+
+        console.log(`✅ AdSense ad pushed successfully for slot: ${slot}`);
+      } catch (error) {
+        console.error('❌ Error pushing AdSense ad:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        setError(`Push failed: ${errorMessage}`);
+
+        // Retry once more after error
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAndPushAd, 1000);
+        }
       }
     };
 
     // Small delay to ensure DOM is ready
     const timer = setTimeout(checkAndPushAd, 300);
     return () => clearTimeout(timer);
-  }, [hasConsent, isLoaded, adPushed]);
+  }, [hasConsent, isLoaded, adPushed, error, slot]);
 
   const parsedStyle = {
     display: 'block',
     width: '100%',
     minWidth: '300px',
-    minHeight: style?.minHeight || '100px',
+    minHeight: style?.minHeight || '250px', // Increased min height
+    height: 'auto',
+    overflow: 'hidden',
     ...style,
     maxWidth: "1100px",
   };
@@ -79,15 +132,40 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
     return null;
   }
 
+  // Debug mode in development
+  if (error && process.env.NODE_ENV === 'development') {
+    return (
+      <div
+        style={parsedStyle}
+        className={`border-2 border-red-300 bg-red-50 p-4 rounded ${className || ''}`}
+      >
+        <div className="text-red-700 text-sm">
+          <strong>AdSense Error (slot: {slot}):</strong><br />
+          {error}
+        </div>
+        <button
+          className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded text-xs"
+          onClick={() => {
+            setError(null);
+            setAdPushed(false);
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <ins
-      ref={adRef}
+      ref={adRef as any}
       className={`adsbygoogle ${className || ''}`}
       style={parsedStyle}
       data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
       data-ad-slot={slot}
       data-ad-format="auto"
       data-full-width-responsive="true"
+      data-adtest={process.env.NODE_ENV === 'development' ? 'on' : undefined}
     />
   );
 }
