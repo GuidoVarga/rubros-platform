@@ -87,20 +87,10 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
 
       // Todo listo, push del ad
       try {
-        console.log(`🎯 Pushing AdSense ad for slot: ${slot}`, {
-          element: element,
-          rect: rect,
-          isInViewport: isInViewport,
-          hasSize: hasSize
-        });
-
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         setAdPushed(true);
         setError(null);
-
-        console.log(`✅ AdSense ad pushed successfully for slot: ${slot}`);
       } catch (error) {
-        console.error('❌ Error pushing AdSense ad:', error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         setError(`Push failed: ${errorMessage}`);
 

@@ -238,12 +238,100 @@ const cityNumberWhitelist = [
   // Agregar más ciudades aquí según sea necesario
 ];
 
+// ✅ Whitelists de categorías por categorySlug de nuestra BD
+const categoryWhitelists: Record<string, string[]> = {
+  'mecanicos': [
+    "Taller mecanico",
+    "Taller de reparacion de automoviles",
+    "Taller de automoviles",
+    "Taller de chapa y pintura",
+    "Taller de reparacion de motos",
+    "Tienda de repuestos para automovil",
+    "Tienda de neumaticos",
+    "Servicio de cambio de aceite",
+    "Taller de revision de automoviles",
+    "Taller de frenos",
+    "Taller de reparacion de vehiculos todoterreno",
+    "Servicio de reacondicionamiento de motores",
+    "Servicio de alineacion de ruedas",
+    "Servicio de reparacion de sistemas electricos para automoviles",
+    "Taller de reparaciones electricas",
+    "Tienda de repuestos para motos",
+    "Tienda de repuestos de automoviles usados",
+    "Servicio de reparacion de aire acondicionado",
+    "Proveedor de repuestos de carroceria de automoviles",
+    "Planchista",
+    "Taller de reparacion de motores diesel",
+    "Tienda de accesorios para automoviles",
+    "Tienda de repuestos para coches de carreras",
+    "Servicio de grua",
+    "Servicio de chapa y pintura",
+    "Tienda de baterias para automovil",
+    "Taller de amortiguadores",
+    "Servicio de remolque",
+    "Tienda de piezas de automovil",
+    "Taller de reparacion de tractores",
+    "Desguace",
+    "Taller de reparacion de autocaravanas",
+    "Servicio de reparacion de motores de baja potencia",
+    "Servicio de restauracion de automoviles",
+    "Tienda de ruedas",
+    "Tienda de transmisiones",
+    "Taller de cristales para automoviles",
+    "Proveedor de alarmas de coche",
+    "Fabricante de repuestos para automoviles",
+    "Pintura de automoviles",
+    "Taller de reparacion de motores electricos",
+    "Inspeccion tecnica de vehiculos",
+    "Servicio de reparacion de radiadores de automoviles",
+    "Servicio de reparacion de radiadores",
+    "Tienda de radiadores",
+    "Servicio de polarizacion de ventanas",
+    "Tienda de automovilismo",
+    "Servicio de reparacion de sistemas hidraulicos",
+    "Servicio de reparacion de maquinaria agricola",
+    "Automocion",
+    "Servicio de reparacion de parabrisas y pantallas",
+    "Servicio de reparacion de cortadoras de cesped",
+    "Taller de reparacion de escuteres",
+    "Fabricante de remolques",
+    "Servicio de reparacion de compresores de aire",
+    "Tapiceria para automoviles",
+    "Auto air conditioning service",
+    "Chapisteria",
+    "Club automovilistico",
+    "Contratista mecanico",
+    "Taller de reparacion de remolques",
+    "Tienda de neumaticos usados",
+    "Taller de camiones",
+    "Tienda de accesorios para camiones",
+    "Taller de reparacion de herramientas",
+    "Tienda de ejes de transmision",
+    "Tienda de silenciadores"
+  ],
+  // ✅ Aquí se pueden agregar más categorías en el futuro:
+  // 'plomeros': [...],
+  // 'electricistas': [...],
+};
+
+// ✅ Función helper para validar categorías del negocio
+function hasValidCategory(businessCategories: string[] | undefined, allowedCategories: string[]): boolean {
+  if (!businessCategories || !Array.isArray(businessCategories) || businessCategories.length === 0) {
+    return false;
+  }
+
+  return businessCategories.some(category => 
+    allowedCategories.includes(category.trim())
+  );
+}
+
 interface BusinessData {
   name: string;
   description: string;
   email: string;
   image: string;
   category: string;
+  categories?: string[]; // ✅ Agregar campo categories
   detailed_address?: {
     street?: string;
     city?: string;
@@ -375,6 +463,7 @@ type ProcessedBusiness = Omit<
 
 type ProcessedBusinessWithKey = ProcessedBusiness & {
   cityKey: string; // Key temporal para mapear después
+  categories?: string[]; // ✅ Preservar categorías originales
 };
 
 // Configuración optimizada para volúmenes masivos
@@ -567,7 +656,9 @@ async function bulkCreateCities(
 
 async function bulkCreateBusinesses(
   businesses: ProcessedBusiness[],
-  batchNumber: number
+  batchNumber: number,
+  slugToCategoriesMap: Map<string, string[]>, // ✅ Mapeo de slug → categorías originales
+  categoryTracker: Map<string, number> // ✅ Tracker global de categorías
 ): Promise<{ sent: number; created: number; skipped: number }> {
   if (businesses.length === 0) return { sent: 0, created: 0, skipped: 0 };
 
@@ -579,6 +670,17 @@ async function bulkCreateBusinesses(
         skipDuplicates: true,
       });
     });
+
+    // ✅ Contar categorías de negocios creados exitosamente
+    for (const createdBusiness of result) {
+      const originalCategories = slugToCategoriesMap.get(createdBusiness.slug);
+      if (originalCategories) {
+        for (const category of originalCategories) {
+          const currentCount = categoryTracker.get(category) || 0;
+          categoryTracker.set(category, currentCount + 1);
+        }
+      }
+    }
 
     const sent = businesses.length;
     const created = result.length;
@@ -653,6 +755,10 @@ async function processStreamingData(
   }> = [];
   // ✅ Track slugs + addresses en este batch: Map<slugBase, Map<address, assignedNumber>>
   const processedBusinessSlugs = new Map<string, Map<string, number>>();
+  
+  // ✅ Tracking de categorías
+  const categoryTracker = new Map<string, number>(); // Contador global de categorías
+  const slugToCategoriesMap = new Map<string, string[]>(); // Mapeo slug → categorías originales
 
   let totalProcessed = 0;
   let batchNumber = 0;
@@ -670,6 +776,7 @@ async function processStreamingData(
     wrongCountry: 0,
     unknownBarrioCABA: 0,
     duplicatedBusiness: 0, // ✅ Contador para duplicados (mismo slug + misma dirección)
+    invalidCategory: 0, // ✅ Contador para negocios sin categorías válidas
     skippedByDatabase: 0, // ✅ Será actualizado al final con totalSkippedByDB
     acceptedByWhitelist: 0, // ✅ Nuevo contador para ciudades aceptadas por whitelist
     acceptedByCPA: 0, // ✅ Nuevo contador para ciudades resueltas via CPA codes
@@ -680,6 +787,7 @@ async function processStreamingData(
     duplicatedSlugs: new Set<string>(), // ✅ Track slugs base con direcciones duplicadas
     whitelistCities: new Set<string>(), // ✅ Track ciudades aceptadas por whitelist
     cpaCities: new Set<string>(), // ✅ Track ciudades resueltas via CPA codes
+    invalidCategories: new Set<string>(), // ✅ Track categorías no válidas encontradas
     examples: {
       invalidStructure: [] as any[],
       missingLocation: [] as any[],
@@ -690,6 +798,7 @@ async function processStreamingData(
       wrongCountry: [] as any[],
       unknownBarrioCABA: [] as any[],
       duplicatedBusiness: [] as any[], // ✅ Ejemplos de duplicados (mismo slug + misma dirección)
+      invalidCategory: [] as any[], // ✅ Ejemplos de negocios sin categorías válidas
     },
   };
 
@@ -770,6 +879,40 @@ async function processStreamingData(
             const locationField = isCABA ? 'ward' : 'city';
             console.log(
               `❗ Registro omitido - Falta ubicación: ${locationField}='${cityRaw}', provincia='${provinceRaw}' (registro #${totalProcessed})`
+            );
+          }
+          callback();
+          return;
+        }
+
+        // ✅ Validar que el negocio tenga al menos una categoría válida
+        const allowedCategories = categoryWhitelists[categorySlug];
+        if (allowedCategories && !hasValidCategory(business.categories, allowedCategories)) {
+          skipReasons.invalidCategory++;
+          
+          // Track categorías inválidas encontradas
+          if (business.categories && Array.isArray(business.categories)) {
+            business.categories.forEach(cat => skipReasons.invalidCategories.add(cat.trim()));
+          }
+          
+          // Guardar ejemplo (máximo 10)
+          if (skipReasons.examples.invalidCategory.length < 10) {
+            skipReasons.examples.invalidCategory.push({
+              record: {
+                name: business.name,
+                categories: business.categories,
+                detailed_address: business.detailed_address,
+                address: business.address,
+              },
+              reason: `Negocio sin categorías válidas para '${categorySlug}'. Categorías encontradas: ${JSON.stringify(business.categories)}`,
+            });
+          }
+          
+          skippedCount++;
+          // Log específico para categorías inválidas
+          if (totalProcessed % 1000 === 0) {
+            console.log(
+              `❗ Registro omitido - Sin categorías válidas: '${business.name}' con categorías ${JSON.stringify(business.categories)} (registro #${totalProcessed})`
             );
           }
           callback();
@@ -1015,6 +1158,11 @@ async function processStreamingData(
           processedBusinessSlugs.set(baseSlug, addressMap);
         }
 
+        // ✅ Mapear slug a categorías originales para tracking
+        if (business.categories && Array.isArray(business.categories)) {
+          slugToCategoriesMap.set(finalSlug, business.categories);
+        }
+
         // Agregar al batch con cityKey temporal y categoryId
         businessBatch.push({
           name: business.name,
@@ -1041,6 +1189,7 @@ async function processStreamingData(
           googlePlaceId: business?.place_id ?? null,
           googleMapsRating: business?.rating ?? null,
           status: true,
+          categories: business.categories, // ✅ Preservar categorías originales
         });
 
         totalProcessed++;
@@ -1159,9 +1308,9 @@ async function processStreamingData(
   let totalCreated = 0;
   let totalSkippedByDB = 0;
 
-  for (const [index, chunk] of businessChunks.entries()) {
-    batchNumber++;
-    const result = await bulkCreateBusinesses(chunk, batchNumber);
+      for (const [index, chunk] of businessChunks.entries()) {
+      batchNumber++;
+      const result = await bulkCreateBusinesses(chunk, batchNumber, slugToCategoriesMap, categoryTracker);
 
     totalSent += result.sent;
     totalCreated += result.created;
@@ -1205,6 +1354,9 @@ async function processStreamingData(
     `   • Falta ubicación: ${skipReasons.missingLocation.toLocaleString()}`
   );
   console.log(
+    `   • Sin categorías válidas: ${skipReasons.invalidCategory.toLocaleString()}`
+  );
+  console.log(
     `   • Ciudad muy corta (≤3 chars): ${skipReasons.invalidCityLength.toLocaleString()}`
   );
   console.log(
@@ -1229,13 +1381,27 @@ async function processStreamingData(
     `   • Negocios omitidos por BD (ya existían): ${skipReasons.skippedByDatabase.toLocaleString()}`
   );
 
+  // ✅ Crear directorio organizado para esta ejecución
+  const { logDir, timestamp } = createLogDirectory(categorySlug);
+
   // Exportar detalles a JSON
   await exportSkipReasons(
     skipReasons,
     categorySlug,
     totalCreated,
     totalSkippedByDB,
-    totalSent
+    totalSent,
+    logDir,
+    timestamp
+  );
+
+  // ✅ Exportar estadísticas de categorías
+  await exportCategoryStats(
+    categoryTracker,
+    categorySlug,
+    totalCreated,
+    logDir,
+    timestamp
   );
 
   if (skipReasons.unknownProvinces.size > 0) {
@@ -1336,6 +1502,28 @@ async function processStreamingData(
       );
     }
   }
+
+  if (skipReasons.invalidCategories.size > 0) {
+    console.log(`\n❌ Categorías inválidas encontradas (primeras 10):`);
+    Array.from(skipReasons.invalidCategories)
+      .slice(0, 10)
+      .forEach((category, i) => {
+        console.log(`   ${i + 1}. "${category}"`);
+      });
+    if (skipReasons.invalidCategories.size > 10) {
+      console.log(
+        `   ... y ${skipReasons.invalidCategories.size - 10} más (ver archivo logs/)`
+      );
+    }
+  }
+}
+
+// ✅ Helper para crear directorio de logs organizado
+function createLogDirectory(categorySlug: string): { logDir: string; timestamp: string } {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const logDir = path.join(__dirname, 'logs', categorySlug, timestamp);
+  
+  return { logDir, timestamp };
 }
 
 async function updateMissingLocations() {
@@ -1365,16 +1553,28 @@ async function exportSkipReasons(
   categorySlug: string,
   totalCreated: number,
   totalSkippedByDB: number,
-  totalSent: number
+  totalSent: number,
+  logDir?: string,
+  timestamp?: string
 ): Promise<void> {
+  // Usar directorio organizado si se proporciona, sino crear uno nuevo
+  let finalLogDir: string;
+  let finalTimestamp: string;
+  
+  if (logDir && timestamp) {
+    finalLogDir = logDir;
+    finalTimestamp = timestamp;
+  } else {
+    const logInfo = createLogDirectory(categorySlug);
+    finalLogDir = logInfo.logDir;
+    finalTimestamp = logInfo.timestamp;
+  }
+
   try {
     console.log('🔄 Iniciando exportación de detalles...');
 
-    // Usar path relativo al archivo actual del script
-    const logsDir = path.join(__dirname, 'logs');
-
-    console.log(`📂 Creando directorio: ${logsDir}`);
-    await fs.mkdir(logsDir, { recursive: true });
+    console.log(`📂 Creando directorio organizado: logs/${categorySlug}/${finalTimestamp}/`);
+    await fs.mkdir(finalLogDir, { recursive: true });
 
     console.log('✅ Directorio creado');
 
@@ -1388,6 +1588,7 @@ async function exportSkipReasons(
         totalSkippedByDB: totalSkippedByDB,
         invalidStructure: skipReasons.invalidStructure,
         missingLocation: skipReasons.missingLocation,
+        invalidCategory: skipReasons.invalidCategory,
         invalidCityLength: skipReasons.invalidCityLength,
         invalidCityNumbers: skipReasons.invalidCityNumbers,
         unknownProvince: skipReasons.unknownProvince,
@@ -1400,6 +1601,7 @@ async function exportSkipReasons(
         totalSkippedByValidation:
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
+          skipReasons.invalidCategory +
           skipReasons.invalidCityLength +
           skipReasons.invalidCityNumbers +
           skipReasons.unknownProvince +
@@ -1412,6 +1614,7 @@ async function exportSkipReasons(
           totalSkippedByDB +
           skipReasons.invalidStructure +
           skipReasons.missingLocation +
+          skipReasons.invalidCategory +
           skipReasons.invalidCityLength +
           skipReasons.invalidCityNumbers +
           skipReasons.unknownProvince +
@@ -1456,13 +1659,17 @@ async function exportSkipReasons(
         businessesSkipped: skipReasons.acceptedByCPA,
         list: Array.from(skipReasons.cpaCities).sort(),
       },
+      invalidCategories: {
+        count: skipReasons.invalidCategories.size,
+        businessesSkipped: skipReasons.invalidCategory,
+        list: Array.from(skipReasons.invalidCategories).sort(),
+      },
       examples: skipReasons.examples,
     };
 
     // Nombre del archivo con timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `skip-reasons-${categorySlug}-${timestamp}.json`;
-    const filepath = path.join(logsDir, filename);
+    const filename = `skip-reasons-${categorySlug}-${finalTimestamp}.json`;
+    const filepath = path.join(finalLogDir, filename);
 
     console.log(`📝 Escribiendo archivo: ${filepath}`);
 
@@ -1471,6 +1678,7 @@ async function exportSkipReasons(
 
     console.log(`✅ Archivo creado exitosamente`);
     console.log(`📁 Detalles de omisiones exportados a: ${filepath}`);
+    console.log(`📂 Directorio de logs: logs/${categorySlug}/${finalTimestamp}/`);
     console.log(
       `📊 Total de provincias no reconocidas: ${skipReasons.unknownProvinces.size}`
     );
@@ -1481,7 +1689,7 @@ async function exportSkipReasons(
     // Intentar crear en directorio actual como fallback
     try {
       console.log('🔄 Intentando crear en directorio actual...');
-      const fallbackFilename = `skip-reasons-${categorySlug}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      const fallbackFilename = `skip-reasons-${categorySlug}-${finalTimestamp}.json`;
       const fallbackPath = path.join(process.cwd(), fallbackFilename);
 
       const exportData = {
@@ -1493,6 +1701,7 @@ async function exportSkipReasons(
           totalSkippedByDB: totalSkippedByDB,
           invalidStructure: skipReasons.invalidStructure,
           missingLocation: skipReasons.missingLocation,
+          invalidCategory: skipReasons.invalidCategory,
           invalidCityLength: skipReasons.invalidCityLength,
           invalidCityNumbers: skipReasons.invalidCityNumbers,
           unknownProvince: skipReasons.unknownProvince,
@@ -1505,6 +1714,7 @@ async function exportSkipReasons(
           totalSkippedByValidation:
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
+            skipReasons.invalidCategory +
             skipReasons.invalidCityLength +
             skipReasons.invalidCityNumbers +
             skipReasons.unknownProvince +
@@ -1517,6 +1727,7 @@ async function exportSkipReasons(
             totalSkippedByDB +
             skipReasons.invalidStructure +
             skipReasons.missingLocation +
+            skipReasons.invalidCategory +
             skipReasons.invalidCityLength +
             skipReasons.invalidCityNumbers +
             skipReasons.unknownProvince +
@@ -1561,7 +1772,122 @@ async function exportSkipReasons(
           businessesSkipped: skipReasons.acceptedByCPA,
           list: Array.from(skipReasons.cpaCities).sort(),
         },
+        invalidCategories: {
+          count: skipReasons.invalidCategories.size,
+          businessesSkipped: skipReasons.invalidCategory,
+          list: Array.from(skipReasons.invalidCategories).sort(),
+        },
         examples: skipReasons.examples,
+      };
+
+      await fs.writeFile(
+        fallbackPath,
+        JSON.stringify(exportData, null, 2),
+        'utf8'
+      );
+      console.log(`✅ Archivo fallback creado en: ${fallbackPath}`);
+    } catch (fallbackError) {
+      console.error('❌ Error también en fallback:', fallbackError);
+    }
+  }
+}
+
+async function exportCategoryStats(
+  categoryTracker: Map<string, number>,
+  categorySlug: string,
+  totalCreated: number,
+  logDir?: string,
+  timestamp?: string
+): Promise<void> {
+  // Usar directorio organizado si se proporciona, sino crear uno nuevo
+  let finalLogDir: string;
+  let finalTimestamp: string;
+  
+  if (logDir && timestamp) {
+    finalLogDir = logDir;
+    finalTimestamp = timestamp;
+  } else {
+    const logInfo = createLogDirectory(categorySlug);
+    finalLogDir = logInfo.logDir;
+    finalTimestamp = logInfo.timestamp;
+  }
+
+  try {
+    console.log('🔄 Iniciando exportación de estadísticas de categorías...');
+
+    console.log(`📂 Creando directorio organizado: logs/${categorySlug}/${finalTimestamp}/`);
+    await fs.mkdir(finalLogDir, { recursive: true });
+
+    console.log('✅ Directorio creado');
+
+    // Preparar datos para export - convertir Map a array ordenado por count descendente
+    const categoryStats = Array.from(categoryTracker.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      category: categorySlug,
+      summary: {
+        totalBusinessesCreated: totalCreated,
+        uniqueCategories: categoryStats.length,
+        totalCategoryOccurrences: Array.from(categoryTracker.values()).reduce((sum, count) => sum + count, 0),
+      },
+      categories: categoryStats,
+    };
+
+    // Nombre del archivo con timestamp
+    const filename = `category-stats-${categorySlug}-${finalTimestamp}.json`;
+    const filepath = path.join(finalLogDir, filename);
+
+    console.log(`📝 Escribiendo archivo: ${filepath}`);
+
+    // Escribir archivo
+    await fs.writeFile(filepath, JSON.stringify(exportData, null, 2), 'utf8');
+
+    console.log(`✅ Archivo creado exitosamente`);
+    console.log(`📁 Estadísticas de categorías exportadas a: ${filepath}`);
+    console.log(`📂 Directorio de logs: logs/${categorySlug}/${finalTimestamp}/`);
+    console.log(
+      `📊 Total de categorías únicas encontradas: ${categoryStats.length}`
+    );
+    console.log(
+      `📊 Total de ocurrencias de categorías: ${exportData.summary.totalCategoryOccurrences}`
+    );
+
+    // Mostrar top 10 categorías
+    if (categoryStats.length > 0) {
+      console.log(`\n🏆 Top 10 categorías más frecuentes:`);
+      categoryStats.slice(0, 10).forEach((cat, i) => {
+        console.log(`   ${i + 1}. "${cat.name}": ${cat.count} negocios`);
+      });
+      if (categoryStats.length > 10) {
+        console.log(`   ... y ${categoryStats.length - 10} categorías más (ver archivo)`);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error exportando estadísticas de categorías:', error);
+    console.error('Stack trace:', error);
+
+    // Intentar crear en directorio actual como fallback
+    try {
+      console.log('🔄 Intentando crear en directorio actual...');
+      const fallbackFilename = `category-stats-${categorySlug}-${finalTimestamp}.json`;
+      const fallbackPath = path.join(process.cwd(), fallbackFilename);
+
+      const categoryStats = Array.from(categoryTracker.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        category: categorySlug,
+        summary: {
+          totalBusinessesCreated: totalCreated,
+          uniqueCategories: categoryStats.length,
+          totalCategoryOccurrences: Array.from(categoryTracker.values()).reduce((sum, count) => sum + count, 0),
+        },
+        categories: categoryStats,
       };
 
       await fs.writeFile(
