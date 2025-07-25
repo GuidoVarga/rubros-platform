@@ -235,6 +235,8 @@ const CpaCodeLookup = {
 // Whitelist de ciudades que tienen números válidos en su nombre
 const cityNumberWhitelist = [
   '25 de mayo',
+  '9 de Abril',
+  '9 de Julio',
   // Agregar más ciudades aquí según sea necesario
 ];
 
