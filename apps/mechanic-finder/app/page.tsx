@@ -44,14 +44,14 @@ export default async function Home() {
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">500+</h2>
+          <h2 className="text-2xl font-bold mb-2">19000+</h2>
           <p className="text-muted-foreground">Talleres listados</p>
         </div>
         <div className="text-center">
           <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <MapPin className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">50+</h2>
+          <h2 className="text-2xl font-bold mb-2">600+</h2>
           <p className="text-muted-foreground">Ciudades cubiertas</p>
         </div>
         <div className="text-center">
