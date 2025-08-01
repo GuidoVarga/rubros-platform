@@ -27,25 +27,25 @@ export async function GET(): Promise<Response> {
       priority: '1.0',
     },
     {
-      loc: `${baseUrl}/acerca`,
+      loc: `${baseUrl}/acerca/`,
       lastmod: new Date().toISOString(),
       changefreq: 'monthly',
       priority: '0.7',
     },
     {
-      loc: `${baseUrl}/contacto`,
+      loc: `${baseUrl}/contacto/`,
       lastmod: new Date().toISOString(),
       changefreq: 'monthly',
       priority: '0.7',
     },
     {
-      loc: `${baseUrl}/terminos-y-condiciones`,
+      loc: `${baseUrl}/terminos-y-condiciones/`,
       lastmod: new Date().toISOString(),
       changefreq: 'monthly',
       priority: '0.5',
     },
     {
-      loc: `${baseUrl}/politica-privacidad`,
+      loc: `${baseUrl}/politica-privacidad/`,
       lastmod: new Date().toISOString(),
       changefreq: 'monthly',
       priority: '0.5',
@@ -56,7 +56,7 @@ export async function GET(): Promise<Response> {
   for (const province of provinces) {
     // Province route
     urls.push({
-      loc: `${baseUrl}/${province.slug}`,
+      loc: `${baseUrl}/${province.slug}/`,
       lastmod: province.updatedAt.toISOString(),
       changefreq: 'weekly',
       priority: '0.8',
@@ -65,7 +65,7 @@ export async function GET(): Promise<Response> {
     // City routes
     for (const city of province.cities) {
       urls.push({
-        loc: `${baseUrl}/${province.slug}/${city.slug}`,
+        loc: `${baseUrl}/${province.slug}/${city.slug}/`,
         lastmod: city.updatedAt.toISOString(),
         changefreq: 'weekly',
         priority: '0.6',
