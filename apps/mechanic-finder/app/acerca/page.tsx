@@ -34,14 +34,14 @@ export default function AboutPage() {
           <Card className="text-center">
             <CardContent className="pt-6">
               <Users className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-2xl font-bold mb-2">500+</h3>
+              <h3 className="text-2xl font-bold mb-2">19000+</h3>
               <p className="text-muted-foreground">Talleres listados</p>
             </CardContent>
           </Card>
           <Card className="text-center">
             <CardContent className="pt-6">
               <MapPin className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-2xl font-bold mb-2">50+</h3>
+              <h3 className="text-2xl font-bold mb-2">600+</h3>
               <p className="text-muted-foreground">Ciudades cubiertas</p>
             </CardContent>
           </Card>
