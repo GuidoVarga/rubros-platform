@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: 'Contactate con Encontrá Mecánico. Preguntas, sugerencias o información sobre nuestro directorio de talleres mecánicos.',
     keywords: ['contacto', 'encontra mecánico', 'soporte', 'ayuda', 'talleres mecánicos'],
     alternates: {
-      canonical: `${baseUrl}/contacto`,
+      canonical: `${baseUrl}/contacto/`,
     },
   };
 }

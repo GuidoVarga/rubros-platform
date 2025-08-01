@@ -81,7 +81,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     alternates: {
-      canonical: `${baseUrl}/${province.slug}`,
+      canonical: `${baseUrl}/${province.slug}/`,
     },
   };
 }

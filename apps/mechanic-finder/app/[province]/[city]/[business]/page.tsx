@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  const canonicalUrl = `${baseUrl}/${province}/${city}/${businessSlug}`;
+  const canonicalUrl = `${baseUrl}/${province}/${city}/${businessSlug}/`;
 
   return {
     title: `${business.name} - ${business.city?.name}, ${business.city?.province?.name}`,

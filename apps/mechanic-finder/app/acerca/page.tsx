@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: 'Conocé más sobre Encontrá Mecánico, el directorio más completo para encontrar talleres mecánicos en Argentina.',
     keywords: ['encontra mecánico', 'sobre nosotros', 'directorio mecánicos', 'argentina', 'talleres'],
     alternates: {
-      canonical: `${baseUrl}/acerca`,
+      canonical: `${baseUrl}/acerca/`,
     },
   };
 }

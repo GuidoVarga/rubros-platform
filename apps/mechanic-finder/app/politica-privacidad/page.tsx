@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     alternates: {
-      canonical: `${baseUrl}/politica-privacidad`,
+      canonical: `${baseUrl}/politica-privacidad/`,
     },
   };
 };
