@@ -14,6 +14,7 @@ export function MockAd({ style, label = "Anuncio", className }: MockAdProps) {
     height,
     minWidth: '300px',
     minHeight: '100px',
+    margin: '0 auto',
     ...style,
     maxWidth: "1100px"
   };

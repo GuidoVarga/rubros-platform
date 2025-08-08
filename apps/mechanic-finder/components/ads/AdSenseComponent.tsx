@@ -114,6 +114,7 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
     minHeight: style?.minHeight || '250px', // Increased min height
     height: 'auto',
     overflow: 'hidden',
+    margin: '0 auto',
     ...style,
     maxWidth: "1100px",
   };
