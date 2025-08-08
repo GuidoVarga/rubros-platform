@@ -12,6 +12,7 @@ import Image from 'next/image'
 import { AdComponent } from '@/components/ads/ads'
 import BusinessActions from '@/components/BusinessActions/BusinessActions'
 import BusinessViewTracker from '@/components/BusinessViewTracker/BusinessViewTracker'
+import { ADSENSE_SLOTS } from '@rubros/ui/constants'
 
 type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
@@ -220,7 +221,7 @@ export default async function BusinessPage({ params }: Props) {
         )}
         <Suspense>
           <div className="mt-16">
-            <AdComponent type="in-feed" />
+            <AdComponent type={ADSENSE_SLOTS.IN_FEED} />
           </div>
         </Suspense>
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">

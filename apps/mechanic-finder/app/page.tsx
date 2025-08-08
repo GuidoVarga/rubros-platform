@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { MapPin, Phone, Clock, Star, Search, Users, Shield } from 'lucide-react';
 import { Suspense } from "react";
 import { AdComponent } from "@/components/ads/ads";
+import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
 export const metadata: Metadata = {
   title: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
@@ -102,7 +103,7 @@ export default async function Home() {
 
       <Suspense>
         <section className="w-full flex justify-center">
-          <AdComponent type="in-feed" />
+          <AdComponent type={ADSENSE_SLOTS.IN_FEED} />
         </section>
       </Suspense>
 

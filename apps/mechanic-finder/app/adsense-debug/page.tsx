@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button } from '@rubros/ui';
 import { AdComponent } from '@/components/ads/ads';
 import { canUseAdvertising, getCurrentConsent } from '@/lib/cookies';
 import { DebugWrapper } from '@/components/Debug/DebugWrapper';
+import { ADSENSE_SLOTS } from '@rubros/ui/constants';
 
 export default function AdSenseDebugPage() {
   const [debugInfo, setDebugInfo] = useState<any>({});
@@ -187,28 +188,28 @@ export default function AdSenseDebugPage() {
                 <div>
                   <h4 className="font-medium mb-2">Top Banner Ad</h4>
                   <div className="border p-2 rounded">
-                    <AdComponent type="top" />
+                    <AdComponent type={ADSENSE_SLOTS.TOP} />
                   </div>
                 </div>
 
                 <div>
                   <h4 className="font-medium mb-2">In-Feed Ad</h4>
                   <div className="border p-2 rounded">
-                    <AdComponent type="in-feed" />
+                    <AdComponent type={ADSENSE_SLOTS.IN_FEED} />
                   </div>
                 </div>
 
                 <div>
                   <h4 className="font-medium mb-2">Square Ad</h4>
                   <div className="border p-2 rounded">
-                    <AdComponent type="square" />
+                    <AdComponent type={ADSENSE_SLOTS.SQUARE} />
                   </div>
                 </div>
 
                 <div>
                   <h4 className="font-medium mb-2">Footer Ad</h4>
                   <div className="border p-2 rounded">
-                    <AdComponent type="footer" />
+                    <AdComponent type={ADSENSE_SLOTS.FOOTER} />
                   </div>
                 </div>
               </CardContent>

@@ -9,6 +9,7 @@ import { AdComponent, Breadcrumb, BreadcrumbProps, EmptyState as EmptyStateUI } 
 import Link from "next/link";
 import { ORGANIZATION } from "@/constants/org";
 import { Suspense } from "react";
+import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
 type Props = {
   params: Promise<{ province: string }>;
@@ -192,7 +193,7 @@ export default async function ProvincePage({ params }: Props) {
 
           <Suspense>
             <div className="mt-16">
-              <AdComponent type="in-feed" />
+              <AdComponent type={ADSENSE_SLOTS.IN_FEED} />
             </div>
           </Suspense>
 

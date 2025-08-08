@@ -11,6 +11,7 @@ import { ORGANIZATION } from "@/constants/org";
 import Link from "next/link";
 import { APP_NAME } from "@/constants/app";
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
+import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -137,14 +138,14 @@ export default function RootLayout({
           <main className="flex-1">
             <div className="flex flex-col gap-8">
               <Suspense>
-                <AdComponent type="top" />
+                <AdComponent type={ADSENSE_SLOTS.TOP} />
               </Suspense>
               <Suspense fallback={<SkeletonPage />}>
                 <div>{children}</div>
               </Suspense>
               <Suspense>
                 <section className="container mb-8">
-                  <AdComponent type="footer" />
+                  <AdComponent type={ADSENSE_SLOTS.FOOTER} />
                 </section>
               </Suspense>
             </div>

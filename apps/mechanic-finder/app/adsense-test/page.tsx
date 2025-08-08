@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdSenseComponent } from "@/components/ads/AdSenseComponent";
 
 export const metadata: Metadata = {
   title: "AdSense Test - Encontrá Mecánico",
@@ -20,19 +21,10 @@ export default function AdSenseTestPage() {
         <div className="space-y-8">
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-4">Anuncio Superior</h2>
-            <ins
-              className="adsbygoogle"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '280px',
-                maxWidth: '1100px',
-                margin: '0 auto',
-              }}
-              data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-              data-ad-slot="top-ad"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
+            <AdSenseComponent
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP || "top-ad"}
+              style={{ minHeight: "280px" }}
+              className="max-w-[1100px] mx-auto"
             />
           </div>
 
@@ -48,39 +40,21 @@ export default function AdSenseTestPage() {
               nostrud exercitation ullamco laboris.
             </p>
             <p>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
+              Duis aute irure dolor in reprehenderit en voluptate velit esse cillum dolore
               eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
             </p>
           </div>
 
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-4">Anuncio Inferior</h2>
-            <ins
-              className="adsbygoogle"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '280px',
-                maxWidth: '1100px',
-                margin: '0 auto',
-              }}
-              data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-              data-ad-slot="in-feed-ad"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
+            <AdSenseComponent
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INFEED || "in-feed-ad"}
+              style={{ minHeight: "280px" }}
+              className="max-w-[1100px] mx-auto"
             />
           </div>
         </div>
       </div>
-
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (adsbygoogle = window.adsbygoogle || []).push({});
-            (adsbygoogle = window.adsbygoogle || []).push({});
-          `,
-        }}
-      />
     </div>
   );
 }

@@ -2,9 +2,10 @@
 
 import { AdSenseProps } from "@rubros/types";
 import { MockTopAd, MockSideAd, MockInFeedAd, MockSquareAd, MockFooterAd } from "./mock-ads";
+import { ADSENSE_SLOTS } from "../constants";
 
 export type AdComponentProps = {
-  type: "top" | "side" | "in-feed" | "square" | "footer";
+  type: ADSENSE_SLOTS;
   useMockInDevelopment?: boolean;
   realAdComponent?: React.ComponentType<Omit<AdSenseProps, "slot">>;
 } & Omit<AdSenseProps, "slot">;
@@ -20,15 +21,15 @@ export function AdComponent({
   // Use mock ads in development if configured to do so
   if (isDevelopment && useMockInDevelopment) {
     switch (type) {
-      case "top":
+      case ADSENSE_SLOTS.TOP:
         return <MockTopAd {...props} />;
-      case "side":
+      case ADSENSE_SLOTS.SIDE:
         return <MockSideAd {...props} />;
-      case "in-feed":
+      case ADSENSE_SLOTS.IN_FEED:
         return <MockInFeedAd {...props} />;
-      case "square":
+      case ADSENSE_SLOTS.SQUARE:
         return <MockSquareAd {...props} />;
-      case "footer":
+      case ADSENSE_SLOTS.FOOTER:
         return <MockFooterAd {...props} />;
     }
   }
@@ -40,15 +41,15 @@ export function AdComponent({
 
   // Fallback to mock if no real component is provided
   switch (type) {
-    case "top":
+    case ADSENSE_SLOTS.TOP:
       return <MockTopAd {...props} />;
-    case "side":
+    case ADSENSE_SLOTS.SIDE:
       return <MockSideAd {...props} />;
-    case "in-feed":
+    case ADSENSE_SLOTS.IN_FEED:
       return <MockInFeedAd {...props} />;
-    case "square":
+    case ADSENSE_SLOTS.SQUARE:
       return <MockSquareAd {...props} />;
-    case "footer":
+    case ADSENSE_SLOTS.FOOTER:
       return <MockFooterAd {...props} />;
   }
 }
