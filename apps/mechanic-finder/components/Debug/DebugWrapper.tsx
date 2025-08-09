@@ -20,7 +20,7 @@ export function DebugWrapper({
 
   useEffect(() => {
     // Solo en development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'development') {
       return;
     }
 
@@ -54,7 +54,7 @@ export function DebugWrapper({
   };
 
   // En producción, no mostrar nada
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'production') {
     return (
       <div className="container py-8">
         <Card>
