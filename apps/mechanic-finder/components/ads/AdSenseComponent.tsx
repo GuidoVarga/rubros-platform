@@ -4,6 +4,7 @@ import Script from "next/script";
 import { AdSenseProps } from "@rubros/types";
 import { useEffect, useState, useRef } from "react";
 import { canUseAdvertising } from "@/lib/cookies";
+import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
 declare global {
   interface Window {
@@ -13,9 +14,10 @@ declare global {
 
 type AdSenseComponentProps = Omit<AdSenseProps, "slot"> & {
   slot: string;
+  type: ADSENSE_SLOTS;
 };
 
-export function AdSenseComponent({ slot, style, className }: AdSenseComponentProps) {
+export function AdSenseComponent({ slot, style, className, type }: AdSenseComponentProps) {
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
@@ -107,17 +109,34 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
     return () => clearTimeout(timer);
   }, [hasConsent, isLoaded, adPushed, error, slot]);
 
-  const parsedStyle = {
-    display: 'block',
-    width: '100%',
-    minWidth: '300px',
-    minHeight: style?.minHeight || '250px', // Increased min height
-    height: 'auto',
-    overflow: 'hidden',
-    margin: '0 auto',
-    ...style,
-    maxWidth: "1100px",
-  };
+  const getTypeProps = () => {
+    if (type === ADSENSE_SLOTS.IN_FEED) {
+      return {
+        "data-ad-format": "fluid",
+        "data-ad-layout-key": process.env.NEXT_PUBLIC_ADSENSE_LAYOUT_KEY_IN_FEED || '',
+        style: {
+          display: 'block',
+        }
+      }
+    }
+
+    return {
+      "data-ad-format": "auto",
+      "data-full-width-responsive": "true",
+      style: {
+        display: 'block',
+        width: '100%',
+        minWidth: '300px',
+        minHeight: style?.minHeight || '250px', // Increased min height
+        height: 'auto',
+        overflow: 'hidden',
+        margin: '0 auto',
+        ...style,
+        maxWidth: "1100px",
+      }
+    };
+  }
+
 
   if (!hasConsent) {
     return null;
@@ -127,7 +146,7 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
   if (error && process.env.NODE_ENV === 'development') {
     return (
       <div
-        style={parsedStyle}
+        style={getTypeProps()?.style}
         className={`border-2 border-red-300 bg-red-50 p-4 rounded ${className || ''}`}
       >
         <div className="text-red-700 text-sm">
@@ -151,12 +170,10 @@ export function AdSenseComponent({ slot, style, className }: AdSenseComponentPro
     <ins
       ref={adRef as any}
       className={`adsbygoogle ${className || ''}`}
-      style={parsedStyle}
       data-ad-client={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
       data-ad-slot={slot}
-      data-ad-format="auto"
-      data-full-width-responsive="true"
       data-adtest={process.env.NODE_ENV === 'development' ? 'on' : undefined}
+      {...getTypeProps()}
     />
   );
 }

@@ -54,6 +54,7 @@ export function AdComponent({ type, ...props }: AdComponentProps) {
     return (
       <AdSenseComponent
         slot={slot}
+        type={type}
         style={style}
         {...adProps}
       />
