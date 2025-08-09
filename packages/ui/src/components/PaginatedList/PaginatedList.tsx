@@ -1,3 +1,4 @@
+import { ADSENSE_SLOTS } from "@/constants";
 import { ReactNode } from "react";
 
 export type PaginatedListProps<T> = {
@@ -33,7 +34,7 @@ export function PaginatedList<T>({
             <div key={key}>
               {isAdd ?
                 <div className="w-full h-full min-h-[200px]">
-                  {renderAd && renderAd({ type: "in-feed", style: { height: "100%" } })}
+                  {renderAd && renderAd({ type: ADSENSE_SLOTS.IN_FEED, style: { height: "100%" } })}
                 </div>
                 : renderItem(item, index)}
             </div>
