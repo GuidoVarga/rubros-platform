@@ -1,4 +1,4 @@
-import { ADSENSE_SLOTS } from "@/constants";
+import { ADSENSE_SLOTS } from "../../constants";
 import { ReactNode } from "react";
 
 export type PaginatedListProps<T> = {
