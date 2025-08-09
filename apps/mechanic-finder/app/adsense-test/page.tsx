@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdSenseComponent } from "@/components/ads/AdSenseComponent";
+import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
 export const metadata: Metadata = {
   title: "AdSense Test - Encontrá Mecánico",
@@ -23,6 +24,7 @@ export default function AdSenseTestPage() {
             <h2 className="text-xl font-semibold mb-4">Anuncio Superior</h2>
             <AdSenseComponent
               slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP || "top-ad"}
+              type={ADSENSE_SLOTS.TOP}
               style={{ minHeight: "280px" }}
               className="max-w-[1100px] mx-auto"
             />
@@ -49,6 +51,7 @@ export default function AdSenseTestPage() {
             <h2 className="text-xl font-semibold mb-4">Anuncio Inferior</h2>
             <AdSenseComponent
               slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INFEED || "in-feed-ad"}
+              type={ADSENSE_SLOTS.IN_FEED}
               style={{ minHeight: "280px" }}
               className="max-w-[1100px] mx-auto"
             />
