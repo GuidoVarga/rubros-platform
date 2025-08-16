@@ -103,7 +103,7 @@ export default async function Home() {
 
       <Suspense>
         <section className="w-full flex justify-center">
-          <AdComponent type={ADSENSE_SLOTS.IN_FEED} />
+          <AdComponent type={ADSENSE_SLOTS.LIST} />
         </section>
       </Suspense>
 

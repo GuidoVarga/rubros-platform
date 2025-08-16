@@ -28,6 +28,9 @@ const defaultStyles: Record<AdComponentProps["type"], { width?: string; height?:
   [ADSENSE_SLOTS.FOOTER]: {
     height: "150px",
   },
+  [ADSENSE_SLOTS.LIST]: {
+    height: "100%"
+  }
 }
 
 const getAdSlot = (type: AdComponentProps["type"]) => {
@@ -42,6 +45,8 @@ const getAdSlot = (type: AdComponentProps["type"]) => {
       return process.env.NEXT_PUBLIC_ADSENSE_SLOT_SQUARE || '';
     case ADSENSE_SLOTS.FOOTER:
       return process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER || '';
+    case ADSENSE_SLOTS.LIST:
+      return process.env.NEXT_PUBLIC_ADSENSE_SLOT_LIST || '';
     default:
       return process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_FEED || '';
   }

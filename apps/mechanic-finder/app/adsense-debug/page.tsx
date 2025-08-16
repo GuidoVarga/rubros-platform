@@ -200,6 +200,13 @@ export default function AdSenseDebugPage() {
                 </div>
 
                 <div>
+                  <h4 className="font-medium mb-2">List Ad</h4>
+                  <div className="border p-2 rounded">
+                    <AdComponent type={ADSENSE_SLOTS.LIST} />
+                  </div>
+                </div>
+
+                <div>
                   <h4 className="font-medium mb-2">Square Ad</h4>
                   <div className="border p-2 rounded">
                     <AdComponent type={ADSENSE_SLOTS.SQUARE} />

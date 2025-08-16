@@ -31,6 +31,8 @@ export function AdComponent({
         return <MockSquareAd {...props} />;
       case ADSENSE_SLOTS.FOOTER:
         return <MockFooterAd {...props} />;
+      case ADSENSE_SLOTS.LIST:
+        return <MockInFeedAd {...props} />;
     }
   }
 

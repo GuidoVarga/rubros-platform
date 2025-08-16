@@ -51,7 +51,7 @@ export default function AdSenseTestPage() {
             <h2 className="text-xl font-semibold mb-4">Anuncio Inferior</h2>
             <AdSenseComponent
               slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INFEED || "in-feed-ad"}
-              type={ADSENSE_SLOTS.IN_FEED}
+              type={ADSENSE_SLOTS.LIST}
               style={{ minHeight: "280px" }}
               className="max-w-[1100px] mx-auto"
             />

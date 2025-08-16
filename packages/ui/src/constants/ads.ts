@@ -4,4 +4,5 @@ export enum ADSENSE_SLOTS {
   IN_FEED = 'in-feed-ad',
   SQUARE = 'square-ad',
   FOOTER = 'footer-ad',
+  LIST = 'list-ad',
 }
