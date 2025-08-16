@@ -221,7 +221,7 @@ export default async function BusinessPage({ params }: Props) {
         )}
         <Suspense>
           <div className="mt-16">
-            <AdComponent type={ADSENSE_SLOTS.LIST} />
+            <AdComponent type={ADSENSE_SLOTS.LANDING} />
           </div>
         </Suspense>
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">

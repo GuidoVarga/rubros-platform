@@ -214,6 +214,13 @@ export default function AdSenseDebugPage() {
                 </div>
 
                 <div>
+                  <h4 className="font-medium mb-2">Landing Ad</h4>
+                  <div className="border p-2 rounded">
+                    <AdComponent type={ADSENSE_SLOTS.LANDING} />
+                  </div>
+                </div>
+
+                <div>
                   <h4 className="font-medium mb-2">Footer Ad</h4>
                   <div className="border p-2 rounded">
                     <AdComponent type={ADSENSE_SLOTS.FOOTER} />

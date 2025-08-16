@@ -5,4 +5,5 @@ export enum ADSENSE_SLOTS {
   SQUARE = 'square-ad',
   FOOTER = 'footer-ad',
   LIST = 'list-ad',
+  LANDING = 'landing-ad',
 }

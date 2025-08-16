@@ -193,7 +193,7 @@ export default async function ProvincePage({ params }: Props) {
 
           <Suspense>
             <div className="mt-16">
-              <AdComponent type={ADSENSE_SLOTS.LIST} />
+              <AdComponent type={ADSENSE_SLOTS.LANDING} />
             </div>
           </Suspense>
 

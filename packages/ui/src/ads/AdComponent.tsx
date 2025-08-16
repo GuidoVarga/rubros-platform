@@ -33,6 +33,8 @@ export function AdComponent({
         return <MockFooterAd {...props} />;
       case ADSENSE_SLOTS.LIST:
         return <MockInFeedAd {...props} />;
+      case ADSENSE_SLOTS.LANDING:
+        return <MockInFeedAd {...props} />;
     }
   }
 
@@ -53,5 +55,9 @@ export function AdComponent({
       return <MockSquareAd {...props} />;
     case ADSENSE_SLOTS.FOOTER:
       return <MockFooterAd {...props} />;
+    case ADSENSE_SLOTS.LIST:
+      return <MockInFeedAd {...props} />;
+    case ADSENSE_SLOTS.LANDING:
+      return <MockInFeedAd {...props} />;
   }
 }
