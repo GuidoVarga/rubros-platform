@@ -15,6 +15,7 @@ import { AdComponent, AdComponentProps } from "@/components/ads/ads";
 import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
+import { Clock, MapPin } from "lucide-react";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -240,6 +241,34 @@ export default async function CityPage({ params, searchParams }: Props) {
                 itemsPerPage={ITEMS_PER_PAGE - 1}
               />
             </div>
+
+            {/* Enlaces internos a páginas especializadas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-8">
+              <Link href={`/${province.slug}/${city.slug}/abiertos/`}>
+                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Clock className="h-6 w-6 text-green-600 group-hover:text-green-700" />
+                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Abiertos Ahora</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm">
+                    Ver solo talleres que podrían estar abiertos en este momento
+                  </p>
+                </div>
+              </Link>
+              
+              <Link href={`/${province.slug}/${city.slug}/cerca/`}>
+                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
+                  <div className="flex items-center gap-3 mb-3">
+                    <MapPin className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
+                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Más Cercanos</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm">
+                    Ordenados por distancia desde tu ubicación
+                  </p>
+                </div>
+              </Link>
+            </div>
+            
 
             {/* Información adicional sobre mecánicos en la ciudad */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">

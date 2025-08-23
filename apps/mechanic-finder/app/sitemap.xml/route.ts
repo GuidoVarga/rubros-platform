@@ -1,4 +1,5 @@
 import { prisma } from '@rubros/db';
+import { getOpenBusinessesCount, getMechanicsCount } from '@/actions/business';
 
 export async function GET(): Promise<Response> {
   // Fetch all active provinces with their cities
@@ -64,12 +65,39 @@ export async function GET(): Promise<Response> {
 
     // City routes
     for (const city of province.cities) {
+      // Base city route
       urls.push({
         loc: `${baseUrl}/${province.slug}/${city.slug}/`,
         lastmod: city.updatedAt.toISOString(),
         changefreq: 'weekly',
         priority: '0.6',
       });
+
+      // CRITICAL: Add conditional variants with threshold logic
+      const [openCount, totalCount] = await Promise.all([
+        getOpenBusinessesCount(city.id),
+        getMechanicsCount(city.id)
+      ]);
+
+      // Abiertos route (only if ≥5 open businesses)
+      if (openCount >= 5) {
+        urls.push({
+          loc: `${baseUrl}/${province.slug}/${city.slug}/abiertos/`,
+          lastmod: city.updatedAt.toISOString(),
+          changefreq: 'weekly',
+          priority: '0.5',
+        });
+      }
+
+      // Cerca route (only if ≥5 total businesses)
+      if (totalCount >= 5) {
+        urls.push({
+          loc: `${baseUrl}/${province.slug}/${city.slug}/cerca/`,
+          lastmod: city.updatedAt.toISOString(),
+          changefreq: 'weekly',
+          priority: '0.5',
+        });
+      }
     }
   }
 
