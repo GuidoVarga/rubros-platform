@@ -10,6 +10,7 @@ type ResultsHeaderProps = {
   currentSort: string;
   currentFilters?: string | null;
   showFilters?: boolean;
+  showSort?: boolean;
 };
 
 export function ResultsHeader({
@@ -17,6 +18,7 @@ export function ResultsHeader({
   currentSort,
   currentFilters,
   showFilters = true,
+  showSort = true,
 }: ResultsHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -47,17 +49,21 @@ export function ResultsHeader({
           {businessCount}
         </div>
 
-        <SortSelector
-          onSortChange={handleSortChange}
-          initialValue={currentSort as SortOption}
-        />
+        {showSort && (
+          <SortSelector
+            onSortChange={handleSortChange}
+            initialValue={currentSort as SortOption}
+          />
+        )}
       </div>
 
- {showFilters &&     <div className="flex items-center justify-start">
-        <FilterSelector
-          initialValue={currentFilters}
-        />
-      </div>}
+      {showFilters && (
+        <div className="flex items-center justify-start">
+          <FilterSelector
+            initialValue={currentFilters}
+          />
+        </div>
+      )}
     </div>
   );
 }
