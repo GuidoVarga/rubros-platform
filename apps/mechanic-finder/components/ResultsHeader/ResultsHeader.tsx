@@ -9,12 +9,14 @@ type ResultsHeaderProps = {
   businessCount: string;
   currentSort: string;
   currentFilters?: string | null;
+  showFilters?: boolean;
 };
 
 export function ResultsHeader({
   businessCount,
   currentSort,
   currentFilters,
+  showFilters = true,
 }: ResultsHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,11 +53,11 @@ export function ResultsHeader({
         />
       </div>
 
-      <div className="flex items-center justify-start">
+ {showFilters &&     <div className="flex items-center justify-start">
         <FilterSelector
           initialValue={currentFilters}
         />
-      </div>
+      </div>}
     </div>
   );
 }
