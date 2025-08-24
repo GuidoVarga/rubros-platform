@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 
     return params;
   } catch (error) {
-    console.error("Error generating static params:", error);
+    console.error("Error generating static params for talleres:", error);
     return [];
   }
 }
@@ -69,19 +69,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const mechanicsCount = await getMechanicsCount(city.id);
 
   return {
-    title: `Mecánicos y Talleres ${city.name} | ${mechanicsCount} servicios`,
-    description: `Encontrá los mejores mecánicos y talleres en ${city.name}, ${province.name}. ${mechanicsCount} talleres mecánicos en tu ciudad con reseñas, horarios y contacto directo.`,
+    title: `Talleres Mecánicos ${city.name} | ${mechanicsCount} servicios`,
+    description: `Encontrá los mejores talleres mecánicos en ${city.name}, ${province.name}. ${mechanicsCount} talleres especializados en tu ciudad con reseñas, horarios y contacto directo.`,
     keywords: [
-      `mecánicos ${city.name.toLowerCase()}`,
       `talleres ${city.name.toLowerCase()}`,
       `taller mecánico ${city.name.toLowerCase()}`,
+      `talleres mecánicos ${city.name.toLowerCase()}`,
       `reparación auto ${city.name.toLowerCase()}`,
       `reparación moto ${city.name.toLowerCase()}`,
       `servicio 24hs ${city.name.toLowerCase()}`,
     ],
     openGraph: {
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
+      title: `Talleres Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
+      description: `Los mejores talleres mecánicos de ${city.name}. Compara precios y servicios.`,
       type: "website",
       images: [
         {
@@ -93,8 +93,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
+      title: `Talleres Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
+      description: `Los mejores talleres mecánicos de ${city.name}. Compara precios y servicios.`,
       images: [
         {
           url: ORGANIZATION.logo,
@@ -104,12 +104,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     alternates: {
-      canonical: `${baseUrl}/${province.slug}/${city.slug}/`,
+      canonical: `${baseUrl}/${province.slug}/${city.slug}/talleres/`,
     },
   };
 }
 
-export default async function CityPage({ params, searchParams }: Props) {
+export default async function TalleresPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
   const { page, sort, filters, lat, lng } = await searchParams;
   const currentPage = Number(page) || 1;
@@ -139,7 +139,7 @@ export default async function CityPage({ params, searchParams }: Props) {
     longitude: Number(lng),
   } : undefined;
 
-  // Obtener mecánicos de la ciudad
+  // Obtener talleres de la ciudad
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
       page: currentPage,
@@ -177,6 +177,12 @@ export default async function CityPage({ params, searchParams }: Props) {
       className: 'hover:text-primary-cta-hover',
       content: city.name,
     },
+    {
+      id: 'talleres',
+      href: `/${province.slug}/${city.slug}/talleres`,
+      className: 'hover:text-primary-cta-hover',
+      content: 'Talleres',
+    },
   ];
 
   return (
@@ -191,14 +197,14 @@ export default async function CityPage({ params, searchParams }: Props) {
               </Link>
             )} />
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Mecánicos en {city.name}
+              Talleres Mecánicos en {city.name}
               <span className="block text-3xl text-muted-foreground mt-2">
                 {province.name}
               </span>
             </h1>
 
             <p className="text-lg leading-8 text-muted-foreground">
-              {pagination.total} mecánicos encontrados en {city.name}.
+              {pagination.total} talleres mecánicos encontrados en {city.name}.
               Consulta información de contacto y ubicación disponible.
             </p>
           </div>
@@ -245,11 +251,11 @@ export default async function CityPage({ params, searchParams }: Props) {
 
             {/* Enlaces internos a páginas especializadas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-8">
-              <Link href={`/${province.slug}/${city.slug}/abiertos/`}>
+              <Link href={`/${province.slug}/${city.slug}/talleres/abiertos/`}>
                 <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
                   <div className="flex items-center gap-3 mb-3">
                     <Clock className="h-6 w-6 text-green-600 group-hover:text-green-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Abiertos Ahora</h3>
+                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Talleres Abiertos Ahora</h3>
                   </div>
                   <p className="text-gray-600 text-sm">
                     Ver solo talleres que podrían estar abiertos en este momento
@@ -257,11 +263,11 @@ export default async function CityPage({ params, searchParams }: Props) {
                 </div>
               </Link>
               
-              <Link href={`/${province.slug}/${city.slug}/cerca/`}>
+              <Link href={`/${province.slug}/${city.slug}/talleres/cerca/`}>
                 <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
                   <div className="flex items-center gap-3 mb-3">
                     <MapPin className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Más Cercanos</h3>
+                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Talleres Más Cercanos</h3>
                   </div>
                   <p className="text-gray-600 text-sm">
                     Ordenados por distancia desde tu ubicación
@@ -271,9 +277,9 @@ export default async function CityPage({ params, searchParams }: Props) {
             </div>
             
 
-            {/* Información adicional sobre mecánicos en la ciudad */}
+            {/* Información adicional sobre talleres en la ciudad */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6">Guía para encontrar mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6">Guía para encontrar talleres mecánicos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Servicios comunes</h3>
@@ -294,7 +300,7 @@ export default async function CityPage({ params, searchParams }: Props) {
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Qué preguntar al contactar</h3>
                   <p className="text-muted-foreground mb-4">
-                    Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
+                    Al buscar un taller mecánico en {city.name}, es importante hacer las preguntas correctas
                     para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
@@ -382,4 +388,4 @@ export default async function CityPage({ params, searchParams }: Props) {
       )}
     </div>
   );
-}
+} 

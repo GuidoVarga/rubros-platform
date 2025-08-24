@@ -98,6 +98,37 @@ export async function GET(): Promise<Response> {
           priority: '0.5',
         });
       }
+
+      // TALLERES VARIANTS (redirects 301 to main pages)
+      // Include in sitemap for discovery, but they redirect
+
+      // Talleres main route
+      urls.push({
+        loc: `${baseUrl}/${province.slug}/${city.slug}/talleres/`,
+        lastmod: city.updatedAt.toISOString(),
+        changefreq: 'weekly',
+        priority: '0.4', // Lower priority since it's a redirect
+      });
+
+      // Talleres abiertos route (only if ≥5 open businesses)
+      if (openCount >= 5) {
+        urls.push({
+          loc: `${baseUrl}/${province.slug}/${city.slug}/talleres/abiertos/`,
+          lastmod: city.updatedAt.toISOString(),
+          changefreq: 'weekly',
+          priority: '0.4',
+        });
+      }
+
+      // Talleres cerca route (only if ≥5 total businesses)
+      if (totalCount >= 5) {
+        urls.push({
+          loc: `${baseUrl}/${province.slug}/${city.slug}/talleres/cerca/`,
+          lastmod: city.updatedAt.toISOString(),
+          changefreq: 'weekly',
+          priority: '0.4',
+        });
+      }
     }
   }
 

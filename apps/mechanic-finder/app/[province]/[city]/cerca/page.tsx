@@ -63,8 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   
   return {
-    title: `Mecánicos cerca de ${city.name} | ${totalCount} talleres por distancia`,
-    description: `Encontrá mecánicos más cercanos en ${city.name}, ${province.name}. ${totalCount} talleres ordenados por distancia según información de fuentes públicas. Verificá ubicaciones directamente.`,
+    title: `Mecánicos y Talleres cerca de ${city.name} | ${totalCount} por distancia`,
+    description: `Encontrá mecánicos y talleres más cercanos en ${city.name}, ${province.name}. ${totalCount} talleres mecánicos ordenados por distancia según información de fuentes públicas. Verificá ubicaciones directamente.`,
     keywords: [
       `mecánicos cerca ${city.name.toLowerCase()}`,
       `talleres cerca ${city.name.toLowerCase()}`,
@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `${baseUrl}/${province.slug}/${city.slug}/cerca/`,
     },
     openGraph: {
-      title: `Mecánicos cerca de ${city.name}`,
+      title: `Mecánicos y Talleres cerca de ${city.name}`,
       description: `${totalCount} talleres mecánicos ordenados por distancia en ${city.name}`,
       type: "website",
       images: [

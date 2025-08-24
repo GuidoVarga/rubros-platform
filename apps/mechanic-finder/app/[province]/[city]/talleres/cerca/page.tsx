@@ -15,16 +15,17 @@ import { AdComponent, AdComponentProps } from "@/components/ads/ads";
 import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
-import { Clock, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { GeolocationButton } from "@/components/GeolocationButton";
+import { getCityCoordinates } from "@/constants/cities-coords";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
   searchParams: Promise<{ page?: string; sort?: string; filters?: string, lat?: string, lng?: string }>;
 };
 
-export const revalidate = 3600;
+export const revalidate = 3600; // 1 hora
 
-// Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
   try {
     const provinces = await getProvinces({ includeCities: true });
@@ -38,50 +39,46 @@ export async function generateStaticParams() {
 
     return params;
   } catch (error) {
-    console.error("Error generating static params:", error);
+    console.error("Error generating static params for talleres cerca:", error);
     return [];
   }
 }
 
-// Generar metadata para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { province: provinceSlug, city: citySlug } = await params;
-
+  
   const [province, city] = await Promise.all([
     getProvinceBySlug(provinceSlug),
     getCityBySlug(citySlug),
   ]);
-
+  
   if (!province || !city) {
-    return {
-      title: "Página no encontrada",
-    };
+    return { title: "Página no encontrada" };
   }
-
-  // Verificar que la ciudad pertenece a la provincia
-  if (city.province.slug !== provinceSlug) {
-    return {
-      title: "Página no encontrada",
-    };
-  }
-
+  
+  // CRITICAL: Get total businesses count for conditional indexing
+  const totalCount = await getMechanicsCount(city.id);
+  const robots = totalCount < 5 ? 'noindex,follow' : 'index,follow';
+  
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  const mechanicsCount = await getMechanicsCount(city.id);
-
+  
   return {
-    title: `Mecánicos y Talleres ${city.name} | ${mechanicsCount} servicios`,
-    description: `Encontrá los mejores mecánicos y talleres en ${city.name}, ${province.name}. ${mechanicsCount} talleres mecánicos en tu ciudad con reseñas, horarios y contacto directo.`,
+    title: `Talleres cerca de ${city.name} | ${totalCount} por distancia`,
+    description: `Encontrá talleres mecánicos más cercanos en ${city.name}, ${province.name}. ${totalCount} talleres ordenados por distancia según información de fuentes públicas. Verificá ubicaciones directamente.`,
     keywords: [
-      `mecánicos ${city.name.toLowerCase()}`,
-      `talleres ${city.name.toLowerCase()}`,
-      `taller mecánico ${city.name.toLowerCase()}`,
-      `reparación auto ${city.name.toLowerCase()}`,
-      `reparación moto ${city.name.toLowerCase()}`,
-      `servicio 24hs ${city.name.toLowerCase()}`,
+      `talleres cerca ${city.name.toLowerCase()}`,
+      `taller cerca ${city.name.toLowerCase()}`,
+      `taller cerca de mí ${city.name.toLowerCase()}`,
+      `taller mecánico cercano ${city.name.toLowerCase()}`,
+      `taller más cercano ${city.name.toLowerCase()}`,
     ],
+    robots,
+    alternates: {
+      canonical: `${baseUrl}/${province.slug}/${city.slug}/talleres/cerca/`,
+    },
     openGraph: {
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
+      title: `Talleres cerca de ${city.name}`,
+      description: `${totalCount} talleres mecánicos ordenados por distancia en ${city.name}`,
       type: "website",
       images: [
         {
@@ -93,25 +90,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
-      images: [
-        {
-          url: ORGANIZATION.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    alternates: {
-      canonical: `${baseUrl}/${province.slug}/${city.slug}/`,
+      title: `Talleres cerca de ${city.name}`,
+      description: `${totalCount} talleres mecánicos ordenados por distancia en ${city.name}`,
+      images: [ORGANIZATION.logo],
     },
   };
 }
 
-export default async function CityPage({ params, searchParams }: Props) {
+export default async function TalleresCercaPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
-  const { page, sort, filters, lat, lng } = await searchParams;
+  const { page, sort, lat, lng } = await searchParams;
   const currentPage = Number(page) || 1;
 
   const [province, city] = await Promise.all([
@@ -128,18 +116,28 @@ export default async function CityPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Determine sort order
-  const orderBy = sort === 'distance'
-    ? { field: 'distance' as const, direction: 'asc' as const }
-    : { field: 'googleMapsRating' as const, direction: 'desc' as const };
+  // CRITICAL: Always use distance ordering for cerca pages
+  const orderBy = { field: 'distance' as const, direction: 'asc' as const };
 
-  // Build userLocation if lat/lng are provided
-  const userLocation = lat && lng ? {
-    latitude: Number(lat),
-    longitude: Number(lng),
-  } : undefined;
+  // CRITICAL: Progressive Enhancement location strategy
+  let userLocation;
+  
+  if (lat && lng) {
+    // Use exact user coordinates from geolocation
+    userLocation = {
+      latitude: Number(lat),
+      longitude: Number(lng)
+    };
+  } else {
+    // Fallback to city center coordinates (works without JavaScript)
+    const cityCoords = getCityCoordinates(city.slug);
+    userLocation = {
+      latitude: cityCoords.lat,
+      longitude: cityCoords.lng
+    };
+  }
 
-  // Obtener mecánicos de la ciudad
+  // Fetch businesses ordered by distance
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
       page: currentPage,
@@ -147,7 +145,6 @@ export default async function CityPage({ params, searchParams }: Props) {
     },
     filters: {
       cityId: city.id,
-      isOpen: filters === 'isOpen' ? true : undefined,
     },
     orderBy,
     userLocation,
@@ -177,6 +174,18 @@ export default async function CityPage({ params, searchParams }: Props) {
       className: 'hover:text-primary-cta-hover',
       content: city.name,
     },
+    {
+      id: 'talleres',
+      href: `/${province.slug}/${city.slug}/talleres`,
+      className: 'hover:text-primary-cta-hover',
+      content: 'Talleres',
+    },
+    {
+      id: 'cerca',
+      href: `/${province.slug}/${city.slug}/talleres/cerca`,
+      className: 'hover:text-primary-cta-hover',
+      content: 'Cerca',
+    },
   ];
 
   return (
@@ -190,17 +199,27 @@ export default async function CityPage({ params, searchParams }: Props) {
                 {children}
               </Link>
             )} />
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Mecánicos en {city.name}
-              <span className="block text-3xl text-muted-foreground mt-2">
-                {province.name}
-              </span>
-            </h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <MapPin className="h-8 w-8 text-blue-600" />
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                Talleres cerca de {city.name}
+                <span className="block text-3xl text-muted-foreground mt-2">
+                  {province.name}
+                </span>
+              </h1>
+            </div>
 
             <p className="text-lg leading-8 text-muted-foreground">
-              {pagination.total} mecánicos encontrados en {city.name}.
-              Consulta información de contacto y ubicación disponible.
+              {pagination.total} talleres ordenados por distancia en {city.name}.
+              Información de fuentes públicas • Verificá ubicaciones directamente.
             </p>
+            
+            {/* Progressive Enhancement: Geolocation */}
+            <GeolocationButton 
+              hasUserLocation={!!(lat && lng)}
+              currentPath={`/${province.slug}/${city.slug}/talleres/cerca`}
+              cityName={city.name}
+            />
           </div>
         </div>
       </section>
@@ -212,13 +231,14 @@ export default async function CityPage({ params, searchParams }: Props) {
             <LocationFilter provinces={provinces} showHelpText={false} className="items-end mb-10 lg:flex-row" />
             <div className="mb-6 mt-12">
               <h2 className="text-2xl font-semibold mb-2">
-                Talleres Mecánicos en {city.name}
+                Talleres Más Cercanos en {city.name}
               </h2>
               <Suspense>
                 <ResultsHeader
                   businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
-                  currentSort={sort || 'relevance'}
-                  currentFilters={filters || null}
+                  currentSort="distance"
+                  showFilters={true}
+                  showSort={false}
                 />
               </Suspense>
             </div>
@@ -243,102 +263,83 @@ export default async function CityPage({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Enlaces internos a páginas especializadas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-8">
-              <Link href={`/${province.slug}/${city.slug}/abiertos/`}>
-                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Clock className="h-6 w-6 text-green-600 group-hover:text-green-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Abiertos Ahora</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm">
-                    Ver solo talleres que podrían estar abiertos en este momento
-                  </p>
-                </div>
-              </Link>
-              
-              <Link href={`/${province.slug}/${city.slug}/cerca/`}>
-                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <MapPin className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Más Cercanos</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm">
-                    Ordenados por distancia desde tu ubicación
-                  </p>
-                </div>
-              </Link>
-            </div>
-            
-
-            {/* Información adicional sobre mecánicos en la ciudad */}
+            {/* Información adicional sobre talleres cercanos */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6">Guía para encontrar mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6">Encontrar talleres cerca en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Servicios comunes</h3>
+                  <h3 className="text-lg font-semibold mb-3">¿Cómo se calcula la distancia?</h3>
                   <p className="text-muted-foreground mb-4">
-                    Los talleres mecánicos suelen ofrecer diversos servicios automotrices.
-                    Es recomendable consultar directamente con cada taller sobre su disponibilidad
-                    y especialidades específicas.
+                    Las distancias se calculan según información de fuentes públicas y coordenadas aproximadas.
+                    Para mayor precisión, usá tu ubicación exacta.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Cambio de aceite y filtros</li>
-                    <li>• Reparación de frenos y suspensión</li>
-                    <li>• Diagnóstico computarizado</li>
-                    <li>• Reparación de motor y transmisión</li>
-                    <li>• Aire acondicionado automotriz</li>
-                    <li>• Alineación y balanceo</li>
+                    <li>• Distancia en línea recta (no por calles)</li>
+                    <li>• Coordenadas de fuentes públicas</li>
+                    <li>• Ordenamiento automático por proximidad</li>
+                    <li>• Opción de geolocalización precisa</li>
+                    <li>• Verificá rutas reales en mapas</li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Qué preguntar al contactar</h3>
+                  <h3 className="text-lg font-semibold mb-3">Consejos para elegir</h3>
                   <p className="text-muted-foreground mb-4">
-                    Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
-                    para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
+                    La proximidad es importante, pero también considerá otros factores
+                    como horarios, servicios y especialidades del taller.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• ¿Trabajan con mi marca de vehículo?</li>
-                    <li>• ¿Qué servicios específicos ofrecen?</li>
-                    <li>• ¿Cuáles son sus horarios de atención?</li>
-                    <li>• ¿Proporcionan presupuestos detallados?</li>
-                    <li>• ¿Ofrecen garantías en sus trabajos?</li>
-                    <li>• ¿Tienen disponibilidad de repuestos?</li>
+                    <li>• Verificar horarios de atención</li>
+                    <li>• Consultar servicios específicos</li>
+                    <li>• Preguntar por disponibilidad</li>
+                    <li>• Considerar especialización del taller</li>
+                    <li>• Comparar con otros talleres cercanos</li>
                   </ul>
+                </div>
+              </div>
+              
+              {/* Disclaimer importante */}
+              <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded mt-6">
+                <div className="flex">
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Importante:</strong> Las distancias mostradas son aproximadas y se basan en coordenadas de fuentes públicas. 
+                      Para rutas exactas y tiempos de viaje reales, consultá aplicaciones de mapas especializadas.
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
 
             {/* Preguntas frecuentes */}
             <section className="mt-16">
-              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas frecuentes</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas sobre ubicación y distancias</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Cómo verificar la información de un taller?</div>
+                  <div className="font-semibold mb-2">¿Cómo funciona "Usar mi ubicación"?</div>
                   <p className="text-sm text-muted-foreground">
-                    Recomendamos contactar directamente con cada taller para confirmar servicios,
-                    horarios y precios, ya que la información puede cambiar sin previo aviso.
+                    Tu navegador solicitará permiso para acceder a tu ubicación GPS, permitiendo 
+                    calcular distancias más precisas a cada taller mecánico.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿De dónde proviene esta información?</div>
+                  <div className="font-semibold mb-2">¿Son exactas las distancias?</div>
                   <p className="text-sm text-muted-foreground">
-                    Los datos mostrados provienen de fuentes públicas como directorios comerciales
-                    y plataformas de mapas. Siempre verifica la información directamente.
+                    Las distancias son aproximadas y se calculan en línea recta. Para rutas exactas 
+                    por calles y tiempo de viaje, usá aplicaciones de mapas especializadas.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</div>
+                  <div className="font-semibold mb-2">¿De dónde vienen las coordenadas?</div>
                   <p className="text-sm text-muted-foreground">
-                    Los servicios varían según cada taller. Algunos se especializan en ciertos tipos
-                    de reparación mientras otros ofrecen servicios más generales.
+                    Las ubicaciones de los talleres provienen de fuentes públicas como directorios 
+                    comerciales. Siempre verificá la dirección exacta con el taller.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Cómo elegir el mejor taller?</div>
+                  <div className="font-semibold mb-2">¿Qué pasa si no encuentro el taller?</div>
                   <p className="text-sm text-muted-foreground">
-                    Considera factores como ubicación, horarios, servicios ofrecidos, y siempre
-                    solicita presupuestos detallados antes de autorizar cualquier trabajo.
+                    Las direcciones pueden haber cambiado. Contactá directamente al taller 
+                    para confirmar su ubicación actual antes de dirigirte al lugar.
                   </p>
                 </div>
               </div>
@@ -382,4 +383,4 @@ export default async function CityPage({ params, searchParams }: Props) {
       )}
     </div>
   );
-}
+} 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { getBusinesses, getMechanicsCount } from "@/actions/business";
+import { getBusinesses, getOpenBusinessesCount } from "@/actions/business";
 import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug, getRelatedCitiesByMechanicsCount } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
@@ -15,16 +15,15 @@ import { AdComponent, AdComponentProps } from "@/components/ads/ads";
 import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
-import { Clock, MapPin } from "lucide-react";
+import { Clock } from "lucide-react";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
   searchParams: Promise<{ page?: string; sort?: string; filters?: string, lat?: string, lng?: string }>;
 };
 
-export const revalidate = 3600;
+export const revalidate = 3600; // 1 hora
 
-// Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
   try {
     const provinces = await getProvinces({ includeCities: true });
@@ -38,50 +37,45 @@ export async function generateStaticParams() {
 
     return params;
   } catch (error) {
-    console.error("Error generating static params:", error);
+    console.error("Error generating static params for talleres abiertos:", error);
     return [];
   }
 }
 
-// Generar metadata para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { province: provinceSlug, city: citySlug } = await params;
-
+  
   const [province, city] = await Promise.all([
     getProvinceBySlug(provinceSlug),
     getCityBySlug(citySlug),
   ]);
-
+  
   if (!province || !city) {
-    return {
-      title: "Página no encontrada",
-    };
+    return { title: "Página no encontrada" };
   }
-
-  // Verificar que la ciudad pertenece a la provincia
-  if (city.province.slug !== provinceSlug) {
-    return {
-      title: "Página no encontrada",
-    };
-  }
-
+  
+  // CRITICAL: Get open businesses count for conditional indexing
+  const openCount = await getOpenBusinessesCount(city.id);
+  const robots = openCount < 5 ? 'noindex,follow' : 'index,follow';
+  
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  const mechanicsCount = await getMechanicsCount(city.id);
-
+  
   return {
-    title: `Mecánicos y Talleres ${city.name} | ${mechanicsCount} servicios`,
-    description: `Encontrá los mejores mecánicos y talleres en ${city.name}, ${province.name}. ${mechanicsCount} talleres mecánicos en tu ciudad con reseñas, horarios y contacto directo.`,
+    title: `Talleres abiertos en ${city.name} | ${openCount} disponibles`,
+    description: `Encontrá talleres mecánicos que podrían estar abiertos ahora en ${city.name}, ${province.name}. ${openCount} talleres según información de fuentes públicas. Verificá horarios directamente con cada taller.`,
     keywords: [
-      `mecánicos ${city.name.toLowerCase()}`,
-      `talleres ${city.name.toLowerCase()}`,
-      `taller mecánico ${city.name.toLowerCase()}`,
-      `reparación auto ${city.name.toLowerCase()}`,
-      `reparación moto ${city.name.toLowerCase()}`,
-      `servicio 24hs ${city.name.toLowerCase()}`,
+      `talleres abiertos ${city.name.toLowerCase()}`,
+      `taller abierto ${city.name.toLowerCase()}`,
+      `taller ${city.name.toLowerCase()} horarios`,
+      `taller mecánico abierto ahora ${city.name.toLowerCase()}`,
     ],
+    robots,
+    alternates: {
+      canonical: `${baseUrl}/${province.slug}/${city.slug}/talleres/abiertos/`,
+    },
     openGraph: {
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
+      title: `Talleres abiertos en ${city.name}`,
+      description: `${openCount} talleres mecánicos abiertos ahora en ${city.name}`,
       type: "website",
       images: [
         {
@@ -93,25 +87,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `Mecánicos en ${city.name}, ${province.name} | ${mechanicsCount} talleres`,
-      description: `Los mejores mecánicos de ${city.name}. Compara precios y servicios.`,
-      images: [
-        {
-          url: ORGANIZATION.logo,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    alternates: {
-      canonical: `${baseUrl}/${province.slug}/${city.slug}/`,
+      title: `Talleres abiertos en ${city.name}`,
+      description: `${openCount} talleres mecánicos abiertos ahora en ${city.name}`,
+      images: [ORGANIZATION.logo],
     },
   };
 }
 
-export default async function CityPage({ params, searchParams }: Props) {
+export default async function TalleresAbiertosPage({ params, searchParams }: Props) {
   const { province: provinceSlug, city: citySlug } = await params;
-  const { page, sort, filters, lat, lng } = await searchParams;
+  const { page, sort, lat, lng } = await searchParams;
   const currentPage = Number(page) || 1;
 
   const [province, city] = await Promise.all([
@@ -139,7 +124,7 @@ export default async function CityPage({ params, searchParams }: Props) {
     longitude: Number(lng),
   } : undefined;
 
-  // Obtener mecánicos de la ciudad
+  // CRITICAL: Fetch only open businesses
   const { businesses: mechanics, pagination } = await getBusinesses({
     pagination: {
       page: currentPage,
@@ -147,7 +132,7 @@ export default async function CityPage({ params, searchParams }: Props) {
     },
     filters: {
       cityId: city.id,
-      isOpen: filters === 'isOpen' ? true : undefined,
+      isOpen: true, // CRITICAL: Only open businesses
     },
     orderBy,
     userLocation,
@@ -177,6 +162,18 @@ export default async function CityPage({ params, searchParams }: Props) {
       className: 'hover:text-primary-cta-hover',
       content: city.name,
     },
+    {
+      id: 'talleres',
+      href: `/${province.slug}/${city.slug}/talleres`,
+      className: 'hover:text-primary-cta-hover',
+      content: 'Talleres',
+    },
+    {
+      id: 'abiertos',
+      href: `/${province.slug}/${city.slug}/talleres/abiertos`,
+      className: 'hover:text-primary-cta-hover',
+      content: 'Abiertos',
+    },
   ];
 
   return (
@@ -190,16 +187,19 @@ export default async function CityPage({ params, searchParams }: Props) {
                 {children}
               </Link>
             )} />
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Mecánicos en {city.name}
-              <span className="block text-3xl text-muted-foreground mt-2">
-                {province.name}
-              </span>
-            </h1>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Clock className="h-8 w-8 text-green-600" />
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                Talleres abiertos en {city.name}
+                <span className="block text-3xl text-muted-foreground mt-2">
+                  {province.name}
+                </span>
+              </h1>
+            </div>
 
             <p className="text-lg leading-8 text-muted-foreground">
-              {pagination.total} mecánicos encontrados en {city.name}.
-              Consulta información de contacto y ubicación disponible.
+              {pagination.total} talleres que podrían estar abiertos en {city.name}.
+              Información de fuentes públicas • Verificá horarios directamente.
             </p>
           </div>
         </div>
@@ -212,13 +212,13 @@ export default async function CityPage({ params, searchParams }: Props) {
             <LocationFilter provinces={provinces} showHelpText={false} className="items-end mb-10 lg:flex-row" />
             <div className="mb-6 mt-12">
               <h2 className="text-2xl font-semibold mb-2">
-                Talleres Mecánicos en {city.name}
+                Talleres Abiertos en {city.name}
               </h2>
               <Suspense>
                 <ResultsHeader
                   businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
                   currentSort={sort || 'relevance'}
-                  currentFilters={filters || null}
+                  showFilters={false}
                 />
               </Suspense>
             </div>
@@ -243,102 +243,83 @@ export default async function CityPage({ params, searchParams }: Props) {
               />
             </div>
 
-            {/* Enlaces internos a páginas especializadas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-8">
-              <Link href={`/${province.slug}/${city.slug}/abiertos/`}>
-                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Clock className="h-6 w-6 text-green-600 group-hover:text-green-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Abiertos Ahora</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm">
-                    Ver solo talleres que podrían estar abiertos en este momento
-                  </p>
-                </div>
-              </Link>
-              
-              <Link href={`/${province.slug}/${city.slug}/cerca/`}>
-                <div className="border rounded-lg p-6 hover:bg-gray-50 hover:border-primary-cta transition-colors group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <MapPin className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
-                    <h3 className="font-semibold text-lg group-hover:text-primary-cta">Mecánicos Más Cercanos</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm">
-                    Ordenados por distancia desde tu ubicación
-                  </p>
-                </div>
-              </Link>
-            </div>
-            
-
-            {/* Información adicional sobre mecánicos en la ciudad */}
+            {/* Información adicional sobre talleres abiertos */}
             <section className="mt-16 bg-muted/30 p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6">Guía para encontrar mecánicos en {city.name}</h2>
+              <h2 className="text-2xl font-bold mb-6">Encontrar talleres abiertos en {city.name}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Servicios comunes</h3>
+                  <h3 className="text-lg font-semibold mb-3">¿Qué considerar?</h3>
                   <p className="text-muted-foreground mb-4">
-                    Los talleres mecánicos suelen ofrecer diversos servicios automotrices.
-                    Es recomendable consultar directamente con cada taller sobre su disponibilidad
-                    y especialidades específicas.
+                    Los horarios pueden variar según el día, temporada o circunstancias especiales.
+                    Siempre es recomendable verificar antes de dirigirse al taller.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Cambio de aceite y filtros</li>
-                    <li>• Reparación de frenos y suspensión</li>
-                    <li>• Diagnóstico computarizado</li>
-                    <li>• Reparación de motor y transmisión</li>
-                    <li>• Aire acondicionado automotriz</li>
-                    <li>• Alineación y balanceo</li>
+                    <li>• Llamar antes de ir al taller</li>
+                    <li>• Preguntar por disponibilidad inmediata</li>
+                    <li>• Consultar sobre servicios de emergencia</li>
+                    <li>• Verificar si atienden tu tipo de vehículo</li>
+                    <li>• Preguntar por tiempos de espera</li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Qué preguntar al contactar</h3>
+                  <h3 className="text-lg font-semibold mb-3">Servicios de emergencia</h3>
                   <p className="text-muted-foreground mb-4">
-                    Al buscar un mecánico en {city.name}, es importante hacer las preguntas correctas
-                    para asegurar que el taller pueda atender las necesidades específicas de tu vehículo.
+                    Para emergencias automotrices, algunos talleres ofrecen servicios especiales
+                    o atención fuera de horario. Consultá directamente con cada taller.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• ¿Trabajan con mi marca de vehículo?</li>
-                    <li>• ¿Qué servicios específicos ofrecen?</li>
-                    <li>• ¿Cuáles son sus horarios de atención?</li>
-                    <li>• ¿Proporcionan presupuestos detallados?</li>
-                    <li>• ¿Ofrecen garantías en sus trabajos?</li>
-                    <li>• ¿Tienen disponibilidad de repuestos?</li>
+                    <li>• Servicios 24 horas</li>
+                    <li>• Atención de emergencias</li>
+                    <li>• Grúa y auxilio mecánico</li>
+                    <li>• Diagnóstico rápido</li>
+                    <li>• Reparaciones urgentes</li>
                   </ul>
+                </div>
+              </div>
+              
+              {/* Disclaimer importante */}
+              <div className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded mt-6">
+                <div className="flex">
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Importante:</strong> Los horarios mostrados provienen de fuentes públicas y pueden no estar actualizados. 
+                      Siempre verificá directamente con el taller antes de tu visita, especialmente para emergencias.
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
 
             {/* Preguntas frecuentes */}
             <section className="mt-16">
-              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas frecuentes</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">Preguntas sobre talleres abiertos</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Cómo verificar la información de un taller?</div>
+                  <div className="font-semibold mb-2">¿Cómo verificar si están abiertos?</div>
                   <p className="text-sm text-muted-foreground">
-                    Recomendamos contactar directamente con cada taller para confirmar servicios,
-                    horarios y precios, ya que la información puede cambiar sin previo aviso.
+                    Recomendamos llamar directamente al taller para confirmar horarios actuales,
+                    ya que pueden cambiar sin previo aviso o por circunstancias especiales.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿De dónde proviene esta información?</div>
+                  <div className="font-semibold mb-2">¿De dónde vienen estos horarios?</div>
                   <p className="text-sm text-muted-foreground">
-                    Los datos mostrados provienen de fuentes públicas como directorios comerciales
-                    y plataformas de mapas. Siempre verifica la información directamente.
+                    Los datos provienen de fuentes públicas como directorios comerciales
+                    y plataformas de mapas. No verificamos directamente con cada taller.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Qué servicios suelen ofrecer?</div>
+                  <div className="font-semibold mb-2">¿Qué pasa si llego y está cerrado?</div>
                   <p className="text-sm text-muted-foreground">
-                    Los servicios varían según cada taller. Algunos se especializan en ciertos tipos
-                    de reparación mientras otros ofrecen servicios más generales.
+                    Los horarios pueden cambiar. Te sugerimos tener una lista de talleres alternativos
+                    y siempre confirmar por teléfono antes de dirigirte al lugar.
                   </p>
                 </div>
                 <div className="bg-card p-6 rounded-lg border">
-                  <div className="font-semibold mb-2">¿Cómo elegir el mejor taller?</div>
+                  <div className="font-semibold mb-2">¿Hay talleres 24 horas?</div>
                   <p className="text-sm text-muted-foreground">
-                    Considera factores como ubicación, horarios, servicios ofrecidos, y siempre
-                    solicita presupuestos detallados antes de autorizar cualquier trabajo.
+                    Algunos talleres ofrecen servicios de emergencia 24hs. Esta información
+                    específica debe consultarse directamente con cada taller.
                   </p>
                 </div>
               </div>
@@ -382,4 +363,4 @@ export default async function CityPage({ params, searchParams }: Props) {
       )}
     </div>
   );
-}
+} 

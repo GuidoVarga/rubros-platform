@@ -61,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   
   return {
-    title: `Mecánicos abiertos en ${city.name} | ${openCount} talleres disponibles`,
-    description: `Encontrá mecánicos que podrían estar abiertos ahora en ${city.name}, ${province.name}. ${openCount} talleres según información de fuentes públicas. Verificá horarios directamente con cada taller.`,
+    title: `Mecánicos y Talleres abiertos en ${city.name} | ${openCount} disponibles`,
+    description: `Encontrá mecánicos y talleres que podrían estar abiertos ahora en ${city.name}, ${province.name}. ${openCount} talleres mecánicos según información de fuentes públicas. Verificá horarios directamente con cada taller.`,
     keywords: [
       `mecánicos abiertos ${city.name.toLowerCase()}`,
       `talleres abiertos ${city.name.toLowerCase()}`,
@@ -74,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `${baseUrl}/${province.slug}/${city.slug}/abiertos/`,
     },
     openGraph: {
-      title: `Mecánicos abiertos en ${city.name}`,
+      title: `Mecánicos y Talleres abiertos en ${city.name}`,
       description: `${openCount} talleres mecánicos abiertos ahora en ${city.name}`,
       type: "website",
       images: [
