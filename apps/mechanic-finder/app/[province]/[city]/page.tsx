@@ -212,13 +212,11 @@ export default async function CityPage({ params, searchParams }: Props) {
               <h2 className="text-2xl font-semibold mb-2">
                 Talleres Mecánicos en {city.name}
               </h2>
-              <Suspense>
-                <ResultsHeader
-                  businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
-                  currentSort={sort || 'relevance'}
-                  currentFilters={filters || null}
-                />
-              </Suspense>
+              <ResultsHeader
+                businessCount={`Mostrando ${(currentPage - 1) * (ITEMS_PER_PAGE - 1) + 1} - ${Math.min(currentPage * (ITEMS_PER_PAGE - 1), pagination.total)} de ${pagination.total} resultados`}
+                currentSort={sort || 'relevance'}
+                currentFilters={filters || null}
+              />
             </div>
             <div className="space-y-8">
               <PaginatedList
