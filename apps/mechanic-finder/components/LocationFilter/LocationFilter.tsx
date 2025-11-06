@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button, Skeleton } from "@rubros/ui";
 import { useRouter } from "next/navigation";
-import { getCitiesByProvince } from "@/actions/cities";
-import { CityEntity, ProvinceEntity } from "@rubros/db";
+import { ProvinceEntity } from "@rubros/db";
 import { cn } from "@/lib/utils";
 import dynamic from 'next/dynamic'
 import { SelectOption } from "@rubros/ui/select";
+import { useGetCities } from "@/queries/useGetCities/useGetCities";
 
 const Select = dynamic(() => import('@rubros/ui/select'), {
   ssr: false,
@@ -29,48 +29,24 @@ export function LocationFilter({
   provinces,
   showHelpText = true,
 }: LocationFilterProps) {
-  const [cities, setCities] = useState<CityEntity[]>([]);
   const [currentProvince, setCurrentProvince] = useState<SelectOption | null>(null);
   const [currentCity, setCurrentCity] = useState<SelectOption | null>(null);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const { data: cities, isLoading } = useGetCities({
+    provinceId: currentProvince?.value,
+    enabled: !!currentProvince?.value,
+  });
 
   const provincesOptions: SelectOption[] = provinces.map((province) => ({
     label: province.name,
     value: province.id,
   }));
 
-  const citiesOptions: SelectOption[] = cities.map((city) => ({
+  const citiesOptions: SelectOption[] = cities?.map((city) => ({
     label: city.name,
     value: city.id,
-  }));
-
-  // Cargar ciudades cuando cambia la provincia
-  useEffect(() => {
-    const loadCities = async () => {
-      setLoading(true);
-      try {
-        const province = provincesOptions.find(p => p.value === currentProvince?.value);
-        if (province) {
-          const citiesData = await getCitiesByProvince(province.value);
-          setCities(citiesData);
-        }
-      } catch (error) {
-        console.error("Error loading cities:", error);
-      }
-      finally {
-        setLoading(false);
-      }
-    };
-
-    if (currentProvince) {
-      loadCities()
-    }
-    else {
-      setCities([]);
-      setCurrentCity(null);
-    }
-  }, [currentProvince, provinces]);
+  })) || [];
 
   const handleProvinceSelect = (province: any) => {
     setCurrentProvince(province);
@@ -84,7 +60,7 @@ export function LocationFilter({
   const handleSearch = () => {
     if (currentProvince && currentCity) {
       const provinceSlug = provinces.find(p => p.id === currentProvince.value)?.slug;
-      const citySlug = cities.find(c => c.id === currentCity.value)?.slug;
+      const citySlug = cities?.find(c => c.id === currentCity.value)?.slug;
       router.push(`/${provinceSlug}/${citySlug}`);
     }
   }
@@ -116,11 +92,11 @@ export function LocationFilter({
           value={currentCity}
           onChange={(city) => handleCitySelect(city)}
           placeholder="Selecciona una ciudad"
-          isLoading={loading}
+          isLoading={isLoading}
           isDisabled={!currentProvince}
           isSearchable={true}
           name="city"
-          noOptionsMessage={() => loading ? 'Cargando ciudades...' : 'No hay ciudades disponibles'}
+          noOptionsMessage={() => isLoading ? 'Cargando ciudades...' : 'No hay ciudades disponibles'}
           inputId="city"
         />
       </div>
