@@ -229,9 +229,8 @@ export default async function CercaPage({ params, searchParams }: Props) {
               </Link>
             )} />
             <div className="flex items-center justify-center gap-3 mb-4">
-              <MapPin className="h-8 w-8 text-blue-600" />
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                Mecánicos cerca de {city.name}
+                Mecánicos cerca en {city.name}
                 <span className="block text-3xl text-muted-foreground mt-2">
                   {province.name}
                 </span>

@@ -235,9 +235,8 @@ export default async function TalleresCercaPage({ params, searchParams }: Props)
               </Link>
             )} />
             <div className="flex items-center justify-center gap-3 mb-4">
-              <MapPin className="h-8 w-8 text-blue-600" />
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                Talleres cerca de {city.name}
+                Talleres cerca en {city.name}
                 <span className="block text-3xl text-muted-foreground mt-2">
                   {province.name}
                 </span>
