@@ -202,7 +202,6 @@ export default async function TalleresAbiertosPage({ params, searchParams }: Pro
               </Link>
             )} />
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Clock className="h-8 w-8 text-green-600" />
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
                 Talleres abiertos en {city.name}
                 <span className="block text-3xl text-muted-foreground mt-2">
