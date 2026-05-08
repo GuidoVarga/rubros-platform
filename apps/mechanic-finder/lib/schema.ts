@@ -65,9 +65,18 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
     name: business.name,
     url: business.url,
     ...(business.description && { description: business.description }),
-    ...(business.image && { image: business.image }), // SEO-friendly
+    ...(business.image && { image: business.image }),
     ...(business.phone && { telephone: business.phone }),
     ...(business.email && { email: business.email }),
+    ...(business.updatedAt && { dateModified: new Date(business.updatedAt).toISOString() }),
+    ...(business.googleMapsRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: business.googleMapsRating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
     ...(business.address && {
       address: {
         '@type': 'PostalAddress',
@@ -83,7 +92,7 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
         addressCountry: 'AR',
       },
     }),
-    ...(business.openingHours && { openingHours: business.openingHours }), // formato "Mo-Fr 09:00-18:00"
+    ...(business.openingHours && { openingHours: business.openingHours }),
     ...(business.latitude &&
       business.longitude && {
         geo: {
@@ -92,5 +101,36 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
           longitude: business.longitude,
         },
       }),
+  };
+}
+
+export function generateFAQSchema(faqs: { question: string; answer: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+export function generateWebSiteSchema(baseUrl: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    url: baseUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${baseUrl}/buscar?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 }

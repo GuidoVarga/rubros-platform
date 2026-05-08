@@ -16,6 +16,7 @@ import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
 import { Clock, MapPin } from "lucide-react";
+import { generateFAQSchema } from "@/lib/schema";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -23,6 +24,25 @@ type Props = {
 };
 
 export const revalidate = 3600;
+
+const CITY_FAQS = [
+  {
+    question: '¿Cómo verificar la información de un taller?',
+    answer: 'Recomendamos contactar directamente con cada taller para confirmar servicios, horarios y precios, ya que la información puede cambiar sin previo aviso.',
+  },
+  {
+    question: '¿De dónde proviene esta información?',
+    answer: 'Los datos mostrados provienen de fuentes públicas como directorios comerciales y plataformas de mapas. Siempre verifica la información directamente.',
+  },
+  {
+    question: '¿Qué servicios suelen ofrecer los talleres?',
+    answer: 'Los servicios varían según cada taller. Algunos se especializan en ciertos tipos de reparación mientras otros ofrecen servicios más generales.',
+  },
+  {
+    question: '¿Cómo elegir el mejor taller?',
+    answer: 'Considera factores como ubicación, horarios, servicios ofrecidos, y siempre solicita presupuestos detallados antes de autorizar cualquier trabajo.',
+  },
+];
 
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
@@ -68,9 +88,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const mechanicsCount = await getMechanicsCount(city.id);
 
+  const robots = mechanicsCount === 0 ? 'noindex,follow' : 'index,follow';
+
   return {
     title: `Mecánicos y Talleres ${city.name} | ${mechanicsCount} servicios`,
     description: `Encontrá los mejores mecánicos y talleres en ${city.name}, ${province.name}. ${mechanicsCount} talleres mecánicos en tu ciudad con reseñas, horarios y contacto directo.`,
+    robots,
     keywords: [
       `mecánicos ${city.name.toLowerCase()}`,
       `talleres ${city.name.toLowerCase()}`,
@@ -179,8 +202,12 @@ export default async function CityPage({ params, searchParams }: Props) {
     },
   ];
 
+  const faqJsonLd = generateFAQSchema(CITY_FAQS);
+
   return (
-    <div className="flex flex-col gap-8">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
         <div className="container">
@@ -379,5 +406,6 @@ export default async function CityPage({ params, searchParams }: Props) {
         </section>
       )}
     </div>
+    </>
   );
 }

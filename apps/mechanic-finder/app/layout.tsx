@@ -13,8 +13,11 @@ import { APP_NAME } from "@/constants/app";
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
+import { generateWebSiteSchema } from "@/lib/schema";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const webSiteJsonLd = generateWebSiteSchema(ORGANIZATION.url);
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -99,9 +102,9 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: '@encontramecanico',
       images: ['/og-image.jpg'],
     },
-    verification: {
-      google: 'your-google-verification-code',
-    },
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+    }),
     alternates: {
       canonical: ORGANIZATION.url,
     },
@@ -122,6 +125,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
         <script
           async
