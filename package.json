@@ -21,6 +21,11 @@
   "engines": {
     "node": ">=18"
   },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.27.0"
+    }
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
