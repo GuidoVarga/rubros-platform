@@ -12,6 +12,7 @@ import Link from "next/link";
 import { APP_NAME } from "@/constants/app";
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import { ADSENSE_SLOTS } from "@rubros/ui/constants";
+import { QueryProvider } from "@/lib/providers/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -130,32 +131,34 @@ export default function RootLayout({
         <meta name="google-adsense-account" content={`ca-pub-${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`} />
       </head>
       <body className={inter.className}>
-        <div className="relative flex min-h-screen flex-col">
-          <Header
-            renderLink={({ href, children, className }) => <Link href={href} className={className}>{children}</Link>}
-            appName={APP_NAME}
-          />
-          <main className="flex-1">
-            <div className="flex flex-col gap-8">
-              <Suspense>
-                <AdComponent type={ADSENSE_SLOTS.TOP} />
-              </Suspense>
-              <Suspense fallback={<SkeletonPage />}>
-                <div>{children}</div>
-              </Suspense>
-              <Suspense>
-                <section className="container mb-8">
-                  <AdComponent type={ADSENSE_SLOTS.FOOTER} />
-                </section>
-              </Suspense>
-            </div>
-          </main>
-          <Footer />
-          <Suspense>
-            <CookieBanner />
-          </Suspense>
-        </div>
-        <GoogleAnalytics />
+        <QueryProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <Header
+              renderLink={({ href, children, className }) => <Link href={href} className={className}>{children}</Link>}
+              appName={APP_NAME}
+            />
+            <main className="flex-1">
+              <div className="flex flex-col gap-8">
+                <Suspense>
+                  <AdComponent type={ADSENSE_SLOTS.TOP} />
+                </Suspense>
+                <Suspense fallback={<SkeletonPage />}>
+                  <div>{children}</div>
+                </Suspense>
+                <Suspense>
+                  <section className="container mb-8">
+                    <AdComponent type={ADSENSE_SLOTS.FOOTER} />
+                  </section>
+                </Suspense>
+              </div>
+            </main>
+            <Footer />
+            <Suspense>
+              <CookieBanner />
+            </Suspense>
+          </div>
+          <GoogleAnalytics />
+        </QueryProvider>
       </body>
     </html>
   );

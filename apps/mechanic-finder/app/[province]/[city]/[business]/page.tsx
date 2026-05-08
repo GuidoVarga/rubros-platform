@@ -179,45 +179,41 @@ export default async function BusinessPage({ params }: Props) {
                   </div>
                 )}
               </div>
-              <Suspense>
-                <BusinessActions
-                  businessName={business.name}
-                  phone={business.phone}
-                  website={business.website}
-                  googleMapsLink={business.googleMapsLink}
-                />
-              </Suspense>
+              <BusinessActions
+                businessName={business.name}
+                phone={business.phone}
+                website={business.website}
+                googleMapsLink={business.googleMapsLink}
+              />
             </CardContent>
           </Card>
         </section>
 
         {/* Map Card */}
         {location && (
-          <Suspense fallback={<SkeletonCard />}>
-            <section className="mt-16">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ubicación</CardTitle>
-                </CardHeader>
-                <CardContent className="sm:h-[500px] h-[300px]">
-                  <CustomMap
-                    center={location as LatLngExpression}
-                    zoom={15}
-                    markers={[
-                      {
-                        id: business.id,
-                        position: location as LatLngExpression,
-                        title: business.name,
-                        description: business.address || undefined,
-                        link: business.googleMapsLink || undefined,
-                      },
-                    ]}
-                    showCurrentLocation
-                  />
-                </CardContent>
-              </Card>
-            </section>
-          </Suspense>
+          <section className="mt-16">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ubicación</CardTitle>
+              </CardHeader>
+              <CardContent className="sm:h-[500px] h-[300px]">
+                <CustomMap
+                  center={location as LatLngExpression}
+                  zoom={15}
+                  markers={[
+                    {
+                      id: business.id,
+                      position: location as LatLngExpression,
+                      title: business.name,
+                      description: business.address || undefined,
+                      link: business.googleMapsLink || undefined,
+                    },
+                  ]}
+                  showCurrentLocation
+                />
+              </CardContent>
+            </Card>
+          </section>
         )}
         <Suspense>
           <div className="mt-16">

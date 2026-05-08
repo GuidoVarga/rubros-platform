@@ -80,9 +80,7 @@ export const Footer = () => {
             Directorio informativo de talleres mecánicos en Argentina basado en información pública.
           </p>
           <div className="mt-4">
-            <Suspense>
-              <CookiesConfigureButton />
-            </Suspense>
+            <CookiesConfigureButton />
           </div>
         </div>
       </div>
