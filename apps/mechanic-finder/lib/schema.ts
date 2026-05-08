@@ -1,5 +1,7 @@
 import { BusinessEntity } from '@rubros/db';
 
+export type BreadcrumbSchemaItem = { href: string; name: string };
+
 type Organization = {
   name: string;
   url: string;
@@ -19,6 +21,39 @@ export function generateOrganizationSchema(org: Organization) {
     url: org.url,
     ...(org.logo && { logo: org.logo }),
     ...(org.description && { description: org.description }),
+  };
+}
+
+export function generateListingPageSchema(
+  breadcrumbs: BreadcrumbSchemaItem[],
+  businesses: { name: string; slug: string }[],
+  baseUrl: string,
+  provinceSlug: string,
+  citySlug: string,
+  pageOffset = 0
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((item, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: item.name,
+          item: `${baseUrl}${item.href}`,
+        })),
+      },
+      {
+        '@type': 'ItemList',
+        itemListElement: businesses.map((biz, i) => ({
+          '@type': 'ListItem',
+          position: pageOffset + i + 1,
+          name: biz.name,
+          url: `${baseUrl}/${provinceSlug}/${citySlug}/${biz.slug}/`,
+        })),
+      },
+    ],
   };
 }
 

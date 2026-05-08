@@ -18,6 +18,7 @@ import { Suspense } from "react";
 import { MapPin } from "lucide-react";
 import { GeolocationButton } from "@/components/GeolocationButton";
 import { getCityCoordinates } from "@/constants/cities-coords";
+import { generateListingPageSchema } from "@/lib/schema";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -155,6 +156,8 @@ export default async function CercaPage({ params, searchParams }: Props) {
     getRelatedCitiesByMechanicsCount(province.id, city.id, 12)
   ]);
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
   const breadcrumbElements: BreadcrumbProps['elements'] = [
     {
       id: 'inicio',
@@ -182,8 +185,19 @@ export default async function CercaPage({ params, searchParams }: Props) {
     },
   ];
 
+  const jsonLd = generateListingPageSchema(
+    breadcrumbElements.map(el => ({ href: el.href ?? '/', name: String(el.content) })),
+    mechanics,
+    baseUrl,
+    province.slug,
+    city.slug,
+    (currentPage - 1) * (ITEMS_PER_PAGE - 1)
+  );
+
   return (
-    <div className="flex flex-col gap-8">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
         <div className="container">
@@ -376,5 +390,6 @@ export default async function CercaPage({ params, searchParams }: Props) {
         </section>
       )}
     </div>
+    </>
   );
 } 

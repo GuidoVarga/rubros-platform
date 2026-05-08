@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getBusinesses, getMechanicsCount } from "@/actions/business";
+import { generateListingPageSchema } from "@/lib/schema";
 import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug, getRelatedCitiesByMechanicsCount } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
@@ -67,6 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
   const mechanicsCount = await getMechanicsCount(city.id);
+  const robots = mechanicsCount < 5 ? 'noindex,follow' : 'index,follow';
 
   return {
     title: `Talleres Mecánicos ${city.name} | ${mechanicsCount} servicios`,
@@ -103,6 +105,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       ],
     },
+    robots,
     alternates: {
       canonical: `${baseUrl}/${province.slug}/${city.slug}/talleres/`,
     },
@@ -158,6 +161,8 @@ export default async function TalleresPage({ params, searchParams }: Props) {
     getRelatedCitiesByMechanicsCount(province.id, city.id, 12)
   ]);
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
   const breadcrumbElements: BreadcrumbProps['elements'] = [
     {
       id: 'inicio',
@@ -185,8 +190,19 @@ export default async function TalleresPage({ params, searchParams }: Props) {
     },
   ];
 
+  const jsonLd = generateListingPageSchema(
+    breadcrumbElements.map(el => ({ href: el.href ?? '/', name: String(el.content) })),
+    mechanics,
+    baseUrl,
+    province.slug,
+    city.slug,
+    (currentPage - 1) * (ITEMS_PER_PAGE - 1)
+  );
+
   return (
-    <div className="flex flex-col gap-8">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
         <div className="container">
@@ -387,5 +403,6 @@ export default async function TalleresPage({ params, searchParams }: Props) {
         </section>
       )}
     </div>
+    </>
   );
 } 
