@@ -1,57 +1,40 @@
 import { prisma } from '@rubros/db';
 import { getOpenBusinessesCount, getMechanicsCount } from '@/actions/business';
 
-export async function GET(): Promise<Response> {
-  // Fetch all active provinces with their cities
-  const provinces = await prisma.province.findMany({
-    where: {
-      status: true,
-    },
-    include: {
-      cities: {
-        where: {
-          status: true,
-        },
-      },
-    },
-  });
+const STATIC_URLS = [
+  { loc: '', changefreq: 'weekly', priority: '1.0' },
+  { loc: '/acerca/', changefreq: 'monthly', priority: '0.7' },
+  { loc: '/contacto/', changefreq: 'monthly', priority: '0.7' },
+  { loc: '/terminos-y-condiciones/', changefreq: 'monthly', priority: '0.5' },
+  { loc: '/politica-privacidad/', changefreq: 'monthly', priority: '0.5' },
+];
 
-  // Base URL from environment or default
+export async function GET(): Promise<Response> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
 
+  let provinces: Awaited<ReturnType<typeof prisma.province.findMany>> = [];
+  try {
+    provinces = await prisma.province.findMany({
+      where: { status: true },
+      include: { cities: { where: { status: true } } },
+    });
+  } catch {
+    const xml = buildXml(STATIC_URLS.map(u => ({
+      loc: `${baseUrl}${u.loc}`,
+      lastmod: new Date().toISOString(),
+      changefreq: u.changefreq,
+      priority: u.priority,
+    })));
+    return xmlResponse(xml);
+  }
+
   // Create sitemap entries
-  const urls = [
-    {
-      loc: baseUrl,
-      lastmod: new Date().toISOString(),
-      changefreq: 'weekly',
-      priority: '1.0',
-    },
-    {
-      loc: `${baseUrl}/acerca/`,
-      lastmod: new Date().toISOString(),
-      changefreq: 'monthly',
-      priority: '0.7',
-    },
-    {
-      loc: `${baseUrl}/contacto/`,
-      lastmod: new Date().toISOString(),
-      changefreq: 'monthly',
-      priority: '0.7',
-    },
-    {
-      loc: `${baseUrl}/terminos-y-condiciones/`,
-      lastmod: new Date().toISOString(),
-      changefreq: 'monthly',
-      priority: '0.5',
-    },
-    {
-      loc: `${baseUrl}/politica-privacidad/`,
-      lastmod: new Date().toISOString(),
-      changefreq: 'monthly',
-      priority: '0.5',
-    },
-  ];
+  const urls = STATIC_URLS.map(u => ({
+    loc: `${baseUrl}${u.loc}`,
+    lastmod: new Date().toISOString(),
+    changefreq: u.changefreq,
+    priority: u.priority,
+  }));
 
   // Add province and city routes
   for (const province of provinces) {
@@ -129,8 +112,13 @@ export async function GET(): Promise<Response> {
     }
   }
 
-  // Generate XML
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  return xmlResponse(buildXml(urls));
+}
+
+type SitemapUrl = { loc: string; lastmod: string; changefreq: string; priority: string };
+
+function buildXml(urls: SitemapUrl[]): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
@@ -143,7 +131,9 @@ ${urls
   )
   .join('\n')}
 </urlset>`;
+}
 
+function xmlResponse(xml: string): Response {
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml',
