@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getBusinesses, getMechanicsCount } from "@/actions/business";
-import { generateListingPageSchema } from "@/lib/schema";
+import { generateListingPageSchema, generateFAQSchema } from "@/lib/schema";
 import { getProvinceBySlug, getProvinces } from "@/actions/province";
 import { getCityBySlug, getRelatedCitiesByMechanicsCount } from "@/actions/cities";
 import { MechanicCard } from "@/components/MechanicCard/MechanicCard";
@@ -24,6 +24,25 @@ type Props = {
 };
 
 export const revalidate = 3600;
+
+const TALLERES_FAQS = [
+  {
+    question: '¿Cómo verificar la información de un taller?',
+    answer: 'Recomendamos contactar directamente con cada taller para confirmar servicios, horarios y precios, ya que la información puede cambiar sin previo aviso.',
+  },
+  {
+    question: '¿De dónde proviene esta información?',
+    answer: 'Los datos mostrados provienen de fuentes públicas como directorios comerciales y plataformas de mapas. Siempre verifica la información directamente.',
+  },
+  {
+    question: '¿Qué servicios suelen ofrecer los talleres?',
+    answer: 'Los servicios varían según cada taller. Algunos se especializan en ciertos tipos de reparación mientras otros ofrecen servicios más generales como mecánica integral.',
+  },
+  {
+    question: '¿Cómo elegir el mejor taller mecánico?',
+    answer: 'Considera factores como ubicación, horarios, servicios ofrecidos, y siempre solicita presupuestos detallados antes de autorizar cualquier trabajo.',
+  },
+];
 
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
@@ -198,10 +217,12 @@ export default async function TalleresPage({ params, searchParams }: Props) {
     city.slug,
     (currentPage - 1) * (ITEMS_PER_PAGE - 1)
   );
+  const faqJsonLd = generateFAQSchema(TALLERES_FAQS);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">

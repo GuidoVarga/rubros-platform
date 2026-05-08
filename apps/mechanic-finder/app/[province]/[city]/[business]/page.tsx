@@ -4,7 +4,7 @@ import { MapPin, Phone, Mail, Globe, Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getBusinessBySlug } from '@/actions/business'
 import { getOpenDays, HourEntry, isOpenNow } from '@rubros/ui/utils'
-import { generateLocalBusinessSchema } from '@/lib/schema'
+import { generateLocalBusinessSchema, generateFAQSchema } from '@/lib/schema'
 import { CustomMap } from '@/components/CustomMap/CustomMap'
 import { LatLngExpression } from '@rubros/ui/map'
 import { Suspense } from 'react'
@@ -19,6 +19,25 @@ type Props = {
 }
 
 export const revalidate = 3600;
+
+const BUSINESS_FAQS = [
+  {
+    question: '¿Cómo verificar la información del taller?',
+    answer: 'Recomendamos contactar directamente con el taller para confirmar horarios, servicios y disponibilidad, ya que la información puede cambiar sin previo aviso.',
+  },
+  {
+    question: '¿De dónde proviene esta información?',
+    answer: 'Los datos mostrados provienen de fuentes públicas disponibles en internet como directorios comerciales y plataformas de mapas.',
+  },
+  {
+    question: '¿Puedo confiar en esta información?',
+    answer: 'Esta plataforma funciona como un directorio informativo. Siempre verifica la información directamente con el taller antes de solicitar servicios.',
+  },
+  {
+    question: '¿Qué hacer si la información está incorrecta?',
+    answer: 'Si encuentras información incorrecta o desactualizada, puedes contactarnos para reportar el problema y trabajaremos para corregirlo.',
+  },
+];
 
 // Simple social share component inline
 const SocialShare = ({ url, title, description, className }: { url: string; title: string; description?: string; className?: string }) => {
@@ -62,8 +81,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonicalUrl = `${baseUrl}/${province}/${city}/${businessSlug}/`;
 
   return {
-    title: `${business.name} - ${business.city?.name}, ${business.city?.province?.name}`,
-    description: business.description || `${business.name} en ${business.city?.name}, ${business.city?.province?.name}. Contacta directamente para más información.`,
+    title: `${business.name} | Mecánico en ${business.city?.name}, ${business.city?.province?.name}`,
+    description: business.description || `${business.name} - Taller mecánico en ${business.city?.name}, ${business.city?.province?.name}. Información de contacto, horarios y ubicación.`,
     keywords: [
       business.name,
       'mecánico',
@@ -115,6 +134,7 @@ export default async function BusinessPage({ params }: Props) {
   const currentUrl = `${baseUrl}/${province}/${city}/${businessSlug}`;
 
   const jsonLd = generateLocalBusinessSchema({ url: currentUrl, ...business });
+  const faqJsonLd = generateFAQSchema(BUSINESS_FAQS);
 
   const isOpen = isOpenNow(business.hours as HourEntry[]);
 
@@ -123,6 +143,10 @@ export default async function BusinessPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <div className="container py-8">
         <Breadcrumb elements={breadcrumbElements} />

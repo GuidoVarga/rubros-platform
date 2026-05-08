@@ -16,7 +16,7 @@ import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
 import { Clock } from "lucide-react";
-import { generateListingPageSchema } from "@/lib/schema";
+import { generateListingPageSchema, generateFAQSchema } from "@/lib/schema";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -24,6 +24,25 @@ type Props = {
 };
 
 export const revalidate = 3600; // 1 hora
+
+const ABIERTOS_FAQS = [
+  {
+    question: '¿Cómo verificar si están abiertos?',
+    answer: 'Recomendamos llamar directamente al taller para confirmar horarios actuales, ya que pueden cambiar sin previo aviso o por circunstancias especiales.',
+  },
+  {
+    question: '¿De dónde vienen estos horarios?',
+    answer: 'Los datos provienen de fuentes públicas como directorios comerciales y plataformas de mapas. No verificamos directamente con cada taller.',
+  },
+  {
+    question: '¿Qué pasa si llego y está cerrado?',
+    answer: 'Los horarios pueden cambiar. Te sugerimos tener una lista de talleres alternativos y siempre confirmar por teléfono antes de dirigirte al lugar.',
+  },
+  {
+    question: '¿Hay talleres 24 horas?',
+    answer: 'Algunos talleres ofrecen servicios de emergencia 24hs. Esta información específica debe consultarse directamente con cada taller.',
+  },
+];
 
 export async function generateStaticParams() {
   try {
@@ -181,10 +200,12 @@ export default async function AbiertosPage({ params, searchParams }: Props) {
     city.slug,
     (currentPage - 1) * (ITEMS_PER_PAGE - 1)
   );
+  const faqJsonLd = generateFAQSchema(ABIERTOS_FAQS);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">

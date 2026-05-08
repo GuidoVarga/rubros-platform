@@ -16,7 +16,7 @@ import { CustomPaginationBar } from "@/components/PaginationBar/PaginationBar";
 import { ResultsHeader } from "@/components/ResultsHeader";
 import { Suspense } from "react";
 import { Clock } from "lucide-react";
-import { generateListingPageSchema } from "@/lib/schema";
+import { generateListingPageSchema, generateFAQSchema } from "@/lib/schema";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -24,6 +24,25 @@ type Props = {
 };
 
 export const revalidate = 3600; // 1 hora
+
+const TALLERES_ABIERTOS_FAQS = [
+  {
+    question: '¿Cómo verificar si un taller está abierto ahora?',
+    answer: 'Recomendamos llamar directamente al taller para confirmar horarios actuales, ya que pueden cambiar sin previo aviso o por circunstancias especiales.',
+  },
+  {
+    question: '¿De dónde vienen estos horarios?',
+    answer: 'Los datos provienen de fuentes públicas como directorios comerciales y plataformas de mapas. No verificamos directamente con cada taller.',
+  },
+  {
+    question: '¿Hay talleres mecánicos 24 horas?',
+    answer: 'Algunos talleres ofrecen servicios de emergencia 24hs. Esta información específica debe consultarse directamente con cada taller.',
+  },
+  {
+    question: '¿Cómo elegir el mejor taller abierto?',
+    answer: 'Considera la distancia, los servicios ofrecidos y los horarios. Siempre es recomendable llamar antes para confirmar disponibilidad.',
+  },
+];
 
 export async function generateStaticParams() {
   try {
@@ -187,10 +206,12 @@ export default async function TalleresAbiertosPage({ params, searchParams }: Pro
     city.slug,
     (currentPage - 1) * (ITEMS_PER_PAGE - 1)
   );
+  const faqJsonLd = generateFAQSchema(TALLERES_ABIERTOS_FAQS);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">

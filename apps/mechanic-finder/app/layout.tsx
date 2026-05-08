@@ -87,7 +87,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: ORGANIZATION.name,
       images: [
         {
-          url: '/og-image.jpg',
+          url: ORGANIZATION.logo,
           width: 1200,
           height: 630,
           alt: `${ORGANIZATION.name} - Directorio de mecánicos en Argentina`,
@@ -100,7 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: ORGANIZATION.description,
       site: '@encontramecanico',
       creator: '@encontramecanico',
-      images: ['/og-image.jpg'],
+      images: [ORGANIZATION.logo],
     },
     ...(process.env.GOOGLE_SITE_VERIFICATION && {
       verification: { google: process.env.GOOGLE_SITE_VERIFICATION },

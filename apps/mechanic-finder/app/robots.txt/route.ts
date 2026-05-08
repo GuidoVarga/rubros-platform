@@ -5,27 +5,22 @@ export async function GET(): Promise<Response> {
 
   const robotsTxt = `User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /private/
 
-# Sitemap
 Sitemap: ${baseUrl}/sitemap.xml
 
-# Crawl-delay
-Crawl-delay: 1
+# Block scrapers that add no SEO value
+User-agent: AhrefsBot
+Disallow: /
 
-# Disallow admin or private areas (if any)
-# Disallow: /admin/
-# Disallow: /private/
+User-agent: SemrushBot
+Disallow: /
 
-# Allow all search engines to crawl all pages
-# This helps with SEO for our mechanic directory
-Allow: /
-Allow: /acerca
-Allow: /contacto
-Allow: /terminos-y-condiciones
-Allow: /politica-privacidad
-Allow: /*/*
-Allow: /*/*/*
-Allow: /*/*/*/*
+User-agent: MJ12bot
+Disallow: /
 `;
 
   return new Response(robotsTxt, {

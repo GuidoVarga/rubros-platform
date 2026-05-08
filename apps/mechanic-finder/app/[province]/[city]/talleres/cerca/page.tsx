@@ -18,7 +18,7 @@ import { Suspense } from "react";
 import { MapPin } from "lucide-react";
 import { GeolocationButton } from "@/components/GeolocationButton";
 import { getCityCoordinates } from "@/constants/cities-coords";
-import { generateListingPageSchema } from "@/lib/schema";
+import { generateListingPageSchema, generateFAQSchema } from "@/lib/schema";
 
 type Props = {
   params: Promise<{ province: string; city: string }>;
@@ -26,6 +26,25 @@ type Props = {
 };
 
 export const revalidate = 3600; // 1 hora
+
+const TALLERES_CERCA_FAQS = [
+  {
+    question: '¿Cómo se determina la distancia a los talleres?',
+    answer: 'La distancia se calcula desde tu ubicación actual usando geolocalización del navegador. Los resultados se ordenan del más cercano al más lejano.',
+  },
+  {
+    question: '¿Puedo buscar talleres sin compartir mi ubicación?',
+    answer: 'Sí, también podés explorar todos los talleres en la ciudad sin activar la geolocalización. Los resultados aparecen ordenados por puntuación.',
+  },
+  {
+    question: '¿Qué servicios ofrecen los talleres cercanos?',
+    answer: 'Los servicios varían según cada taller. Consultá directamente con cada uno para confirmar que ofrecen lo que necesitás para tu vehículo.',
+  },
+  {
+    question: '¿Cómo contactar a un taller cercano?',
+    answer: 'En cada ficha de taller encontrarás la información de contacto disponible públicamente: teléfono, dirección y enlace a Google Maps.',
+  },
+];
 
 export async function generateStaticParams() {
   try {
@@ -199,10 +218,12 @@ export default async function TalleresCercaPage({ params, searchParams }: Props)
     city.slug,
     (currentPage - 1) * (ITEMS_PER_PAGE - 1)
   );
+  const faqJsonLd = generateFAQSchema(TALLERES_CERCA_FAQS);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="flex flex-col gap-8">
       {/* Header Section */}
       <section className="bg-muted/50 py-16">
