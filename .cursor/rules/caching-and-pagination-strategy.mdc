@@ -15,8 +15,8 @@ Redeploy regenerates all `generateStaticParams` pages automatically.
 |-------|----------|--------|
 | `[province]/page.tsx` | SSG puro (sin revalidate) | Datos muy estables, tiene `generateStaticParams` |
 | `[city]/page.tsx` | SSG puro (sin revalidate) | Tiene `generateStaticParams`, se regenera en redeploy |
-| `[city]/talleres/page.tsx` | `revalidate = 86400 * 7` | Listing estable |
-| `[city]/[business]/page.tsx` | `revalidate = 86400 * 7` | Datos de negocio cambian poco |
+| `[city]/talleres/page.tsx` | `revalidate = 604800` (7d) | Listing estable |
+| `[city]/[business]/page.tsx` | `revalidate = 604800` (7d) | Datos de negocio cambian poco |
 | `[city]/abiertos/page.tsx` | `revalidate = 3600` | Contenido sensible al tiempo |
 | `[city]/cerca/page.tsx` | `revalidate = 3600` | Contenido dependiente de geolocalización |
 | `sitemap.xml/route.ts` | `revalidate = 86400` | 3 queries Prisma, no regenerar en cada request |
@@ -48,3 +48,15 @@ Pros: page base completamente estática, sin SSR en paginación.
 Contras: requiere API route + Client Component para el listado paginado.
 
 **Decisión pendiente:** monitorear CPU después del fix del sitemap antes de atacar esto.
+
+## ⚠️ Gotcha: revalidate requiere número literal
+
+Next.js evalúa `revalidate` estáticamente en build time. Las expresiones binarias rompen el build:
+
+```ts
+// ❌ Build error: "Unsupported node type BinaryExpression"
+export const revalidate = 86400 * 7;
+
+// ✅ Correcto
+export const revalidate = 604800; // 7 days
+```

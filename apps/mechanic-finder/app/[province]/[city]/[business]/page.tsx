@@ -18,7 +18,7 @@ type Props = {
   params: Promise<{ province: string; city: string; business: string }>;
 }
 
-export const revalidate = 86400 * 7; // 7 days
+export const revalidate = 604800; // 7 days
 
 const BUSINESS_FAQS = [
   {
