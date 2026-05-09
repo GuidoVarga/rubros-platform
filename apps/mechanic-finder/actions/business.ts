@@ -699,3 +699,24 @@ export async function getBusinessBySlug(
     return null;
   }
 }
+
+// Función para contar negocios abiertos en una ciudad (para conditional indexing)
+export async function getOpenBusinessesCount(cityId: string): Promise<number> {
+  try {
+    // Solo necesitamos el conteo total, no los datos de businesses
+    const result = await getBusinessesByDistance({
+      filters: { cityId, isOpen: true },
+      orderBy: { field: 'googleMapsRating', direction: 'desc' },
+      pagination: { page: 1, limit: 1 }, // Limit mínimo ya que solo necesitamos el total
+      userLocation: { latitude: 0, longitude: 0 }, // Fallback para isOpen filter
+      maxDistance: 999999999
+    });
+
+    return result.pagination.total;
+  } catch (error) {
+    console.error('Error counting open businesses:', error);
+    return 0;
+  }
+}
+
+

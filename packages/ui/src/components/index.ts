@@ -19,3 +19,4 @@ export * from './CookieBanner';
 export * from './CookiesConfigureButton';
 export * from './ContactActions';
 export * from './ViewTracker';
+export * from './GeolocationButton';

@@ -13,8 +13,11 @@ import { APP_NAME } from "@/constants/app";
 import GoogleAnalytics from "@/components/Analytics/GoogleAnalytics";
 import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
+import { generateWebSiteSchema } from "@/lib/schema";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const webSiteJsonLd = generateWebSiteSchema(ORGANIZATION.url);
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -84,7 +87,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: ORGANIZATION.name,
       images: [
         {
-          url: '/og-image.jpg',
+          url: ORGANIZATION.logo,
           width: 1200,
           height: 630,
           alt: `${ORGANIZATION.name} - Directorio de mecánicos en Argentina`,
@@ -97,11 +100,11 @@ export async function generateMetadata(): Promise<Metadata> {
       description: ORGANIZATION.description,
       site: '@encontramecanico',
       creator: '@encontramecanico',
-      images: ['/og-image.jpg'],
+      images: [ORGANIZATION.logo],
     },
-    verification: {
-      google: 'your-google-verification-code',
-    },
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+    }),
     alternates: {
       canonical: ORGANIZATION.url,
     },
@@ -122,6 +125,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
         <script
           async

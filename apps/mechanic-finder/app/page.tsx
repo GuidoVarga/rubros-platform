@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getProvinces } from "@/actions/province";
+import { getProvinces, getTopProvincesByMechanicsCount } from "@/actions/province";
 import { ProvinceEntity } from "@rubros/db";
 import { LocationFilter } from "@/components/LocationFilter/LocationFilter";
 import { ORGANIZATION } from "@/constants/org";
@@ -16,7 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const provinces: ProvinceEntity[] = await getProvinces();
+  const [provinces, topProvinces] = await Promise.all([
+    getProvinces(),
+    getTopProvincesByMechanicsCount(8),
+  ]);
 
   return (
     <div className="container py-16">
@@ -63,6 +66,25 @@ export default async function Home() {
           <p className="text-muted-foreground">Disponibilidad</p>
         </div>
       </section>
+
+      {/* Top Provinces — server-rendered for SEO crawlability */}
+      {topProvinces.length > 0 && (
+        <section className="mt-12 mb-16">
+          <h2 className="text-2xl font-bold text-center mb-6">Provincias Destacadas</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {topProvinces.map((p) => (
+              <Link
+                key={p.id}
+                href={`/${p.slug}`}
+                className="block p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
+              >
+                <span className="text-sm font-medium group-hover:text-primary block">{p.name}</span>
+                <span className="text-xs text-muted-foreground mt-1 block">{p.mechanicsCount} talleres</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How it works */}
       <section className="mb-16">

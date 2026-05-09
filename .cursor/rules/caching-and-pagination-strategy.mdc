@@ -1,0 +1,62 @@
+---
+description: Caching/revalidation decisions and pagination optimization plan for mechanic-finder
+globs: apps/mechanic-finder/app/**/*.tsx,apps/mechanic-finder/app/**/*.ts
+alwaysApply: false
+---
+
+# Caching & Revalidation Strategy
+
+## Current decisions (May 2026)
+
+Context: Vercel Free Tier, Fluid Active CPU near limit (86%). Scraper runs manually → DB update → redeploy.
+Redeploy regenerates all `generateStaticParams` pages automatically.
+
+| Route | Strategy | Reason |
+|-------|----------|--------|
+| `[province]/page.tsx` | SSG puro (sin revalidate) | Datos muy estables, tiene `generateStaticParams` |
+| `[city]/page.tsx` | SSG puro (sin revalidate) | Tiene `generateStaticParams`, se regenera en redeploy |
+| `[city]/talleres/page.tsx` | `revalidate = 604800` (7d) | Listing estable |
+| `[city]/[business]/page.tsx` | `revalidate = 604800` (7d) | Datos de negocio cambian poco |
+| `[city]/abiertos/page.tsx` | `revalidate = 3600` | Contenido sensible al tiempo |
+| `[city]/cerca/page.tsx` | `revalidate = 3600` | Contenido dependiente de geolocalización |
+| `sitemap.xml/route.ts` | `revalidate = 86400` | 3 queries Prisma, no regenerar en cada request |
+
+## Pending: Pagination & searchParams
+
+**Problema:** `await searchParams` en Server Components opta por dynamic rendering (SSR).
+- `/mar-del-plata` → SSG ✅ (cache estático, 0 CPU)
+- `/mar-del-plata?page=2` → SSR ⚠️ (queries a DB por request)
+
+Googlebot no crawlea las URLs paginadas (no están en el sitemap), por lo que el impacto es solo de usuarios reales. Actualmente aceptable.
+
+### Opciones cuando el tráfico crezca
+
+**Opción A — URL path-based pagination** *(refactor grande, SEO óptimo)*
+```
+/mar-del-plata/           → page 1, SSG
+/mar-del-plata/pagina/2/  → page 2, SSG (en generateStaticParams)
+```
+Pros: 100% estático, indexable por Google, sin CPU extra.
+Contras: cambio de estructura de rutas, redirecciones 301 necesarias desde `?page=N`.
+
+**Opción B — Client-side pagination con Route Handler** *(refactor moderado)*
+```
+/mar-del-plata            → SSG puro (no lee searchParams)
+?page=2                   → Client Component hace fetch a /api/businesses?city=...&page=2
+```
+Pros: page base completamente estática, sin SSR en paginación.
+Contras: requiere API route + Client Component para el listado paginado.
+
+**Decisión pendiente:** monitorear CPU después del fix del sitemap antes de atacar esto.
+
+## ⚠️ Gotcha: revalidate requiere número literal
+
+Next.js evalúa `revalidate` estáticamente en build time. Las expresiones binarias rompen el build:
+
+```ts
+// ❌ Build error: "Unsupported node type BinaryExpression"
+export const revalidate = 86400 * 7;
+
+// ✅ Correcto
+export const revalidate = 604800; // 7 days
+```

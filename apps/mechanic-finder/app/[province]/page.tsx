@@ -17,8 +17,6 @@ type Props = {
   searchParams: Promise<{ page?: string }>;
 };
 
-export const revalidate = 3600;
-
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
   try {
@@ -50,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `Mecánicos en ${province.name} | Selecciona tu ciudad`,
-    description: `Encontrá los mejores mecánicos en ${province.name}. ${totalMechanics} talleres en ${province.cities.length} ciudades. Selecciona tu ciudad para ver los mejores talleres cerca de vos.`,
+    description: `Encontrá los mejores mecánicos en ${province.name}. ${totalMechanics} talleres en toda la provincia. Selecciona tu ciudad para ver los mejores talleres cerca de vos.`,
     keywords: [
       `mecánicos ${province.name.toLowerCase()}`,
       `talleres ${province.name.toLowerCase()}`,
@@ -60,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ],
     openGraph: {
       title: `Mecánicos en ${province.name}`,
-      description: `${totalMechanics} talleres mecánicos en ${province.cities.length} ciudades de ${province.name}`,
+      description: `${totalMechanics} talleres mecánicos en ${province.name}`,
       type: "website",
       images: [
         {
@@ -73,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `Mecánicos en ${province.name}`,
-      description: `${totalMechanics} talleres mecánicos en ${province.cities.length} ciudades de ${province.name}`,
+      description: `${totalMechanics} talleres mecánicos en ${province.name}`,
       images: [
         {
           url: ORGANIZATION.logo,
@@ -137,7 +135,7 @@ export default async function ProvincePage({ params }: Props) {
             {province.cities.length > 0 && totalMechanicsInProvince > 0 && (
               <>
                 <p className="text-lg leading-8 text-muted-foreground mb-8">
-                  {totalMechanics} mecánicos en {province.cities.length} ciudades.
+                  {totalMechanics} mecánicos en {citiesWithCounts.length} ciudades con talleres.
                   Selecciona tu ciudad para ver talleres disponibles en tu zona.
                 </p>
                 <CitySelector
@@ -230,7 +228,7 @@ export default async function ProvincePage({ params }: Props) {
                     en {province.name}. Los datos se actualizan regularmente desde fuentes públicas.
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-2">
-                    <li>• {province.cities.length} ciudades con información</li>
+                    <li>• {citiesWithCounts.length} ciudades con talleres</li>
                     <li>• {totalMechanics} talleres registrados</li>
                     <li>• Datos de fuentes públicas</li>
                     <li>• Información de contacto cuando disponible</li>
