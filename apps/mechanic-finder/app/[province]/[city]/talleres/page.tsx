@@ -23,8 +23,6 @@ type Props = {
   searchParams: Promise<{ page?: string; sort?: string; filters?: string, lat?: string, lng?: string }>;
 };
 
-export const revalidate = 3600;
-
 const TALLERES_FAQS = [
   {
     question: '¿Cómo verificar la información de un taller?',

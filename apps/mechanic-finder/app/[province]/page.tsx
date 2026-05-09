@@ -17,8 +17,6 @@ type Props = {
   searchParams: Promise<{ page?: string }>;
 };
 
-export const revalidate = 3600;
-
 // Generar rutas estáticas para SEO (SSG)
 export async function generateStaticParams() {
   try {

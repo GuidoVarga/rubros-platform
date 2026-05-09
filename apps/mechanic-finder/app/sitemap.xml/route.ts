@@ -2,6 +2,8 @@ import { prisma, Categories } from '@rubros/db';
 
 const THRESHOLD = 5;
 
+export const revalidate = 86400; // 24 hours
+
 export async function GET(): Promise<Response> {
   // Fetch all data in parallel with 3 queries instead of N×2
   const [provinces, totalCountsByCity, openCountsByCity] = await Promise.all([
