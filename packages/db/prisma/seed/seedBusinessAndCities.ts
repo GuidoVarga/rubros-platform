@@ -1190,6 +1190,7 @@ async function processStreamingData(
             : null,
           googlePlaceId: business?.place_id ?? null,
           googleMapsRating: business?.rating ?? null,
+          googleMapsRatingCount: business?.reviews ?? null,
           status: true,
           categories: business.categories, // ✅ Preservar categorías originales
         });
@@ -1288,6 +1289,7 @@ async function processStreamingData(
         hours: business.hours,
         closedOn: business.closedOn,
         googleMapsRating: business.googleMapsRating,
+        googleMapsRatingCount: business.googleMapsRatingCount,
       });
     } else {
       console.warn(`❗ No se encontró cityId para key: ${business.cityKey}`);

@@ -69,10 +69,11 @@ export function generateLocalBusinessSchema(business: LocalBusiness) {
     ...(business.phone && { telephone: business.phone }),
     ...(business.email && { email: business.email }),
     ...(business.updatedAt && { dateModified: new Date(business.updatedAt).toISOString() }),
-    ...(business.googleMapsRating && {
+    ...(business.googleMapsRating && business.googleMapsRatingCount && {
       aggregateRating: {
         '@type': 'AggregateRating',
         ratingValue: business.googleMapsRating,
+        ratingCount: business.googleMapsRatingCount,
         bestRating: 5,
         worstRating: 1,
       },
