@@ -2,7 +2,7 @@
 
 import { prisma } from '@rubros/db';
 import type { BusinessEntity } from '@rubros/db/entities';
-import type { GetBusinessesParams, BusinessFilters } from '@/types/business';
+import type { GetBusinessesParams } from '@/types/business';
 
 // Tipo extendido para incluir campos calculados
 export type BusinessWithCalculatedFields = BusinessEntity & {
@@ -494,6 +494,7 @@ async function getBusinessesByDistance({
       b."closedOn",
       b."googlePlaceId",
       b."googleMapsRating",
+      b."googleMapsRatingCount",
       b.status,
       b."createdAt",
       b."updatedAt",
@@ -570,6 +571,7 @@ async function getBusinessesByDistance({
     closedOn: row.closedOn,
     googlePlaceId: row.googlePlaceId,
     googleMapsRating: row.googleMapsRating,
+    googleMapsRatingCount: row.googleMapsRatingCount,
     status: row.status,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

@@ -10,9 +10,10 @@ export type AdComponentProps = {
 } & Omit<AdSenseProps, "slot">;
 
 
-const defaultStyles: Record<AdComponentProps["type"], { width?: string; height?: string }> = {
+const defaultStyles: Record<AdComponentProps["type"], { width?: string; height?: string, minHeight?: string }> = {
   [ADSENSE_SLOTS.TOP]: {
     height: "90px",
+    minHeight: "90px",
   },
   [ADSENSE_SLOTS.SIDE]: {
     width: "100%",
