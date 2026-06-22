@@ -16,7 +16,11 @@ import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { generateWebSiteSchema } from "@/lib/schema";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "optional",
+  preload: true,
+});
 
 const webSiteJsonLd = generateWebSiteSchema(ORGANIZATION.url);
 
@@ -123,10 +127,6 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#000000" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-        <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

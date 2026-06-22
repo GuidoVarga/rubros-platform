@@ -10,6 +10,8 @@ import { Suspense } from "react";
 import { AdComponent } from "@/components/ads/ads";
 import { ADSENSE_SLOTS } from "@rubros/ui/constants";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: `${ORGANIZATION.name} - ${ORGANIZATION.shortDescription}`,
   description: ORGANIZATION.description,
@@ -22,7 +24,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="container py-16">
+    <div className="container pt-8 pb-16">
       {/* Hero Section */}
       <section className="text-center mb-16">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
